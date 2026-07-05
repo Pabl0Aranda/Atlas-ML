@@ -1,0 +1,25 @@
+import type { AlgorithmId, AlgorithmSpec } from '../../types/viz';
+
+/** Dynamic imports keep each docs page from downloading every algorithm. */
+const loaders: Record<AlgorithmId, () => Promise<AlgorithmSpec>> = {
+	'linear-regression': () => import('./specs/regression').then((m) => m.linearRegression),
+	'polynomial-regression': () => import('./specs/regression').then((m) => m.polynomialRegression),
+	'decision-tree': () => import('./specs/decisionTree').then((m) => m.decisionTree),
+	knn: () => import('./specs/knn').then((m) => m.knn),
+	svm: () => import('./specs/svm').then((m) => m.svm),
+	'k-means': () => import('./specs/kmeans').then((m) => m.kMeans),
+	pca: () => import('./specs/pca').then((m) => m.pca),
+	perceptron: () => import('./specs/neural').then((m) => m.perceptron),
+	mlp: () => import('./specs/neural').then((m) => m.mlp),
+	'q-learning': () => import('./specs/rl').then((m) => m.qLearning),
+	sarsa: () => import('./specs/rl').then((m) => m.sarsa),
+	'deep-q-networks': () => import('./specs/dqn').then((m) => m.deepQNetwork),
+	'data-cleaning': () => import('./specs/preparation').then((m) => m.dataCleaning),
+	'feature-scaling': () => import('./specs/preparation').then((m) => m.featureScaling),
+	'data-splitting': () => import('./specs/preparation').then((m) => m.dataSplitting),
+	'cross-validation': () => import('./specs/evaluation').then((m) => m.crossValidation),
+	'hyperparameter-search': () => import('./specs/evaluation').then((m) => m.hyperparameterSearch),
+	'threshold-metrics': () => import('./specs/evaluation').then((m) => m.thresholdMetrics),
+};
+
+export const loadSpec = (id: AlgorithmId): Promise<AlgorithmSpec> => loaders[id]();

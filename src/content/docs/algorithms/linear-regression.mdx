@@ -1,0 +1,72 @@
+---
+title: Linear Regression
+description: Fit a straight line to data by minimizing mean squared error with gradient descent.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Linear regression finds the line that passes as close as possible to every point. "Close" means small vertical distances, called residuals. It is the baseline against which most predictive models should be compared.
+
+## Mathematical Foundation
+
+The model is $\hat{y} = w_0 + w_1 x$, and the loss is the mean squared error:
+
+$$
+L(w) = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2
+$$
+
+Its gradient tells us how to change each weight:
+
+$$
+\frac{\partial L}{\partial w_0} = \frac{2}{n} \sum_{i} (\hat{y}_i - y_i), \qquad
+\frac{\partial L}{\partial w_1} = \frac{2}{n} \sum_{i} (\hat{y}_i - y_i)\, x_i
+$$
+
+This problem also has an exact solution, the normal equation $w = (X^\top X)^{-1} X^\top y$. We use [gradient descent](/concepts/gradient-descent/) here because it exposes the learning process and carries over to models with no closed form.
+
+## Step-by-Step Breakdown
+
+1. Start with all weights at zero.
+2. Predict $\hat{y}$ for every sample and compute the residuals.
+3. Compute the gradient of the loss.
+4. Update $w \leftarrow w - \alpha \nabla L(w)$.
+5. Repeat until the loss stops falling.
+
+## Interactive Sandbox
+
+Push the learning rate to its maximum to watch the updates overshoot. Then choose **Trend + outliers** and see how a few points tilt the line, because squared error punishes large residuals heavily.
+
+<Sandbox client:visible algorithm="linear-regression" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="regression.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.linear_model import LinearRegression
+
+model = LinearRegression().fit(X, y)
+print(model.intercept_, model.coef_)
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- Fast, and the coefficients are directly interpretable.
+- A strong baseline when the relationship is close to linear.
+
+**Limitations**
+
+- It cannot capture curvature without engineered features. See [polynomial regression](/algorithms/polynomial-regression/).
+- Squared error makes it sensitive to outliers.
+- Strongly correlated features make individual coefficients unstable.

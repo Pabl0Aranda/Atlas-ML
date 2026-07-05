@@ -1,0 +1,84 @@
+---
+title: Data Processing
+description: Scale numeric features, encode categories and build features algorithms can use.
+sidebar:
+  order: 3
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Algorithms see numbers, not meaning. A salary in the tens of thousands and an age in the tens look wildly different in size, so a distance-based model would all but ignore age. Processing puts every feature into a form where the model can compare them fairly.
+
+## Mathematical Foundation
+
+**Min-max scaling** maps each feature onto $[0, 1]$:
+
+$$
+x' = \frac{x - x_{\min}}{x_{\max} - x_{\min}}
+$$
+
+**Standardization** gives each feature mean 0 and standard deviation 1:
+
+$$
+z = \frac{x - \mu}{\sigma}
+$$
+
+Standardization is the usual default. A single extreme value squeezes every other point under min-max scaling, because it sets the range by itself.
+
+## Which Algorithms Need Scaling?
+
+| Needs scaling | Reason |
+| --- | --- |
+| [KNN](/algorithms/knn/), [k-means](/algorithms/k-means/), [SVM](/algorithms/svm/) | They compare distances directly |
+| [PCA](/algorithms/pca/) | Large-scale features dominate the variance |
+| [Neural networks](/algorithms/mlp/) and [gradient descent](/concepts/gradient-descent/) | Similar scales make training faster and more stable |
+| Regularized regression | The penalty should treat coefficients equally |
+
+[Decision trees](/algorithms/decision-tree/) and tree ensembles do not need it, because splits depend only on the order of values.
+
+## Encoding Categories
+
+- **One-hot encoding** creates a binary column per category. It suits categories with no natural order, such as colors.
+- **Ordinal encoding** maps ordered categories to integers, such as low, medium, high to 0, 1, 2. Using it on unordered categories invents an order that does not exist.
+- **High-cardinality columns**, such as postal codes, can explode into thousands of columns. Group rare values, or look at target encoding, which needs care to avoid leakage.
+
+## Other Common Transformations
+
+- **Log transforms** compress long-tailed values such as income.
+- **Feature engineering** builds informative inputs, such as day of week from a date.
+- **Feature selection** removes columns that add only noise.
+
+## Interactive Sandbox
+
+Step to apply the scaler, and compare the statistics before and after. Then choose **Cloud with outliers** and compare both scalers.
+
+<Sandbox client:visible algorithm="feature-scaling" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="preprocessing.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+scaler = StandardScaler().fit(X_train)   # learn from training data only
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+encoder = OneHotEncoder(handle_unknown="ignore").fit(colors_train)
+```
+</TabItem>
+</Tabs>
+
+## Trade-offs
+
+- Scalers and encoders learn from data, so fit them on the training set and only apply them elsewhere.
+- Save fitted transformers with the model. Production data must pass through the same steps.
+- Scaled features are harder to read, so keep the originals for reporting.

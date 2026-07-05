@@ -1,0 +1,83 @@
+---
+title: Support Vector Machines
+description: Find the maximum-margin boundary between two classes, optionally through a kernel.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Many lines can separate two classes. An SVM picks the one with the widest empty corridor on both sides. Only the points touching that corridor, the support vectors, determine the solution, and moving any other point changes nothing.
+
+## Mathematical Foundation
+
+With labels $y_i \in \{-1, +1\}$, the soft-margin primal problem is:
+
+$$
+\min_{w, b, \xi} \; \frac{1}{2} \lVert w \rVert^2 + C \sum_{i} \xi_i
+\quad \text{s.t.} \quad y_i (w^\top x_i + b) \ge 1 - \xi_i, \;\; \xi_i \ge 0
+$$
+
+The margin width is $2 / \lVert w \rVert$, and $C$ sets the cost of violating it. The dual depends on the data only through inner products:
+
+$$
+\max_{\alpha} \; \sum_{i} \alpha_i - \frac{1}{2} \sum_{i,j} \alpha_i \alpha_j y_i y_j K(x_i, x_j)
+\quad \text{s.t.} \quad 0 \le \alpha_i \le C, \;\; \sum_{i} \alpha_i y_i = 0
+$$
+
+So we can swap in a kernel, such as the RBF kernel $K(a, b) = e^{-\gamma \lVert a - b \rVert^2}$, and get nonlinear boundaries. The decision function is:
+
+$$
+f(x) = \sum_{i} \alpha_i y_i K(x_i, x) + b
+$$
+
+## Step-by-Step Breakdown
+
+This site uses simplified Sequential Minimal Optimization (SMO):
+
+1. Start with every $\alpha_i = 0$.
+2. Find a sample that violates the optimality (KKT) conditions.
+3. Pair it with a second sample and solve that two-variable problem in closed form, clipping to the box $[0, C]$.
+4. Update the bias.
+5. Stop when a full pass changes nothing.
+
+## Interactive Sandbox
+
+Ringed points are support vectors, and dashed curves are the margins $f(x) = \pm 1$. Choose **Circles** with the linear kernel to see it fail, then switch to RBF. Raising $\gamma$ makes the boundary hug individual points.
+
+<Sandbox client:visible algorithm="svm" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="svm.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+
+model = make_pipeline(StandardScaler(), SVC(kernel="rbf", C=1.0, gamma="scale"))
+model.fit(X, y)
+print(model[-1].n_support_)
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- A convex objective has no bad local minima.
+- Works well with many features and moderate sample counts.
+- The solution is sparse: only support vectors matter.
+
+**Limitations**
+
+- Kernel training scales poorly, at roughly quadratic cost or worse in $n$.
+- Results depend strongly on $C$, $\gamma$ and feature scaling.
+- Outputs are scores, not calibrated probabilities.

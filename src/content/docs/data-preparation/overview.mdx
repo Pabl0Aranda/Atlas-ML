@@ -1,0 +1,54 @@
+---
+title: Data Preparation Overview
+description: What happens to data before any algorithm runs, and the order to do it in.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+Models learn whatever the data contains, including its errors. Most of the work in a real project happens before training, and a simple model on well-prepared data usually beats a sophisticated model on careless data.
+
+## The three stages
+
+1. **[Clean](/data-preparation/cleaning/):** fix or remove what is wrong, such as missing values, duplicates, inconsistent entries and outliers.
+2. **[Separate](/data-preparation/splitting/):** set aside data the model will never train on, so you can measure honestly.
+3. **[Process](/data-preparation/processing/):** turn the training data into the numeric form algorithms need, through scaling and encoding.
+
+:::caution[Separate before you learn anything from the data]
+Only fixes that need no statistics belong before the split. Any step that **learns a value from the data**, such as a mean, a scale or a category list, must be fitted on the training set only and then applied to the test set.
+:::
+
+## Data leakage
+
+Leakage happens when information from outside the training set reaches the model. The results look excellent, then collapse in production. Common causes:
+
+- Scaling or imputing on the full dataset before splitting.
+- Keeping a feature that is only known after the outcome, such as a "refund issued" column when predicting purchases.
+- Duplicate rows, or several rows from the same customer, landing on both sides of the split.
+- Randomly splitting time series, which lets the model see the future.
+
+Row-level fixes that use no statistics, such as correcting typos or dropping exact duplicates, are safe to do before splitting.
+
+## A safe default workflow
+
+```python
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)
+
+prepare = ColumnTransformer([
+    ("numeric", make_pipeline(SimpleImputer(strategy="median"), StandardScaler()), numeric_columns),
+    ("categories", OneHotEncoder(handle_unknown="ignore"), category_columns),
+])
+
+model = make_pipeline(prepare, LogisticRegression())
+model.fit(X_train, y_train)          # every step is fitted on training data only
+print(model.score(X_test, y_test))
+```
+
+A pipeline makes leakage hard to commit, because each preparation step is refitted inside `fit`, and inside every cross-validation fold.

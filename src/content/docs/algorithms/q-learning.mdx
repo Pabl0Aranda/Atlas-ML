@@ -1,0 +1,73 @@
+---
+title: Q-Learning
+description: Learn the value of every action in every state from trial and error, without a model of the world.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+An agent wanders a world, collecting rewards and penalties. Nobody tells it the right move, and it has no map. Q-Learning keeps a table of how good each action looks from each state, and after every move it corrects one entry using what happened next. Good news slowly flows backward from the goal until the table describes the best route.
+
+## Mathematical Foundation
+
+The optimal action value $Q^*(s, a)$ is the expected discounted return from taking $a$ in $s$ and acting optimally afterward. It satisfies the Bellman optimality equation:
+
+$$
+Q^*(s, a) = \mathbb{E}\left[ r + \gamma \max_{a'} Q^*(s', a') \right]
+$$
+
+Q-Learning turns this into a sample-based update with learning rate $\alpha$:
+
+$$
+Q(s, a) \leftarrow Q(s, a) + \alpha \left[ r + \gamma \max_{a'} Q(s', a') - Q(s, a) \right]
+$$
+
+The bracket is the temporal-difference error. Because the target uses the best next action rather than the one actually taken, Q-Learning is **off-policy**: it learns about the greedy policy while behaving differently.
+
+## Step-by-Step Breakdown
+
+1. Set every $Q(s, a)$ to zero.
+2. In state $s$, pick an action with an $\varepsilon$-greedy policy: random with probability $\varepsilon$, otherwise the best known action.
+3. Observe the reward $r$ and next state $s'$.
+4. Apply the update above. Terminal states contribute no future value.
+5. Continue from $s'$, and restart when the episode ends.
+
+## Interactive Sandbox
+
+Each move costs $-1$, and falling off the cliff costs $-100$ and ends the episode. Blue shading shows the learned state value, arrows show the best action in each cell, and hovering a cell shows its four Q-values.
+
+Q-Learning settles on the shortest route, right along the cliff edge. It is the best route, yet exploration keeps pushing the agent over the edge during training. Compare this with [SARSA](/algorithms/sarsa/), or set $\varepsilon = 0$ to see what happens with no exploration.
+
+<Sandbox client:visible algorithm="q-learning" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="tabularRl.ts" />
+</TabItem>
+<TabItem label="Python">
+```python
+def q_learning_update(Q, s, a, r, s_next, done, alpha=0.5, gamma=1.0):
+    future = 0.0 if done else max(Q[s_next])
+    Q[s][a] += alpha * (r + gamma * future - Q[s][a])
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- It needs no model of the environment.
+- Off-policy learning means it can learn from exploratory or logged behavior.
+- In the tabular case it converges to $Q^*$, given enough visits to every state-action pair and a suitable decay of $\alpha$.
+
+**Limitations**
+
+- The table grows with the number of states, so it fails on large or continuous spaces. Deep Q-Networks replace the table with a neural network.
+- The $\max$ operator tends to overestimate values when estimates are noisy.
+- It ignores the risk created by its own exploration, as the cliff shows.

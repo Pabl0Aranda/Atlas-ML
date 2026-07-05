@@ -1,0 +1,55 @@
+---
+title: Testing Overview
+description: How to measure a finished model honestly, and how to keep testing it after release.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+Testing answers a different question from [validation](/validation/overview/): **how well will this chosen model work on new data?** It happens once, at the end, after every decision has been made.
+
+## Good Practices
+
+- **Use the test set once.** If you change the model after seeing the result, the test set has become validation data.
+- **Choose metrics first.** Decide what success means before looking at results, based on the cost of each kind of error.
+- **Compare with a baseline.** 95% accuracy means little if 95% of samples belong to one class.
+- **Report uncertainty.** A score from a small test set can move several points by chance.
+- **Test subgroups.** A good average can hide failure on a region, device type or demographic group.
+- **Read the errors.** Look through real mistakes, as they often reveal labeling problems and missing features.
+- **Check for leakage.** A result that seems too good usually is. See [data leakage](/data-preparation/overview/#data-leakage).
+
+## Most Used Methods
+
+| Method | Purpose |
+| --- | --- |
+| Hold-out test set | The final unbiased estimate |
+| [Classification metrics](/testing/classification-metrics/) | Precision, recall, F1, ROC AUC and the confusion matrix |
+| [Regression metrics](/testing/regression-metrics/) | MAE, RMSE and $R^2$ |
+| Bootstrap confidence intervals | How much the score could vary by chance |
+| Paired statistical tests | Whether model A truly beats model B, such as McNemar's test |
+| Slice analysis | Performance per subgroup |
+| Calibration curves | Whether a predicted 80% really happens 80% of the time |
+| Robustness tests | Behavior with noise, missing fields and unusual inputs |
+
+## Confidence Intervals
+
+The bootstrap resamples the test set with replacement many times and recomputes the metric each time. The middle 95% of those results forms the interval. It works for almost any metric and needs no formula.
+
+For accuracy $\hat{p}$ on $n$ samples, a quick approximation is:
+
+$$
+\hat{p} \pm 1.96 \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}
+$$
+
+At 90% accuracy on 100 samples, that is about $\pm 6$ points, so a model at 92% is not clearly better.
+
+## Testing in Production
+
+A test set is a snapshot, and the world keeps changing.
+
+- **Shadow deployment:** run the model on live traffic without acting on its predictions.
+- **A/B testing:** send part of the traffic to the new model and compare business outcomes.
+- **Monitoring:** track input distributions, prediction rates and delayed accuracy, to detect data drift.
+- **Retraining rules:** decide in advance what triggers an update.
+
+Code around the model needs ordinary software tests too: unit tests for feature logic, schema checks on input data, and a small fixed set of examples the model must keep getting right.

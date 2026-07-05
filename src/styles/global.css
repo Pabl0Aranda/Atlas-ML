@@ -1,0 +1,211 @@
+@layer base, starlight, theme, components, utilities;
+
+@import '@astrojs/starlight-tailwind';
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@theme {
+	--font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+	--font-display: 'Space Grotesk Variable', 'Inter Variable', sans-serif;
+	--color-accent-200: #b9d3f5;
+	--color-accent-600: #2a78d6;
+	--color-accent-900: #123a6b;
+	--color-accent-950: #0c2747;
+}
+
+/* Starlight's default theme is dark; light mode is the [data-theme] override.
+   Series values are the validated data-viz palette for each surface. */
+:root {
+	--viz-surface: #1a1a19;
+	--viz-panel: #20201f;
+	--viz-border: #3a3a37;
+	--viz-grid: #2e2e2b;
+	--viz-ink: #f0efec;
+	--viz-muted: #6f6e68;
+	--viz-muted-ink: #c3c2b7;
+	--viz-series-1: #3987e5;
+	--viz-series-2: #d95926;
+	--viz-series-3: #199e70;
+	--viz-series-4: #c98500;
+}
+
+:root[data-theme='light'] {
+	--viz-surface: #fcfcfb;
+	--viz-panel: #f4f3f0;
+	--viz-border: #d9d8d2;
+	--viz-grid: #e9e8e3;
+	--viz-ink: #0b0b0b;
+	--viz-muted: #a3a29b;
+	--viz-muted-ink: #52514e;
+	--viz-series-1: #2a78d6;
+	--viz-series-2: #eb6834;
+	--viz-series-3: #1baf7a;
+	--viz-series-4: #eda100;
+}
+
+h1,
+h2,
+h3,
+.site-title {
+	font-family: var(--font-display);
+	letter-spacing: -0.01em;
+}
+
+.katex-display {
+	overflow-x: auto;
+	overflow-y: hidden;
+	padding-block: 0.25rem;
+}
+
+.hero-plot svg {
+	display: block;
+	width: min(100%, 24rem);
+	margin-inline: auto;
+	border-radius: 0.75rem;
+	border: 1px solid var(--viz-border);
+}
+
+:root {
+	--sl-content-width: 50rem;
+}
+
+.sl-markdown-content h2 {
+	font-size: 1.65rem;
+	margin-top: 2.75rem;
+}
+
+.sl-markdown-content h3 {
+	font-size: 1.2rem;
+}
+
+.hero {
+	padding-block: 2.5rem 3rem;
+}
+
+.hero h1 {
+	font-weight: 700;
+	letter-spacing: -0.025em;
+}
+
+.atlas-card {
+	display: block;
+	border: 1px solid var(--viz-border);
+	border-radius: 0.875rem;
+	background: var(--viz-panel);
+	color: var(--viz-ink);
+	text-decoration: none;
+	transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+a.atlas-card.flex {
+	display: flex;
+}
+
+a.atlas-card.grid {
+	display: grid;
+}
+
+.atlas-card:hover {
+	border-color: var(--sl-color-accent);
+	box-shadow: 0 6px 20px -12px rgb(0 0 0 / 0.45);
+	transform: translateY(-2px);
+}
+
+.atlas-card:focus-visible {
+	outline: 2px solid var(--sl-color-accent);
+	outline-offset: 2px;
+}
+
+.font-display {
+	font-family: var(--font-display);
+}
+
+.header-nav {
+	display: flex;
+	gap: 1.25rem;
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+
+.header-nav a {
+	color: var(--sl-color-gray-2);
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.header-nav a:hover {
+	color: var(--sl-color-text-accent);
+}
+
+.page-eyebrow {
+	margin: 0 0 0.35rem;
+	color: var(--sl-color-text-accent);
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.page-jumps {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-top: 1rem;
+}
+
+.page-jump {
+	border: 1px solid var(--viz-border);
+	border-radius: 999px;
+	padding: 0.3rem 0.9rem;
+	color: var(--viz-ink);
+	font-size: 0.875rem;
+	font-weight: 500;
+	text-decoration: none;
+}
+
+.page-jump:hover {
+	border-color: var(--sl-color-accent);
+}
+
+.page-jump-primary {
+	border-color: var(--sl-color-accent);
+	background: var(--sl-color-accent);
+	color: #fff;
+}
+
+.source-details {
+	border: 1px solid var(--viz-border);
+	border-radius: 0.625rem;
+	padding: 0.6rem 0.9rem;
+}
+
+.source-details summary {
+	cursor: pointer;
+	font-size: 0.9rem;
+	font-weight: 500;
+}
+
+.source-details[open] summary {
+	margin-bottom: 0.75rem;
+}
+
+.catalog-bar {
+	position: sticky;
+	top: var(--sl-nav-height);
+	z-index: 5;
+	margin-inline: -0.5rem;
+	padding: 0.75rem 0.5rem;
+	background: var(--sl-color-bg);
+	border-bottom: 1px solid var(--viz-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.atlas-card {
+		transition: none;
+	}
+
+	.atlas-card:hover {
+		transform: none;
+	}
+}

@@ -1,0 +1,72 @@
+---
+title: Decision Trees
+description: Classify data with a hierarchy of axis-aligned questions chosen to reduce impurity.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+A decision tree plays twenty questions with your data. Each question tests one feature against a threshold, and each answer narrows the region until one class dominates. The result reads like a flowchart.
+
+## Mathematical Foundation
+
+A node's Gini impurity measures how mixed it is, where $p_c$ is the share of class $c$:
+
+$$
+G = 1 - \sum_{c} p_c^2
+$$
+
+CART greedily picks the split that minimizes the weighted impurity of the two children:
+
+$$
+\frac{n_L}{n} G(L) + \frac{n_R}{n} G(R)
+$$
+
+Finding the globally optimal tree is NP-hard, so greedy, one-level-at-a-time search is the standard approach.
+
+## Step-by-Step Breakdown
+
+1. Start with all samples in the root.
+2. For each feature, try a threshold between each pair of adjacent sorted values.
+3. Keep the split with the lowest weighted child impurity.
+4. Recurse on both children.
+5. Stop when a node is pure, too small, or at the maximum depth. Leaves predict their majority class.
+
+## Interactive Sandbox
+
+Each step adds one level. On **XOR**, the first split barely helps, because neither feature alone is informative. That is the weakness of greedy search, yet a few more levels solve the problem.
+
+<Sandbox client:visible algorithm="decision-tree" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="decisionTree.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.tree import DecisionTreeClassifier, export_text
+
+model = DecisionTreeClassifier(criterion="gini", max_depth=4).fit(X, y)
+print(export_text(model))
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- Easy to read, and it requires no feature scaling.
+- Captures interactions and nonlinear structure.
+
+**Limitations**
+
+- Deep trees overfit, and small data changes can produce a very different tree.
+- Boundaries are axis-aligned, so diagonal ones need a staircase of splits.
+
+Random forests and gradient boosting exist largely to fix this instability. Both are in the [catalog](/catalog/).

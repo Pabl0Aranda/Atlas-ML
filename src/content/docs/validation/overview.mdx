@@ -1,0 +1,39 @@
+---
+title: Validation Overview
+description: The most used validation methods, and how to choose between them.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+Validation answers one question during development: **which model and settings should I pick?** It uses data held back from training, but it is not the final exam. That is the job of [testing](/testing/overview/).
+
+## Most Used Methods
+
+| Method | How it works | Use it when |
+| --- | --- | --- |
+| Hold-out | One fixed validation set | Data is plentiful, or training is expensive |
+| [K-fold cross-validation](/validation/cross-validation/) | Each of $k$ folds validates once | The general default, usually with $k$ of 5 or 10 |
+| Stratified k-fold | K-fold that preserves class shares | Classification, above all with rare classes |
+| Group k-fold | All rows of one entity stay in one fold | Several rows per patient, customer or device |
+| Time series split | Train on the past, validate on the next period | Any data ordered in time |
+| Leave-one-out | $k$ equals the number of samples | Very small datasets with cheap models |
+| Nested cross-validation | An inner loop tunes, an outer loop scores | You need an unbiased score from a small dataset |
+
+## Good Practices
+
+- **Match validation to production.** If the model will predict next month, validate on a later period, not on shuffled rows.
+- **Keep preparation inside the loop.** Refit imputers and scalers on each training fold, using a [pipeline](/data-preparation/overview/#a-safe-default-workflow).
+- **Start with a baseline.** Compare against a trivial model, such as always predicting the majority class or the mean.
+- **Report the spread.** A mean of 90% with a fold deviation of 8% tells a different story from one of 1%.
+- **Watch for overfitting.** A large gap between training and validation scores signals [high variance](/concepts/bias-variance/).
+- **Fix your seeds and folds**, so that candidates are compared on identical splits.
+
+## Learning Curves
+
+Plot training and validation scores as the training set grows:
+
+- If both scores are low and close together, the model is underfitting. Use a richer model or better features.
+- If there is a persistent gap, the model is overfitting. More data or regularization should help.
+
+Neural networks often use **early stopping** too: training stops when the validation loss has not improved for a set number of epochs.

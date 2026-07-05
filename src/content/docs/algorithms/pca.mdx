@@ -1,0 +1,75 @@
+---
+title: Principal Component Analysis
+description: Find the orthogonal directions along which data varies most.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Photograph a cloud of points from the angle that shows the most spread. That viewing direction is the first principal component. PCA rotates data onto such directions so you can drop the ones that carry little information.
+
+## Mathematical Foundation
+
+For centered data, the sample covariance matrix is:
+
+$$
+\Sigma = \frac{1}{n - 1} \sum_{i} (x_i - \bar{x})(x_i - \bar{x})^\top
+$$
+
+The first component is the unit vector that maximizes the projected variance:
+
+$$
+v_1 = \arg\max_{\lVert v \rVert = 1} v^\top \Sigma v
+$$
+
+The solution is the eigenvector of $\Sigma$ with the largest eigenvalue $\lambda_1$, and the share of variance it explains is $\lambda_1 / \sum_j \lambda_j$. Maximizing projected variance is equivalent to minimizing the squared projection distances.
+
+## Step-by-Step Breakdown
+
+The sandbox uses power iteration, which makes the search for $v_1$ visible:
+
+1. Center the data and compute $\Sigma$.
+2. Start from an arbitrary unit vector $v$.
+3. Update $v \leftarrow \Sigma v / \lVert \Sigma v \rVert$.
+4. Repeat. The component along $v_1$ grows fastest, so $v$ rotates toward it.
+
+Libraries generally compute all components at once with the singular value decomposition.
+
+## Interactive Sandbox
+
+The solid line is the current axis, and the dashed line is its orthogonal complement. On **Circles** the variance is nearly equal in every direction, so no axis is clearly best.
+
+<Sandbox client:visible algorithm="pca" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="pca.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+Z = PCA(n_components=2).fit(StandardScaler().fit_transform(X))
+print(Z.explained_variance_ratio_)
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- Deterministic, fast, and useful for compression, denoising and plotting.
+- Components are uncorrelated, which helps some downstream models.
+
+**Limitations**
+
+- It only captures linear structure.
+- It is sensitive to feature scale, so standardize when units differ.
+- High variance does not guarantee relevance to your prediction task.

@@ -1,0 +1,27 @@
+---
+import Default from '@astrojs/starlight/components/PageTitle.astro';
+import { CATALOG } from '@/data/catalog';
+
+const route = Astro.locals.starlightRoute;
+const id = route.id.replace(/\/$/, '');
+const entry = CATALOG.find((e) => e.page && (e.page.path ?? `algorithms/${e.page.id}`) === id);
+const body = route.entry.body ?? '';
+const jumps = [
+	body.includes('<Sandbox') && { label: 'Try the sandbox', href: '#interactive-sandbox', primary: true },
+	body.includes('## Code') && { label: 'See the code', href: '#code', primary: false },
+].filter((jump) => !!jump);
+---
+
+{entry && <p class="page-eyebrow">{entry.family}</p>}
+<Default />
+{
+	jumps.length > 0 && (
+		<div class="page-jumps">
+			{jumps.map((jump) => (
+				<a href={jump.href} class:list={['page-jump', { 'page-jump-primary': jump.primary }]}>
+					{jump.label}
+				</a>
+			))}
+		</div>
+	)
+}

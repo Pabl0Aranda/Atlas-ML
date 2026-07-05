@@ -1,0 +1,84 @@
+---
+title: Multilayer Perceptron
+description: A feedforward neural network trained with backpropagation.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+One [perceptron](/algorithms/perceptron/) draws one line. Stack layers of smooth neurons and each layer bends the space for the next, until a problem that was not linearly separable becomes separable. Backpropagation works out how much each weight contributed to the error.
+
+## Mathematical Foundation
+
+Layer $l$ computes an affine map followed by a nonlinearity. Here hidden layers use $\tanh$ and the output uses a sigmoid $\sigma$:
+
+$$
+a^{(l)} = \tanh\left(W^{(l)} a^{(l-1)} + b^{(l)}\right), \qquad \hat{y} = \sigma\left(W^{(L)} a^{(L-1)} + b^{(L)}\right)
+$$
+
+Training minimizes binary cross-entropy:
+
+$$
+L = -\frac{1}{n} \sum_{i} \left[ y_i \log \hat{y}_i + (1 - y_i) \log (1 - \hat{y}_i) \right]
+$$
+
+The chain rule propagates an error signal $\delta$ backward. The sigmoid and cross-entropy pair simplifies the output signal to $\delta^{(L)} = \hat{y} - y$, and for hidden layers:
+
+$$
+\delta^{(l)} = \left( W^{(l+1)\top} \delta^{(l+1)} \right) \odot \left( 1 - (a^{(l)})^2 \right),
+\qquad \frac{\partial L}{\partial W^{(l)}} = \delta^{(l)} a^{(l-1)\top}
+$$
+
+## Step-by-Step Breakdown
+
+1. Initialize weights randomly, scaled by layer width.
+2. **Forward pass:** compute every layer's activations.
+3. **Backward pass:** propagate $\delta$ from output to input and accumulate gradients.
+4. Update all weights with [gradient descent](/concepts/gradient-descent/).
+5. Repeat for many epochs.
+
+## Interactive Sandbox
+
+Hover over the plot to trace how a location activates each neuron. Edge width shows weight magnitude and edge color shows its sign. Try one hidden layer of two units on **Circles** to see too little capacity.
+
+<Sandbox client:visible algorithm="mlp" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="mlp.ts" />
+</TabItem>
+<TabItem label="PyTorch">
+```python
+import torch
+from torch import nn
+
+model = nn.Sequential(nn.Linear(2, 6), nn.Tanh(), nn.Linear(6, 6), nn.Tanh(), nn.Linear(6, 1))
+optimizer = torch.optim.SGD(model.parameters(), lr=0.5)
+loss_fn = nn.BCEWithLogitsLoss()
+
+for epoch in range(1000):
+    optimizer.zero_grad()
+    loss = loss_fn(model(X).squeeze(1), y)
+    loss.backward()
+    optimizer.step()
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- Universal approximators: with enough units they can fit nearly any continuous function.
+- They learn their own features and scale with data and compute.
+
+**Limitations**
+
+- The loss is non-convex, so results depend on initialization and tuning.
+- They need more data and care than classical models, and they often lose to gradient boosting on small tabular datasets.
+- Their internals are hard to interpret.

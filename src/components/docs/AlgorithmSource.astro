@@ -1,0 +1,19 @@
+---
+import { Code } from '@astrojs/starlight/components';
+
+interface Props {
+	/** File name inside src/lib/ml, e.g. kmeans.ts */
+	file: string;
+}
+
+// Reading the real module means the docs can never drift from the code the sandbox runs.
+const sources = import.meta.glob<string>('/src/lib/ml/*.ts', { query: '?raw', import: 'default', eager: true });
+const { file } = Astro.props;
+const code = sources[`/src/lib/ml/${file}`];
+if (!code) throw new Error(`No source file src/lib/ml/${file}`);
+---
+
+<details class="source-details">
+	<summary>Show the full source · {code.trimEnd().split('\n').length} lines</summary>
+	<Code code={code} lang="ts" title={`src/lib/ml/${file}`} />
+</details>

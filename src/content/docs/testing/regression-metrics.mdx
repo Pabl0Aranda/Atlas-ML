@@ -1,0 +1,67 @@
+---
+title: Regression Metrics
+description: MAE, RMSE, R² and MAPE, and how to read residuals.
+sidebar:
+  order: 3
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Regression predictions are never exactly right, so the question is how wrong they are, and in which way. Each metric summarizes the errors $e_i = y_i - \hat{y}_i$ differently.
+
+## Mathematical Foundation
+
+$$
+\text{MAE} = \frac{1}{n} \sum_i |e_i|, \qquad \text{RMSE} = \sqrt{\frac{1}{n} \sum_i e_i^2}
+$$
+
+$$
+R^2 = 1 - \frac{\sum_i e_i^2}{\sum_i (y_i - \bar{y})^2}, \qquad \text{MAPE} = \frac{100\%}{n} \sum_i \left| \frac{e_i}{y_i} \right|
+$$
+
+## Which Metric to Use
+
+| Metric | Meaning | Use it when |
+| --- | --- | --- |
+| MAE | Typical error, in the target's units | Easy reporting, or outliers should not dominate |
+| RMSE | Like MAE, but punishes large errors more | Big misses are especially costly |
+| $R^2$ | Variance explained, compared with predicting the mean | Comparing fits on the same dataset |
+| MAPE | Error as a percentage | Targets are well above zero, and relative error matters |
+
+$R^2$ can be negative on a test set, which means the model does worse than predicting the mean. MAPE breaks down when targets are near zero.
+
+## Residual Analysis
+
+Plot residuals against predictions, as the thin lines do in the [linear regression sandbox](/algorithms/linear-regression/#interactive-sandbox):
+
+- A random band around zero is what you want.
+- A curve means the model misses a nonlinear pattern.
+- A funnel means the error grows with the target, so try a log transform.
+- A shifted average means the predictions are biased.
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="evaluation.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+predictions = model.predict(X_test)
+print(mean_absolute_error(y_test, predictions))
+print(mean_squared_error(y_test, predictions) ** 0.5)
+print(r2_score(y_test, predictions))
+```
+</TabItem>
+</Tabs>
+
+## Trade-offs
+
+- Always compare with a baseline, such as predicting the training mean or, for forecasts, the last observed value.
+- Report the metric in units your audience understands.
+- For forecasts that need a range, evaluate prediction intervals as well as point errors.

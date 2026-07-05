@@ -1,0 +1,69 @@
+---
+title: K-Nearest Neighbors
+description: Classify a point by the majority vote of its k closest training samples.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+You can often guess something from its neighbors. KNN has no training phase: it stores the data, and at prediction time it asks the $k$ closest samples to vote.
+
+## Mathematical Foundation
+
+With $N_k(x)$ the set of the $k$ nearest samples under Euclidean distance, the prediction is:
+
+$$
+\hat{y}(x) = \arg\max_{c} \sum_{x_i \in N_k(x)} \mathbb{1}[y_i = c]
+$$
+
+$$
+d(a, b) = \sqrt{\sum_{j} (a_j - b_j)^2}
+$$
+
+At $k = 1$, the decision regions form the Voronoi diagram of the samples. Larger $k$ averages over more points, trading variance for bias.
+
+## Step-by-Step Breakdown
+
+1. Store the training set.
+2. For a query, compute its distance to every sample.
+3. Take the $k$ closest.
+4. Return the majority class. This implementation breaks ties in favor of the class of the nearest neighbor.
+
+## Interactive Sandbox
+
+Each step raises $k$ by two. Accuracy is measured leave-one-out, because training accuracy at $k = 1$ is always 100% and tells you nothing.
+
+<Sandbox client:visible algorithm="knn" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="knn.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import cross_val_score
+
+model = KNeighborsClassifier(n_neighbors=5)
+print(cross_val_score(model, X, y, cv=5).mean())
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- No training cost, and new data can be added instantly.
+- Boundaries can take any shape.
+
+**Limitations**
+
+- Naive prediction costs $O(nd)$ per query, and all the data must stay in memory.
+- It is sensitive to feature scale.
+- In high dimensions distances concentrate, so "nearest" loses meaning.

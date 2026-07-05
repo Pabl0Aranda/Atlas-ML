@@ -1,0 +1,70 @@
+---
+title: Perceptron
+description: The original learning neuron, a linear classifier trained by correcting its mistakes.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+The perceptron, introduced by Frank Rosenblatt in 1958, sums weighted inputs and fires if the total crosses a threshold. When it gets a sample wrong, it nudges the boundary toward that sample. When it is right, it does nothing.
+
+## Mathematical Foundation
+
+The prediction is a step function of a linear score:
+
+$$
+\hat{y} = \mathbb{1}[w^\top x + b > 0]
+$$
+
+For each sample, with targets $y \in \{0, 1\}$, the update is:
+
+$$
+w \leftarrow w + \alpha (y - \hat{y})\, x, \qquad b \leftarrow b + \alpha (y - \hat{y})
+$$
+
+The perceptron convergence theorem guarantees a finite number of mistakes when the classes are linearly separable. If they are not, the weights never settle.
+
+## Step-by-Step Breakdown
+
+1. Start with small weights.
+2. Visit each sample and compute $\hat{y}$.
+3. If it is wrong, apply the update.
+4. Stop after an epoch with no mistakes.
+
+## Interactive Sandbox
+
+**Linear** can converge, as long as the sampled classes do not overlap. Try **XOR** next: the mistake count never reaches zero, because no single line can separate it. Minsky and Papert's 1969 analysis of this limit motivated [multi-layer networks](/algorithms/mlp/).
+
+<Sandbox client:visible algorithm="perceptron" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="perceptron.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.linear_model import Perceptron
+
+model = Perceptron(eta0=0.1, max_iter=1000).fit(X, y)
+print(model.coef_, model.intercept_)
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- Tiny, fast and naturally online: it learns from one sample at a time.
+- Comes with a clean convergence guarantee on separable data.
+
+**Limitations**
+
+- It only draws linear boundaries.
+- Any separating line satisfies it, so the margin may be poor. Compare the [SVM](/algorithms/svm/).
+- It produces no probabilities and oscillates on noisy data.

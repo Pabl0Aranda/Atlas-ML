@@ -1,0 +1,27 @@
+---
+title: Bias and Variance
+description: Why models that are too simple and too flexible both fail on new data.
+---
+
+For squared error, the expected prediction error at a point decomposes into three terms:
+
+$$
+\mathbb{E}\left[(y - \hat{f}(x))^2\right] = \text{Bias}[\hat{f}(x)]^2 + \text{Var}[\hat{f}(x)] + \sigma^2
+$$
+
+- **Bias** is the error from wrong assumptions. A line fitted to a curve has high bias, which is underfitting.
+- **Variance** is sensitivity to the particular training sample. A very flexible model has high variance, which is overfitting.
+- **Noise** $\sigma^2$ cannot be removed by any model.
+
+## See it in the sandboxes
+
+| Control | Lower bias, higher variance | Higher bias, lower variance |
+| --- | --- | --- |
+| [Polynomial degree](/algorithms/polynomial-regression/) | High degree | Low degree |
+| [k in KNN](/algorithms/knn/) | Small $k$ | Large $k$ |
+| [Tree depth](/algorithms/decision-tree/) | Deep | Shallow |
+| [SVM penalty C](/algorithms/svm/) | Large $C$ | Small $C$ |
+
+## What to do about it
+
+Measure on data the model has not seen, using a held-out set or cross-validation. Training error alone always favors the most flexible model. Regularization, ensembles and more data are the main ways to reduce variance.

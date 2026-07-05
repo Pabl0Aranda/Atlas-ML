@@ -1,0 +1,30 @@
+---
+import { CATALOG, type Family } from '@/data/catalog';
+import { generateDataset } from '@/lib/ml/datasets';
+import { loadSpec } from '@/lib/viz/registry';
+import { thumbnailScene } from '@/lib/viz/scene';
+import { sceneToSvg } from '@/lib/viz/svg';
+import type { DatasetKind } from '@/types/ml';
+import type { AlgorithmId } from '@/types/viz';
+
+interface Props {
+	family: Family;
+	description: string;
+	preview: AlgorithmId;
+	dataset: DatasetKind;
+}
+
+const { family, description, preview, dataset } = Astro.props;
+const entries = CATALOG.filter((e) => e.family === family);
+const interactive = entries.filter((e) => e.page).length;
+const svg = sceneToSvg(thumbnailScene(await loadSpec(preview), generateDataset(dataset)), `${family} example`);
+---
+
+<a href={`/catalog/?family=${encodeURIComponent(family)}`} class="atlas-card grid grid-cols-[6.5rem_1fr] items-center gap-4 p-3 sm:grid-cols-[8rem_1fr]">
+	<div class="overflow-hidden rounded-lg border border-(--viz-border) [&>svg]:block [&>svg]:aspect-square [&>svg]:w-full" set:html={svg} />
+	<div class="min-w-0">
+		<span class="font-display block text-lg leading-tight font-semibold">{family}</span>
+		<span class="mt-1 block text-sm leading-snug text-(--viz-muted-ink)">{description}</span>
+		<span class="mt-2 block text-xs text-(--viz-muted-ink)">{entries.length} algorithms · {interactive} interactive</span>
+	</div>
+</a>

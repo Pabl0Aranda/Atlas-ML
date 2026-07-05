@@ -1,0 +1,30 @@
+---
+title: Gradient Descent
+description: The optimization loop behind most machine learning models.
+---
+
+Gradient descent minimizes a loss by repeatedly stepping downhill:
+
+$$
+w \leftarrow w - \alpha \nabla L(w)
+$$
+
+The gradient $\nabla L(w)$ points in the direction of steepest increase, so we move against it. The learning rate $\alpha$ sets the step size.
+
+## Choosing the learning rate
+
+- **Too small:** progress is slow.
+- **Well chosen:** the loss falls steadily.
+- **Too large:** updates overshoot, and the loss can oscillate or diverge.
+
+You can see all three in the [linear regression sandbox](/algorithms/linear-regression/#interactive-sandbox).
+
+## Variants
+
+| Variant | Gradient computed on | Trade-off |
+| --- | --- | --- |
+| Batch | The full dataset | Stable, but costly per step |
+| Stochastic | One sample | Cheap and noisy |
+| Mini-batch | A small subset | The usual choice in deep learning |
+
+Adaptive methods such as Adam adjust the step size for each parameter. Every sandbox on this site that uses gradients runs full-batch descent, so each step is deterministic.

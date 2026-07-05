@@ -1,0 +1,30 @@
+---
+import { generateDataset } from '@/lib/ml/datasets';
+import { loadSpec } from '@/lib/viz/registry';
+import { thumbnailScene } from '@/lib/viz/scene';
+import { sceneToSvg } from '@/lib/viz/svg';
+import type { CatalogEntry } from '@/data/catalog';
+
+interface Props {
+	entry: CatalogEntry & { page: NonNullable<CatalogEntry['page']> };
+}
+
+const { entry } = Astro.props;
+const spec = await loadSpec(entry.page.id);
+const svg = sceneToSvg(thumbnailScene(spec, generateDataset(entry.page.thumbnail)), `${entry.name} result`);
+---
+
+<a
+	href={`/${entry.page.path ?? `algorithms/${entry.page.id}`}/`}
+	data-entry
+	data-family={entry.family}
+	data-search={`${entry.name} ${entry.aliases ?? ''} ${entry.summary}`.toLowerCase()}
+	class="atlas-card flex flex-col overflow-hidden"
+>
+	<div class="bg-(--viz-surface) [&>svg]:block [&>svg]:aspect-[5/3] [&>svg]:w-full" set:html={svg.includes('data-grid') ? svg : svg.replace('<svg ', '<svg preserveAspectRatio="xMidYMid slice" ')} />
+	<div class="flex flex-1 flex-col gap-1 p-4">
+		<span class="text-xs text-(--viz-muted-ink)">{entry.family}</span>
+		<span class="font-display text-lg font-semibold leading-tight">{entry.name}</span>
+		<span class="text-sm leading-snug text-(--viz-muted-ink)">{entry.summary}</span>
+	</div>
+</a>

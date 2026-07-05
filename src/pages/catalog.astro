@@ -1,0 +1,94 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import AlgorithmCard from '@/components/ui/AlgorithmCard.astro';
+import { CATALOG, FAMILIES, FEATURED } from '@/data/catalog';
+
+const indexed = CATALOG.filter((e) => !e.page).sort((a, b) => a.name.localeCompare(b.name));
+const chipClass =
+	'cursor-pointer rounded-full border border-(--viz-border) bg-transparent px-3 py-1 text-sm text-(--viz-ink) hover:border-(--viz-ink) aria-pressed:border-(--viz-ink) aria-pressed:bg-(--viz-ink) aria-pressed:text-(--viz-surface)';
+---
+
+<StarlightPage
+	frontmatter={{
+		title: 'Algorithm catalog',
+		description: 'Search and filter every machine learning algorithm in the atlas.',
+		tableOfContents: false,
+	}}
+>
+	<div class="not-content">
+		<div class="catalog-bar">
+		<label class="block">
+			<span class="sr-only">Filter algorithms</span>
+			<input
+				id="catalog-filter"
+				type="search"
+				placeholder="Filter by name or alias, e.g. SVM, clustering, attention"
+				class="w-full rounded-lg border border-(--viz-border) bg-(--viz-surface) px-4 py-2.5 text-(--viz-ink)"
+			/>
+		</label>
+		<div class="mt-3 flex gap-2 overflow-x-auto pb-1 [&>button]:shrink-0" role="group" aria-label="Filter by family">
+			<button type="button" class={chipClass} data-family-filter="" aria-pressed="true">All</button>
+			{FAMILIES.map((f) => <button type="button" class={chipClass} data-family-filter={f} aria-pressed="false">{f}</button>)}
+		</div>
+		<p id="catalog-count" class="mt-3 mb-0 text-sm text-(--viz-muted-ink)" aria-live="polite">{CATALOG.length} entries</p>
+		</div>
+
+		<section data-group class="mt-6">
+			<h2 class="mb-3 text-xl font-semibold">Interactive</h2>
+			<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+				{FEATURED.map((entry) => <AlgorithmCard entry={entry as any} />)}
+			</div>
+		</section>
+
+		<section data-group class="mt-10">
+			<h2 class="mb-1 text-xl font-semibold">Indexed</h2>
+			<p class="m-0 mb-3 text-sm text-(--viz-muted-ink)">No sandbox here yet. Each entry links to an external reference.</p>
+			<ul class="m-0 list-none divide-y divide-(--viz-border) border-y border-(--viz-border) p-0">
+				{indexed.map((e) => (
+					<li data-entry data-family={e.family} data-search={`${e.name} ${e.aliases ?? ''} ${e.summary}`.toLowerCase()} class="m-0">
+						<a href={`https://en.wikipedia.org/wiki/${e.wiki}`} rel="noopener" class="grid gap-x-4 py-3 text-(--viz-ink) no-underline hover:bg-(--viz-panel) sm:grid-cols-[14rem_1fr]">
+							<span class="font-medium">{e.name} <span class="text-(--viz-muted-ink)" aria-label="external link">↗&#xFE0E;</span></span>
+							<span class="text-sm text-(--viz-muted-ink)">{e.summary}</span>
+						</a>
+					</li>
+				))}
+			</ul>
+		</section>
+		<p id="catalog-empty" hidden class="mt-6 text-(--viz-muted-ink)">Nothing matches. Try a broader term, or use the site search for the documentation.</p>
+	</div>
+</StarlightPage>
+
+<script>
+	const input = document.querySelector<HTMLInputElement>('#catalog-filter')!;
+	const chips = [...document.querySelectorAll<HTMLButtonElement>('[data-family-filter]')];
+	const entries = [...document.querySelectorAll<HTMLElement>('[data-entry]')];
+	const groups = [...document.querySelectorAll<HTMLElement>('[data-group]')];
+	const count = document.querySelector('#catalog-count')!;
+	const empty = document.querySelector<HTMLElement>('#catalog-empty')!;
+	let family = new URLSearchParams(location.search).get('family') ?? '';
+
+	function apply() {
+		const terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+		let visible = 0;
+		for (const entry of entries) {
+			const match =
+				(!family || entry.dataset.family === family) && terms.every((t) => entry.dataset.search!.includes(t));
+			entry.hidden = !match;
+			entry.style.display = match ? '' : 'none';
+			if (match) visible += 1;
+		}
+		for (const group of groups) group.hidden = !group.querySelector('[data-entry]:not([hidden])');
+		for (const chip of chips) chip.setAttribute('aria-pressed', String(chip.dataset.familyFilter === family));
+		count.textContent = `${visible} ${visible === 1 ? 'entry' : 'entries'}`;
+		empty.hidden = visible > 0;
+	}
+
+	input.addEventListener('input', apply);
+	for (const chip of chips) {
+		chip.addEventListener('click', () => {
+			family = chip.dataset.familyFilter ?? '';
+			apply();
+		});
+	}
+	apply();
+</script>

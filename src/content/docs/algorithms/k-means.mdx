@@ -1,0 +1,74 @@
+---
+title: K-Means Clustering
+description: Partition data into k clusters by alternating between assigning points and moving centroids.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Drop $k$ flags on a map and let every point walk to its nearest flag. Then move each flag to the middle of the crowd around it. Repeat until nobody switches flags. Those flags are the centroids, and the crowds are the clusters.
+
+## Mathematical Foundation
+
+k-means looks for a partition $C_1, \dots, C_k$ that minimizes the within-cluster sum of squares, also called inertia:
+
+$$
+J = \sum_{j=1}^{k} \sum_{x_i \in C_j} \lVert x_i - \mu_j \rVert^2
+$$
+
+For fixed assignments, the best centroid is the cluster mean:
+
+$$
+\mu_j = \frac{1}{|C_j|} \sum_{x_i \in C_j} x_i
+$$
+
+Neither step can increase $J$, and there are finitely many partitions, so the algorithm always terminates. It reaches a local minimum, which is not necessarily the global one.
+
+## Step-by-Step Breakdown
+
+1. **Seed** the centroids with k-means++: pick one sample, then sample each next centroid with probability proportional to its squared distance from the nearest existing centroid.
+2. **Assign** each point to its nearest centroid.
+3. **Update** each centroid to the mean of its assigned points.
+4. **Repeat** steps 2 and 3 until no assignment changes.
+
+## Interactive Sandbox
+
+Try **Moons** to see the method fail: k-means can only draw straight boundaries between centroids, so it cuts through curved clusters.
+
+<Sandbox client:visible algorithm="k-means" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="kmeans.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.cluster import KMeans
+
+model = KMeans(n_clusters=4, init="k-means++", n_init=10, random_state=0)
+labels = model.fit_predict(X)
+print(model.cluster_centers_, model.inertia_)
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- Simple and fast: each iteration costs $O(nkd)$.
+- Scales to large data, especially in its mini-batch variant.
+
+**Limitations**
+
+- You must choose $k$ in advance.
+- It assumes compact, similarly sized clusters.
+- Results depend on initialization, so production code runs several restarts.
+- Features need comparable scales, because distance mixes them directly.
+
+For curved or density-based structure, consider DBSCAN or hierarchical clustering, both listed in the [catalog](/catalog/).

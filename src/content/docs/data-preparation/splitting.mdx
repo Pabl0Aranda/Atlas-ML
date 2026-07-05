@@ -1,0 +1,73 @@
+---
+title: Data Splitting
+description: Separate training, validation and test data so you can measure performance honestly.
+sidebar:
+  order: 4
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+A student who has seen the exam answers proves nothing by scoring well. A model is the same: its score on training data says little about new data. So we hide part of the data and only use it to grade the final model.
+
+## The Three Sets
+
+| Set | Used to | Typical share |
+| --- | --- | --- |
+| Training | Fit the model's parameters | 60–80% |
+| Validation | Compare models and tune hyperparameters | 10–20% |
+| Test | Estimate final performance, once | 10–20% |
+
+If you repeatedly check the test set and adjust, you are tuning to it, and its score stops being honest.
+
+## Mathematical Foundation
+
+Stratified sampling splits each class separately, so class proportions match in every set. Without it, the number of minority samples in a test set of size $m$, with class share $p$, varies by chance. Its standard deviation is about $\sqrt{m\, p (1 - p)}$, which is large relative to $mp$ when the class is rare.
+
+In **k-fold cross-validation**, the data is divided into $k$ folds. Each fold serves once as validation data, and the score is averaged:
+
+$$
+\text{CV} = \frac{1}{k} \sum_{i=1}^{k} \text{score}_i
+$$
+
+This uses all the data for validation at the cost of training $k$ models, which helps most on small datasets.
+
+## Choosing a Split
+
+- **Random:** fine for large, balanced, independent samples.
+- **Stratified:** the default for classification, and essential for rare classes.
+- **Grouped:** keeps all rows of a customer or patient on one side.
+- **Time-based:** train on the past and test on the future. Never shuffle time series.
+
+## Interactive Sandbox
+
+The default dataset has about 10% Class B. Step to split, then change the seed and watch the Class B share in the test set jump around. Switch to **Stratified** and it holds steady.
+
+<Sandbox client:visible algorithm="data-splitting" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="preprocessing.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=0)
+
+folds = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
+print(cross_val_score(model, X_train, y_train, cv=folds).mean())
+```
+</TabItem>
+</Tabs>
+
+## Trade-offs
+
+- More test data gives a more reliable estimate but leaves less for training.
+- Split before fitting any [cleaning or processing](/data-preparation/overview/#data-leakage) statistics.
+- Set a random seed, so results can be reproduced.

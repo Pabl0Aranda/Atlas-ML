@@ -1,0 +1,84 @@
+---
+title: Deep Q-Networks
+description: Q-Learning with a neural network in place of the table, stabilized by experience replay and a target network.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+[Q-Learning](/algorithms/q-learning/) stores one number per state and action, which is impossible when the state is a screen of pixels. A Deep Q-Network (DQN) replaces the table with a [neural network](/algorithms/mlp/) that takes a state and outputs a value for each action. Similar states now share what they learn. DeepMind's DQN, published in 2013 and 2015, learned to play Atari games directly from pixels this way.
+
+## Mathematical Foundation
+
+The network $Q(s, a; \theta)$ is trained to reduce the squared temporal-difference error on stored transitions:
+
+$$
+L(\theta) = \mathbb{E}_{(s, a, r, s') \sim \mathcal{D}} \left[ \left( r + \gamma \max_{a'} Q(s', a'; \theta^-) - Q(s, a; \theta) \right)^2 \right]
+$$
+
+Simply putting a network into Q-Learning tends to be unstable, for two reasons. DQN adds one fix for each:
+
+- **Experience replay.** Consecutive moves are highly correlated, which misleads gradient descent. Transitions go into a buffer $\mathcal{D}$, and training samples random minibatches from it. Each experience also gets reused many times.
+- **Target network.** The target would otherwise shift with every update, like chasing your own shadow. A frozen copy with parameters $\theta^-$ computes the targets, and is refreshed from $\theta$ only every so often.
+
+## Step-by-Step Breakdown
+
+1. Initialize the online network randomly, and copy it to the target network.
+2. Choose an action with an $\varepsilon$-greedy policy, with $\varepsilon$ decaying from 1 toward a small value.
+3. Store the transition $(s, a, r, s')$ in the replay buffer.
+4. Sample a random minibatch from the buffer.
+5. Compute targets with the target network, using only $r$ for terminal states.
+6. Take a gradient step on the online network, for the actions that were taken.
+7. Every $C$ moves, copy the online weights into the target network.
+
+## Interactive Sandbox
+
+The worlds match the [Q-Learning sandbox](/algorithms/q-learning/#interactive-sandbox), so you can compare them directly. Here the input is not a cell ID: it is a one-hot column plus a one-hot row, feeding 48 hidden units. Press **Play** and allow about a minute. Early on the arrows change wildly, which is the network generalizing before it has enough evidence.
+
+The sandbox trains on one minibatch per move. Because each sample's gradient is divided by the batch size, a learning rate of 1 here is gentler than it looks. Lower it to around 0.1 and the network will likely fail to find a route within the move budget.
+
+<Sandbox client:visible algorithm="deep-q-networks" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="dqn.ts" />
+</TabItem>
+<TabItem label="PyTorch">
+```python
+import torch
+from torch import nn
+
+def train_step(online, target, optimizer, batch, gamma=0.98):
+    states, actions, rewards, next_states, done = batch
+    predicted = online(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+    with torch.no_grad():
+        future = target(next_states).max(dim=1).values
+        goal = rewards + gamma * future * (1 - done)
+    loss = nn.functional.smooth_l1_loss(predicted, goal)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    return loss.item()
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- It handles huge state spaces, including raw images.
+- Replay makes it far more sample-efficient than learning from each move once.
+- It is off-policy, so it can learn from old experience.
+
+**Limitations**
+
+- Actions must be discrete, because it takes a maximum over them. Continuous control needs methods such as DDPG or Soft Actor-Critic.
+- It is sensitive to hyperparameters, and results vary between random seeds.
+- On a world this small a table is faster and more reliable. The network pays off when states are too many to list.
+- The $\max$ overestimates values. Double DQN is a common fix, and dueling networks and prioritized replay are other standard improvements.

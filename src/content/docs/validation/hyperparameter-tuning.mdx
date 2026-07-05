@@ -1,0 +1,57 @@
+---
+title: Hyperparameter Tuning
+description: Use validation scores to choose the settings a model cannot learn by itself.
+sidebar:
+  order: 3
+---
+
+import Sandbox from '@/components/interactive/Sandbox';
+
+## Intuition & Overview
+
+Parameters, such as regression weights, are learned during training. Hyperparameters, such as $k$ in KNN or a learning rate, are chosen before it. Tuning tries candidates and keeps the one with the best validation score.
+
+## Most Used Methods
+
+| Method | How it works | Use it when |
+| --- | --- | --- |
+| Manual search | Adjust based on experience | First exploration |
+| Grid search | Tries every combination | Few hyperparameters with few values |
+| Random search | Samples combinations at random | The usual default for several hyperparameters |
+| Bayesian optimization | A surrogate model picks promising candidates | Each training run is expensive |
+| Successive halving, Hyperband | Stops weak candidates early | Many candidates, and partial training is informative |
+
+Random search often beats grid search for the same budget. Usually only a few hyperparameters matter much, and random sampling tries more distinct values of each one.
+
+## Good Practices
+
+- Search on a log scale for rates and penalties, such as 0.001, 0.01, 0.1.
+- If the best value sits at the edge of your range, extend the range.
+- Prefer the simpler model when scores are within noise of each other.
+- Keep the test set out of it. Each extra comparison on the same validation data also overfits it slightly, which is why [nested cross-validation](/validation/overview/) exists.
+
+## Interactive Sandbox
+
+This is a grid search over $k$ in KNN, where each candidate is scored by cross-validation. Training accuracy starts at 100%, which is meaningless, while the validation curve shows the real trade-off.
+
+<Sandbox client:visible algorithm="hyperparameter-search" />
+
+## Code
+
+```python
+from scipy.stats import loguniform
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.svm import SVC
+
+search = RandomizedSearchCV(
+    SVC(),
+    {"C": loguniform(1e-2, 1e2), "gamma": loguniform(1e-3, 1e1)},
+    n_iter=30,
+    cv=5,
+    random_state=0,
+)
+search.fit(X_train, y_train)
+print(search.best_params_, search.best_score_)
+```
+
+`best_score_` is optimistic, because it is the highest of many noisy scores. Only the [test set](/testing/overview/) gives an honest final number.

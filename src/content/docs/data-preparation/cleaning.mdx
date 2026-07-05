@@ -1,0 +1,74 @@
+---
+title: Data Cleaning
+description: Handle missing values, duplicates, inconsistent entries and outliers.
+sidebar:
+  order: 2
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Real data arrives with gaps, typos and impossible values. Cleaning means finding these problems and deciding, case by case, whether to fix, remove or keep them. Always start by looking at the data: its types, ranges, missing counts and a few raw rows.
+
+## Common Problems
+
+| Problem | Example | Typical treatment |
+| --- | --- | --- |
+| Missing values | Empty `age` field | Impute, drop, or add an "is missing" flag |
+| Duplicates | The same order exported twice | Drop exact copies |
+| Inconsistent entries | `Spain`, `spain`, `ES` | Standardize to one form |
+| Wrong types | Prices stored as text | Convert and validate |
+| Impossible values | An age of 212 | Fix at the source, or treat as missing |
+| Outliers | One huge purchase | Investigate, then keep, cap or remove |
+
+## Missing Values
+
+First ask **why** a value is missing, because that determines what is safe:
+
+- Dropping rows is simple, but it loses data and can bias the sample when missingness is not random.
+- The median is a robust default for numeric features, and the most frequent value for categories.
+- If missingness itself is informative, keep a binary "was missing" column.
+
+## Mathematical Foundation
+
+A common outlier rule uses Tukey's fences, built from the quartiles $Q_1$ and $Q_3$:
+
+$$
+\text{IQR} = Q_3 - Q_1, \qquad [\, Q_1 - k \cdot \text{IQR}, \;\; Q_3 + k \cdot \text{IQR} \,]
+$$
+
+Values outside the fences are flagged. The usual choice is $k = 1.5$. Quartiles are barely affected by extreme values, unlike the mean and standard deviation, which the outliers themselves distort.
+
+## Interactive Sandbox
+
+Step once to compute the fences and again to remove what they flag. Lower $k$ and watch ordinary points get flagged too. Because this rule checks each axis separately, it can miss a point that is unusual only as a combination of features: try **Correlated cloud**.
+
+<Sandbox client:visible algorithm="data-cleaning" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="preprocessing.ts" />
+</TabItem>
+<TabItem label="pandas">
+```python
+df = df.drop_duplicates()
+df["country"] = df["country"].str.strip().str.lower()
+print(df.isna().mean())  # share of missing values per column
+
+q1, q3 = df["price"].quantile([0.25, 0.75])
+iqr = q3 - q1
+outliers = df[(df["price"] < q1 - 1.5 * iqr) | (df["price"] > q3 + 1.5 * iqr)]
+```
+</TabItem>
+</Tabs>
+
+## Trade-offs
+
+- **Flagged does not mean wrong.** In fraud detection, the outliers are the point. Remove a value only when you can explain why.
+- Removing data changes what the model learns about, so record every decision.
+- Medians used for imputing are learned values. Fit them on the [training set only](/data-preparation/overview/#data-leakage).

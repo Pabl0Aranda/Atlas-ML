@@ -1,0 +1,11 @@
+---
+const links = [
+	{ label: 'Catalog', href: '/catalog/' },
+	{ label: 'Workflow', href: '/#workflow' },
+	{ label: 'Start here', href: '/data-preparation/overview/' },
+];
+---
+
+<nav class="header-nav" aria-label="Main">
+	{links.map((link) => <a href={link.href}>{link.label}</a>)}
+</nav>

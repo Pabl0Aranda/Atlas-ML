@@ -1,0 +1,78 @@
+---
+title: Classification Metrics
+description: Confusion matrix, precision, recall, F1 and ROC AUC, and when to use each.
+sidebar:
+  order: 2
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Accuracy treats every mistake equally, but missing a tumor is not the same as a false alarm. On imbalanced data it also misleads: a model that never predicts fraud scores 99% if 1% of transactions are fraudulent. Better metrics start from counting each kind of outcome.
+
+## The Confusion Matrix
+
+| | Predicted positive | Predicted negative |
+| --- | --- | --- |
+| **Actually positive** | True positive (TP) | False negative (FN) |
+| **Actually negative** | False positive (FP) | True negative (TN) |
+
+## Mathematical Foundation
+
+$$
+\text{Precision} = \frac{TP}{TP + FP}, \qquad \text{Recall} = \frac{TP}{TP + FN}
+$$
+
+Precision asks how many alarms were real. Recall asks how many real cases were caught. F1 is their harmonic mean, which stays low if either one is low:
+
+$$
+F_1 = \frac{2 \cdot \text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+$$
+
+ROC AUC measures ranking quality across all thresholds. It equals the probability that a random positive scores above a random negative, so 0.5 is chance and 1 is perfect.
+
+## Which Metric to Use
+
+| Situation | Prefer |
+| --- | --- |
+| Balanced classes, equal error costs | Accuracy |
+| False alarms are costly, such as spam filters | Precision |
+| Misses are costly, such as disease screening | Recall |
+| A single balanced score | F1 |
+| Comparing rankings before setting a threshold | ROC AUC |
+| Rare positive class | Precision-recall curve and its average precision |
+| Probabilities feed a decision | Log loss, Brier score and calibration curves |
+| More than two classes | Per-class metrics, with macro or weighted averages |
+
+## Interactive Sandbox
+
+A fixed scoring model rates each sample. Each step raises the decision threshold, so watch precision rise while recall falls. ROC AUC does not change, because it does not depend on the threshold. On **Imbalanced classes**, compare accuracy with F1.
+
+<Sandbox client:visible algorithm="threshold-metrics" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="evaluation.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
+
+predictions = model.predict(X_test)
+print(confusion_matrix(y_test, predictions))
+print(classification_report(y_test, predictions))
+print(roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]))
+```
+</TabItem>
+</Tabs>
+
+## Trade-offs
+
+- The default threshold of 0.5 is rarely the right one. Choose it from the cost of errors, on [validation](/validation/overview/) data rather than on the test set.
+- ROC AUC can look strong on very rare classes even when precision is poor.
+- Always read the confusion matrix too, since one summary number hides which errors occur.
