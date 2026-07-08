@@ -1,0 +1,70 @@
+---
+title: Naive Bayes
+description: Classify with Bayes' rule, assuming features are independent within each class.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Start with a belief about how common each class is, then let each piece of evidence update that belief. Naive Bayes makes one bold simplification: within a class, features are treated as independent. The assumption is usually false, yet the classifier often works well, and it trains in a single pass over the data.
+
+## Mathematical Foundation
+
+Bayes' rule gives the posterior probability of class $c$ given features $x_1, \dots, x_d$:
+
+$$
+P(c \mid x) = \frac{P(c)\, P(x \mid c)}{P(x)}
+$$
+
+The naive assumption factors the likelihood into one term per feature:
+
+$$
+\hat{y} = \arg\max_c \; \log P(c) + \sum_{j=1}^{d} \log P(x_j \mid c)
+$$
+
+This site uses the Gaussian variant, where each feature in each class follows $\mathcal{N}(\mu_{cj}, \sigma_{cj}^2)$. Working with logarithms avoids multiplying many tiny numbers.
+
+## Step-by-Step Breakdown
+
+1. Estimate each class prior from its share of the data.
+2. For each class and feature, estimate a mean and a variance.
+3. For a new point, add the log prior to the log likelihood of each feature.
+4. Predict the class with the highest total.
+
+## Interactive Sandbox
+
+Each step adds evidence: first the prior alone, then feature $x$, then $y$. **Circles** works well, because the two classes differ in variance. On **XOR** it fails, because each class's features look identical when viewed one at a time, and only their combination carries information.
+
+<Sandbox client:visible algorithm="naive-bayes" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="naiveBayes.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.naive_bayes import GaussianNB
+
+model = GaussianNB().fit(X_train, y_train)
+print(model.predict_proba(X_test))
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- Training is one fast pass, and it works with little data.
+- It handles many features well, which made it a classic for spam filtering, using the multinomial variant on word counts.
+
+**Limitations**
+
+- It cannot use feature interactions, as XOR shows.
+- Its probabilities tend to be overconfident, because correlated evidence is counted twice. Rankings are often better than the raw values.
+- A category never seen with a class gets zero probability unless you apply smoothing.

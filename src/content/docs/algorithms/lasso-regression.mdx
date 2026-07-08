@@ -1,0 +1,70 @@
+---
+title: Lasso Regression
+description: Least squares with an L1 penalty that sets coefficients exactly to zero.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+[Ridge](/algorithms/ridge-regression/) shrinks every coefficient but keeps them all. Lasso penalizes absolute values instead, and this small change makes it drop features entirely. The model selects its own features as it trains.
+
+## Mathematical Foundation
+
+$$
+\min_w \; \frac{1}{2n} \lVert y - Xw \rVert^2 + \lambda \lVert w \rVert_1
+$$
+
+The absolute value has a sharp corner at zero, so there is no closed-form solution. With the other coefficients fixed, each one is solved by **soft thresholding**:
+
+$$
+w_j = \frac{S(c_j, \lambda)}{z_j}, \qquad S(c, \lambda) = \text{sign}(c) \max(|c| - \lambda, 0)
+$$
+
+Here $c_j$ is the correlation of feature $j$ with the current residual, and $z_j$ is the feature's mean square. If the correlation is weaker than $\lambda$, the coefficient is exactly zero. From a Bayesian view, lasso corresponds to a Laplace prior, which peaks sharply at zero.
+
+## Step-by-Step Breakdown
+
+1. Build the features and start at zero.
+2. For each coefficient, measure its correlation with the residual.
+3. Apply soft thresholding.
+4. Repeat passes until nothing changes.
+
+## Interactive Sandbox
+
+Watch **Non-zero terms** as you raise $\lambda$. Compare with the [ridge sandbox](/algorithms/ridge-regression/#interactive-sandbox), which keeps all of them.
+
+<Sandbox client:visible algorithm="lasso-regression" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="regularizedRegression.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.linear_model import LassoCV
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+model = make_pipeline(StandardScaler(), LassoCV(cv=5)).fit(X_train, y_train)
+print((model[-1].coef_ != 0).sum(), "features kept")
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- Sparse models are easier to explain and cheaper to run.
+- It works when only a few of many features matter.
+
+**Limitations**
+
+- Among correlated features it tends to pick one somewhat arbitrarily, and the choice can change between samples.
+- It shrinks the coefficients it keeps, which adds bias.
+- With more features than samples, it selects at most $n$ of them.

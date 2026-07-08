@@ -1,0 +1,70 @@
+---
+title: Elastic Net
+description: Blend the L1 and L2 penalties to get sparsity with stability.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+[Lasso](/algorithms/lasso-regression/) selects features but behaves erratically when they are correlated. [Ridge](/algorithms/ridge-regression/) is stable but keeps everything. Elastic net mixes both penalties, so it can drop features while treating correlated groups more evenly.
+
+## Mathematical Foundation
+
+With mixing ratio $\rho$ between 0 and 1:
+
+$$
+\min_w \; \frac{1}{2n} \lVert y - Xw \rVert^2 + \lambda \left( \rho \lVert w \rVert_1 + \frac{1 - \rho}{2} \lVert w \rVert_2^2 \right)
+$$
+
+Setting $\rho = 1$ gives lasso, and $\rho = 0$ gives ridge. Each coordinate update combines both effects, a threshold from the L1 part and extra shrinkage from the L2 part:
+
+$$
+w_j = \frac{S(c_j, \lambda \rho)}{z_j + \lambda (1 - \rho)}
+$$
+
+## Step-by-Step Breakdown
+
+1. Choose $\lambda$ and $\rho$, usually by [cross-validation](/validation/cross-validation/).
+2. Start at zero.
+3. Apply the coordinate update to each coefficient.
+4. Repeat until the coefficients stop changing.
+
+## Interactive Sandbox
+
+Move **L1 ratio** from 0 to 1 and watch **Non-zero terms** go from ridge behavior to lasso behavior. Polynomial features are strongly correlated with each other, which is the situation elastic net was designed for.
+
+<Sandbox client:visible algorithm="elastic-net" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="regularizedRegression.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.linear_model import ElasticNetCV
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+model = make_pipeline(StandardScaler(), ElasticNetCV(l1_ratio=[0.1, 0.5, 0.9], cv=5))
+model.fit(X_train, y_train)
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- It combines feature selection with stability on correlated features.
+- It can keep more than $n$ features, unlike lasso.
+
+**Limitations**
+
+- There are two hyperparameters to tune instead of one.
+- Like lasso, it adds bias to the coefficients it keeps.
+- Features must be scaled.

@@ -50,6 +50,20 @@ export default defineConfig({
 					items: [{ slug: 'algorithms/k-means' }, { slug: 'algorithms/pca' }],
 				},
 				{
+					label: 'Statistical Learning',
+					collapsed: true,
+					items: [
+						{ slug: 'algorithms/naive-bayes' },
+						{ slug: 'algorithms/logistic-regression' },
+						{ slug: 'algorithms/linear-discriminant-analysis' },
+						{ slug: 'algorithms/gaussian-mixture-models' },
+						{ slug: 'algorithms/ridge-regression' },
+						{ slug: 'algorithms/lasso-regression' },
+						{ slug: 'algorithms/elastic-net' },
+						{ slug: 'algorithms/gaussian-process-regression' },
+					],
+				},
+				{
 					label: 'Deep Learning',
 					collapsed: true,
 					items: [{ slug: 'algorithms/perceptron' }, { slug: 'algorithms/mlp' }],
@@ -57,7 +71,7 @@ export default defineConfig({
 				{
 					label: 'Reinforcement Learning',
 					collapsed: true,
-					items: [{ slug: 'algorithms/q-learning' }, { slug: 'algorithms/sarsa' }, { slug: 'algorithms/deep-q-networks' }],
+					items: [{ slug: 'algorithms/q-learning' }, { slug: 'algorithms/sarsa' }, { slug: 'algorithms/deep-q-networks' }, { slug: 'algorithms/proximal-policy-optimization' }],
 				},
 				{ label: 'Concepts', collapsed: true, items: [{ autogenerate: { directory: 'concepts' } }] },
 			],

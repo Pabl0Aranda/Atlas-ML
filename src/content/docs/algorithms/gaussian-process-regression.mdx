@@ -1,0 +1,72 @@
+---
+title: Gaussian Process Regression
+description: A distribution over functions that gives predictions with honest uncertainty.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Most regression models return one curve. A Gaussian process (GP) keeps a whole distribution over possible curves, and each observation rules out those that disagree with it. The result says what it expects **and** how sure it is: confident near data, and unsure far from it.
+
+## Mathematical Foundation
+
+A GP assumes any finite set of function values is jointly Gaussian, with covariance given by a kernel. This site uses the squared exponential kernel:
+
+$$
+k(x, x') = \exp\left( -\frac{(x - x')^2}{2 \ell^2} \right)
+$$
+
+Given observations $y$ with noise $\sigma^2$, the prediction at a new point $x_*$ is Gaussian, with:
+
+$$
+\mu_* = k_*^\top (K + \sigma^2 I)^{-1} y, \qquad \sigma_*^2 = k(x_*, x_*) - k_*^\top (K + \sigma^2 I)^{-1} k_*
+$$
+
+There is no training loop: conditioning on the data gives the exact answer.
+
+## Step-by-Step Breakdown
+
+1. Choose a kernel and its hyperparameters.
+2. Build the kernel matrix $K$ between observations.
+3. Factor $K + \sigma^2 I$ with a Cholesky decomposition, which is stable and fast.
+4. Compute the posterior mean and variance at each query point.
+
+## Interactive Sandbox
+
+Each step reveals one observation, and the band narrows around it. A small length scale $\ell$ makes the curve wiggly and the band quick to reopen between points. Raising the noise $\sigma$ stops the curve from passing through every sample.
+
+<Sandbox client:visible algorithm="gaussian-process-regression" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="gaussianProcess.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import RBF, WhiteKernel
+
+model = GaussianProcessRegressor(RBF(length_scale=0.3) + WhiteKernel(0.01)).fit(X_train, y_train)
+mean, std = model.predict(X_test, return_std=True)
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- It gives calibrated uncertainty, assuming the kernel suits the data.
+- It works well with little data, which makes it central to Bayesian optimization.
+- The kernel is a flexible way to encode assumptions such as smoothness or periodicity.
+
+**Limitations**
+
+- Exact inference costs $O(n^3)$, which limits it to a few thousand points without approximations.
+- Results depend strongly on the kernel.
+- It struggles in high dimensions.

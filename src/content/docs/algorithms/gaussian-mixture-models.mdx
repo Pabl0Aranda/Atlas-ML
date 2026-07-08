@@ -1,0 +1,78 @@
+---
+title: Gaussian Mixture Models
+description: Soft clustering with a weighted sum of Gaussians, fitted by expectation-maximization.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+[K-means](/algorithms/k-means/) makes hard decisions and assumes round clusters. A Gaussian mixture assumes the data came from several overlapping Gaussian clouds, each with its own shape, size and weight. Each point gets a probability of belonging to each cloud, rather than one label.
+
+## Mathematical Foundation
+
+The density is a weighted sum of $K$ Gaussians:
+
+$$
+p(x) = \sum_{k=1}^{K} \pi_k \, \mathcal{N}(x \mid \mu_k, \Sigma_k)
+$$
+
+Expectation-maximization (EM) alternates two steps. The **E-step** computes responsibilities, the probability that component $k$ produced point $i$:
+
+$$
+r_{ik} = \frac{\pi_k \, \mathcal{N}(x_i \mid \mu_k, \Sigma_k)}{\sum_j \pi_j \, \mathcal{N}(x_i \mid \mu_j, \Sigma_j)}
+$$
+
+The **M-step** refits each component to its weighted points, with $N_k = \sum_i r_{ik}$:
+
+$$
+\pi_k = \frac{N_k}{n}, \qquad \mu_k = \frac{1}{N_k} \sum_i r_{ik} x_i, \qquad \Sigma_k = \frac{1}{N_k} \sum_i r_{ik} (x_i - \mu_k)(x_i - \mu_k)^\top
+$$
+
+Each EM iteration cannot decrease the likelihood, though it can stop at a local maximum.
+
+## Step-by-Step Breakdown
+
+1. Initialize the means, here with k-means++, and start with round covariances.
+2. E-step: compute responsibilities.
+3. M-step: update weights, means and covariances.
+4. Stop when the log-likelihood barely changes.
+
+## Interactive Sandbox
+
+Ellipses mark two standard deviations of each component. **Correlated cloud** with $k = 1$ shows a shape k-means cannot describe. **Uncertain points** counts samples with no component above 90%.
+
+<Sandbox client:visible algorithm="gaussian-mixture-models" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="gmm.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.mixture import GaussianMixture
+
+model = GaussianMixture(n_components=4, covariance_type="full", n_init=5).fit(X)
+print(model.predict_proba(X), model.bic(X))
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- Clusters can be elongated, tilted and overlapping.
+- Soft assignments express uncertainty.
+- It is a full density model, useful for anomaly detection and sampling.
+
+**Limitations**
+
+- You must choose $K$, although BIC gives a principled guide.
+- It is sensitive to initialization, so run several restarts.
+- A component can collapse onto a few points, which is why covariances need a small floor.
+- Curved clusters still need several Gaussians.

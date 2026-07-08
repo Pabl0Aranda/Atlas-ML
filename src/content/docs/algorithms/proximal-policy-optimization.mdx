@@ -1,0 +1,89 @@
+---
+title: Proximal Policy Optimization
+sidebar:
+  label: PPO
+description: Learn a policy directly, while clipping each update so that it cannot change too much at once.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+[Q-Learning](/algorithms/q-learning/) and [Deep Q-Networks](/algorithms/deep-q-networks/) learn action values, then act on them. PPO skips that step and learns the **policy** itself: a network that outputs the probability of each action. Actions that turned out better than expected become more likely.
+
+The danger is that one bad, oversized update can wreck a good policy, and the agent then collects worse data, which makes recovery harder. PPO, introduced by Schulman and colleagues in 2017, keeps each update close to the previous policy. It is simple and dependable enough to have become a default choice in reinforcement learning, and it is widely used to fine-tune language models from human feedback.
+
+## Mathematical Foundation
+
+PPO is an **actor-critic** method. The actor is the policy $\pi_\theta(a \mid s)$, and the critic is a value network $V(s)$ that estimates expected return. The advantage $\hat{A}_t$ says how much better an action was than the critic expected. It is built from TD errors with Generalized Advantage Estimation:
+
+$$
+\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t), \qquad \hat{A}_t = \sum_{l \ge 0} (\gamma \lambda)^l \, \delta_{t+l}
+$$
+
+The probability ratio measures how far the policy has moved since collecting the data:
+
+$$
+\rho_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\text{old}}(a_t \mid s_t)}
+$$
+
+The clipped objective removes the incentive to move further than $\varepsilon$:
+
+$$
+L^{\text{CLIP}}(\theta) = \mathbb{E}_t \left[ \min\left( \rho_t \hat{A}_t, \; \text{clip}(\rho_t, 1 - \varepsilon, 1 + \varepsilon) \, \hat{A}_t \right) \right]
+$$
+
+An **entropy bonus** added to the objective rewards keeping some randomness, so that the policy does not commit too early.
+
+## Step-by-Step Breakdown
+
+1. Run the current policy for a fixed number of moves, storing each move and its probability.
+2. Compute advantages with the critic.
+3. Update the actor on the clipped objective, and the critic toward the observed returns.
+4. Repeat step 3 for a few epochs on the same data. The clip is what makes this reuse safe.
+5. Discard the data and collect a new rollout.
+
+## Interactive Sandbox
+
+Arrows show each cell's likeliest action, and shading shows the critic's value. Hover a cell to see its action probabilities. **Clipped samples** counts how often the clip stopped an update, and **Policy entropy** falls as the policy becomes certain.
+
+**Rooms** is the reliable case: in our tests this configuration solved it on all six random seeds.
+
+**Cliff** is a deliberately hard case. With default settings PPO usually fails here, and it solved only one of six seeds. Random exploration reaches the goal rarely, while falling is frequent and costly, so the policy gets little evidence that the goal is worth the risk. Episodes end up stuck around the 100-move time limit instead. Try learning rate 0.5, entropy 0.08 and rollout 1024: more exploration solves Cliff for this sandbox's fixed seed, though across six seeds that setting still failed twice.
+
+<Sandbox client:visible algorithm="proximal-policy-optimization" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="ppo.ts" />
+</TabItem>
+<TabItem label="PyTorch">
+```python
+import torch
+
+def ppo_loss(new_log_probs, old_log_probs, advantages, entropy, clip=0.2, entropy_bonus=0.01):
+    ratio = torch.exp(new_log_probs - old_log_probs)
+    clipped = torch.clamp(ratio, 1 - clip, 1 + clip)
+    surrogate = torch.min(ratio * advantages, clipped * advantages)
+    return -surrogate.mean() - entropy_bonus * entropy.mean()
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- It handles discrete and continuous actions.
+- It is much simpler than its predecessor, Trust Region Policy Optimization, and is stable across many tasks.
+- A stochastic policy explores by itself, with no $\varepsilon$ schedule.
+
+**Limitations**
+
+- It is on-policy, so data is discarded after each update, which makes it sample-hungry.
+- Exploration depends on the policy's own randomness, so it can settle into a poor habit, as Cliff shows.
+- Results depend on implementation details such as advantage normalization and the entropy coefficient.

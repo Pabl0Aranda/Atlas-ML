@@ -1,0 +1,75 @@
+---
+title: Linear Discriminant Analysis
+description: Find the direction that best separates classes, assuming they share one covariance.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+[PCA](/algorithms/pca/) looks for the direction of greatest spread, ignoring labels. LDA uses the labels: it looks for the direction where classes sit far apart **and** each class stays tight. It works both as a classifier and as a supervised way to reduce dimensions.
+
+## Mathematical Foundation
+
+Fisher's criterion maximizes between-class separation relative to within-class spread along a direction $w$:
+
+$$
+J(w) = \frac{\left( w^\top (\mu_1 - \mu_0) \right)^2}{w^\top \Sigma\, w}
+$$
+
+The solution has a closed form, with no iterations:
+
+$$
+w \propto \Sigma^{-1} (\mu_1 - \mu_0)
+$$
+
+The same result comes from assuming each class is Gaussian with a shared covariance $\Sigma$. Bayes' rule then gives a linear boundary:
+
+$$
+w^\top x - w^\top \frac{\mu_0 + \mu_1}{2} + \log \frac{\pi_1}{\pi_0} = 0
+$$
+
+## Step-by-Step Breakdown
+
+1. Compute each class mean.
+2. Compute the pooled within-class covariance $\Sigma$.
+3. Solve for the direction $w$.
+4. Place the threshold between the means, shifted by the class priors.
+
+## Interactive Sandbox
+
+Step from the class means to the axis to the boundary. On **Imbalanced classes**, the prior pushes the boundary toward the rare class. On **Circles**, the means nearly coincide, so there is no useful direction.
+
+<Sandbox client:visible algorithm="linear-discriminant-analysis" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="lda.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+
+model = LinearDiscriminantAnalysis().fit(X_train, y_train)
+X_projected = model.transform(X_train)  # at most (classes - 1) dimensions
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- A closed-form solution with no learning rate to tune.
+- It works well when its assumptions roughly hold, even with few samples.
+- It doubles as supervised dimensionality reduction.
+
+**Limitations**
+
+- It assumes Gaussian classes with equal covariance. Quadratic Discriminant Analysis relaxes the second assumption.
+- It depends on differences between means, so it fails when classes share a center.
+- Outliers distort the means and covariance.

@@ -1,0 +1,73 @@
+---
+title: Ridge Regression
+description: Least squares with an L2 penalty that shrinks coefficients and tames overfitting.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+A flexible [polynomial](/algorithms/polynomial-regression/) can bend wildly to chase noise, using huge coefficients that cancel out. Ridge regression charges a price for large coefficients, which trades a little bias for much lower [variance](/concepts/bias-variance/).
+
+## Mathematical Foundation
+
+The objective adds a squared penalty on every coefficient except the bias:
+
+$$
+\min_w \; \frac{1}{2n} \lVert y - Xw \rVert^2 + \frac{\lambda}{2} \lVert w \rVert_2^2
+$$
+
+It has a closed-form solution, which stays well defined even when features are correlated:
+
+$$
+w = (X^\top X + n\lambda I)^{-1} X^\top y
+$$
+
+From a Bayesian view, ridge is the most probable $w$ under a Gaussian prior centered on zero. Coefficients shrink smoothly, but they do not reach exactly zero.
+
+## Step-by-Step Breakdown
+
+This site uses coordinate descent, so ridge, [lasso](/algorithms/lasso-regression/) and [elastic net](/algorithms/elastic-net/) share one implementation:
+
+1. Build polynomial features of $x$.
+2. Solve each coefficient exactly, holding the others fixed.
+3. Repeat passes until the coefficients stop changing.
+
+## Interactive Sandbox
+
+Set $\lambda = 0$ to see the raw fit, then raise it and watch **Largest weight** fall. **Non-zero terms** stays at the maximum, which is the key contrast with lasso.
+
+<Sandbox client:visible algorithm="ridge-regression" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="regularizedRegression.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.linear_model import RidgeCV
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+model = make_pipeline(StandardScaler(), RidgeCV(alphas=[0.01, 0.1, 1, 10, 100]))
+model.fit(X_train, y_train)
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- It stabilizes models with correlated features, or more features than samples.
+- It is cheap, and usually a safe default over plain least squares.
+
+**Limitations**
+
+- It keeps every feature, so it does not simplify the model.
+- Features must be scaled, or the penalty treats them unequally.
+- $\lambda$ needs [tuning](/validation/hyperparameter-tuning/).
