@@ -1,21 +1,37 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import { unified } from '@astrojs/markdown-remark';
 import preact from '@astrojs/preact';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
+import { familySidebar } from './src/data/catalog.ts';
+
+// The sitemap, canonical URLs and social images need an absolute origin, so they
+// switch on once the deployment sets SITE_URL.
+const site = process.env.SITE_URL;
+const socialImage = site ? new URL('/og-image.png', site).href : undefined;
 
 // https://astro.build/config
 export default defineConfig({
+	site,
 	markdown: {
-		remarkPlugins: [remarkMath],
-		rehypePlugins: [rehypeKatex],
+		processor: unified({
+			remarkPlugins: [remarkMath],
+			rehypePlugins: [rehypeKatex],
+		}),
 	},
 	integrations: [
 		starlight({
 			title: 'Atlas ML',
 			logo: { src: './src/assets/logo.svg' },
+			head: socialImage
+				? [
+						{ tag: 'meta', attrs: { property: 'og:image', content: socialImage } },
+						{ tag: 'meta', attrs: { name: 'twitter:image', content: socialImage } },
+					]
+				: [],
 			components: {
 				PageTitle: './src/components/overrides/PageTitle.astro',
 				SocialIcons: './src/components/overrides/SocialIcons.astro',
@@ -33,46 +49,11 @@ export default defineConfig({
 				{ label: 'Data Preparation', collapsed: true, items: [{ autogenerate: { directory: 'data-preparation' } }] },
 				{ label: 'Validation', collapsed: true, items: [{ autogenerate: { directory: 'validation' } }] },
 				{ label: 'Testing', collapsed: true, items: [{ autogenerate: { directory: 'testing' } }] },
-				{
-					label: 'Supervised Learning',
+				.../** @type {const} */ (['Supervised Learning', 'Unsupervised Learning', 'Statistical Learning', 'Deep Learning', 'Reinforcement Learning']).map((family) => ({
+					label: family,
 					collapsed: true,
-					items: [
-						{ slug: 'algorithms/linear-regression' },
-						{ slug: 'algorithms/polynomial-regression' },
-						{ slug: 'algorithms/decision-tree' },
-						{ slug: 'algorithms/knn' },
-						{ slug: 'algorithms/svm' },
-					],
-				},
-				{
-					label: 'Unsupervised Learning',
-					collapsed: true,
-					items: [{ slug: 'algorithms/k-means' }, { slug: 'algorithms/pca' }],
-				},
-				{
-					label: 'Statistical Learning',
-					collapsed: true,
-					items: [
-						{ slug: 'algorithms/naive-bayes' },
-						{ slug: 'algorithms/logistic-regression' },
-						{ slug: 'algorithms/linear-discriminant-analysis' },
-						{ slug: 'algorithms/gaussian-mixture-models' },
-						{ slug: 'algorithms/ridge-regression' },
-						{ slug: 'algorithms/lasso-regression' },
-						{ slug: 'algorithms/elastic-net' },
-						{ slug: 'algorithms/gaussian-process-regression' },
-					],
-				},
-				{
-					label: 'Deep Learning',
-					collapsed: true,
-					items: [{ slug: 'algorithms/perceptron' }, { slug: 'algorithms/mlp' }],
-				},
-				{
-					label: 'Reinforcement Learning',
-					collapsed: true,
-					items: [{ slug: 'algorithms/q-learning' }, { slug: 'algorithms/sarsa' }, { slug: 'algorithms/deep-q-networks' }, { slug: 'algorithms/proximal-policy-optimization' }],
-				},
+					items: familySidebar(family),
+				})),
 				{ label: 'Concepts', collapsed: true, items: [{ autogenerate: { directory: 'concepts' } }] },
 			],
 		}),

@@ -104,3 +104,13 @@ const GUIDE_FAMILIES: Family[] = ['Data Preparation', 'Validation', 'Testing'];
 export const ALGORITHM_COUNT = CATALOG.filter((e) => !GUIDE_FAMILIES.includes(e.family)).length;
 
 export const FEATURED = CATALOG.filter((e) => e.page);
+
+/** Several pages can embed one sandbox, so this counts distinct sandboxes. */
+export const SANDBOX_COUNT = new Set(FEATURED.map((e) => e.page!.id)).size;
+
+/** Content slug of an entry with a page. */
+export const pageSlug = (entry: CatalogEntry): string => entry.page!.path ?? `algorithms/${entry.page!.id}`;
+
+/** Sidebar links for a family. Guide pages set their own path and autogenerate by directory. */
+export const familySidebar = (family: Family): { slug: string }[] =>
+	FEATURED.filter((e) => e.family === family && !e.page!.path).map((e) => ({ slug: pageSlug(e) }));

@@ -3,7 +3,7 @@ import { generateDataset } from '@/lib/ml/datasets';
 import { loadSpec } from '@/lib/viz/registry';
 import { thumbnailScene } from '@/lib/viz/scene';
 import { sceneToSvg } from '@/lib/viz/svg';
-import type { CatalogEntry } from '@/data/catalog';
+import { pageSlug, type CatalogEntry } from '@/data/catalog';
 
 interface Props {
 	entry: CatalogEntry & { page: NonNullable<CatalogEntry['page']> };
@@ -15,7 +15,7 @@ const svg = sceneToSvg(thumbnailScene(spec, generateDataset(entry.page.thumbnail
 ---
 
 <a
-	href={`/${entry.page.path ?? `algorithms/${entry.page.id}`}/`}
+	href={`/${pageSlug(entry)}/`}
 	data-entry
 	data-family={entry.family}
 	data-search={`${entry.name} ${entry.aliases ?? ''} ${entry.summary}`.toLowerCase()}

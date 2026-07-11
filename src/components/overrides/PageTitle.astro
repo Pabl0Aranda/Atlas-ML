@@ -1,10 +1,10 @@
 ---
 import Default from '@astrojs/starlight/components/PageTitle.astro';
-import { CATALOG } from '@/data/catalog';
+import { CATALOG, pageSlug } from '@/data/catalog';
 
 const route = Astro.locals.starlightRoute;
 const id = route.id.replace(/\/$/, '');
-const entry = CATALOG.find((e) => e.page && (e.page.path ?? `algorithms/${e.page.id}`) === id);
+const entry = CATALOG.find((e) => e.page && pageSlug(e) === id);
 const body = route.entry.body ?? '';
 const jumps = [
 	body.includes('<Sandbox') && { label: 'Try the sandbox', href: '#interactive-sandbox', primary: true },
