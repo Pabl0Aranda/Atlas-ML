@@ -36,6 +36,8 @@ export interface ParamSpec {
 	min?: number;
 	max?: number;
 	step?: number;
+	/** The run does not depend on this value, so changing it redraws without restarting. */
+	live?: boolean;
 	/** Renders a select instead of a slider. */
 	options?: { label: string; value: number }[];
 }

@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useId, useMemo, useRef, useState } from 'preact/hooks';
 import { drawGrid, drawScene, readPlotColors } from '@/lib/viz/canvas';
 import { DATASET_LABELS, generateDataset } from '@/lib/ml/datasets';
+import { moveProbe, probeStep, toolOptions, type PlotTool, type Point2D } from '@/lib/viz/interaction';
 import { loadSpec } from '@/lib/viz/registry';
 import { defaultParams } from '@/lib/viz/scene';
 import type { Dataset, DatasetKind, Hyperparameters } from '@/types/ml';
@@ -12,7 +13,7 @@ const TICK_MS = 140;
 const buttonClass =
 	'cursor-pointer rounded-md border border-(--viz-border) bg-(--viz-surface) px-3 py-1.5 text-sm font-medium text-(--viz-ink) transition-colors hover:border-(--viz-ink) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--sl-color-accent) disabled:cursor-not-allowed disabled:opacity-45';
 const primaryButtonClass =
-	'cursor-pointer rounded-md border border-(--sl-color-accent) bg-(--sl-color-accent) px-3 py-1.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--sl-color-accent) disabled:cursor-not-allowed disabled:opacity-45';
+	'cursor-pointer rounded-md border border-(--sl-color-accent) bg-(--sl-color-accent) px-3 py-1.5 text-sm font-semibold text-(--on-accent) transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--sl-color-accent) disabled:cursor-not-allowed disabled:opacity-45';
 const SPEEDS = [1, 2, 4];
 const fieldLabelClass = 'text-xs font-medium text-(--viz-muted-ink)';
 
@@ -60,9 +61,14 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 	const [speed, setSpeed] = useState(1);
 	const [probe, setProbe] = useState({ x: 0.3, y: 0.3 });
 	const [hovering, setHovering] = useState(false);
+	/** Keeps the readout and cursor visible after a tap or a key press, when no mouse is hovering. */
+	const [pinned, setPinned] = useState(false);
+	const [tool, setTool] = useState<PlotTool>(0);
 	const [theme, setTheme] = useState(0);
 	const [width, setWidth] = useState(0);
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const pointerType = useRef('mouse');
+	const toolGroup = useId();
 
 	const done = spec.isDone(state, params);
 	const editable = spec.editable !== false;
@@ -126,10 +132,34 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 		};
 	};
 
-	const addPoint = (event: MouseEvent) => {
-		if (!editable) return;
-		const { x, y } = toDomain(event);
-		restart([...data, { x, y, label: spec.labeled && event.shiftKey ? 1 : 0 }], params);
+	const applyTool = ({ x, y }: Point2D) => {
+		if (!editable || tool === 'inspect') return;
+		restart([...data, { x, y, label: tool }], params);
+	};
+
+	const onPlotClick = (event: MouseEvent) => {
+		const at = toDomain(event);
+		setProbe(at);
+		if (interactive && pointerType.current !== 'mouse') setPinned(true);
+		applyTool(at);
+	};
+
+	const onPlotKey = (event: KeyboardEvent) => {
+		if (event.key === 'Escape') {
+			setPinned(false);
+			return;
+		}
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			setPinned(true);
+			applyTool(probe);
+			return;
+		}
+		const next = moveProbe(probe, event.key, probeStep(scene.grid, event.shiftKey));
+		if (!next) return;
+		event.preventDefault();
+		setProbe(next);
+		setPinned(true);
 	};
 
 	const legend = spec.legend(params);
@@ -137,24 +167,51 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 	const series = spec.series?.(state);
 	const diagram = spec.diagram?.(state, probe);
 	const prediction = scene.region ? legend[scene.region(probe.x, probe.y)] : null;
+	const probeable = Boolean(scene.region || spec.describe || diagram);
+	const interactive = editable || probeable;
+	const readout = spec.describe
+		? spec.describe(state, probe, params)
+		: `(${probe.x.toFixed(2)}, ${probe.y.toFixed(2)})${prediction ? ` → ${prediction}` : ''}`;
+
+	// Announcing every tick would talk over the animation, so the spoken caption waits for a stop.
+	const spokenCaption = useRef(caption);
+	if (!playing) spokenCaption.current = caption;
 
 	return (
 		<section class="not-content my-8 rounded-2xl border border-(--viz-border) bg-(--viz-panel) p-3 text-(--viz-ink) shadow-sm sm:p-5" aria-label="Interactive sandbox">
 			<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_14rem]">
 				<div>
-					<canvas
-						ref={canvasRef}
-						class={`block w-full rounded-lg border border-(--viz-border) ${editable ? 'cursor-crosshair' : ''}`}
-						style={{ aspectRatio: String(1 / aspect) }}
-						role="img"
-						aria-label={caption}
-						onClick={addPoint}
-						onPointerMove={(e) => {
-							setProbe(toDomain(e));
-							setHovering(true);
-						}}
-						onPointerLeave={() => setHovering(false)}
-					/>
+					<div class="relative">
+						<canvas
+							ref={canvasRef}
+							class={`block w-full touch-manipulation rounded-lg border border-(--viz-border) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--sl-color-accent) ${editable ? 'cursor-crosshair' : ''}`}
+							style={{ aspectRatio: String(1 / aspect) }}
+							role={interactive ? 'application' : 'img'}
+							aria-roledescription={interactive ? 'plot' : undefined}
+							aria-label={interactive ? `Interactive plot. Arrow keys move the cursor${editable ? ', Enter applies the selected tool' : ''}.` : caption}
+							tabIndex={interactive ? 0 : undefined}
+							onClick={onPlotClick}
+							onKeyDown={onPlotKey}
+							onFocus={(e) => e.currentTarget.matches(':focus-visible') && setPinned(true)}
+							onBlur={() => setPinned(false)}
+							onPointerDown={(e) => {
+								pointerType.current = e.pointerType;
+							}}
+							onPointerMove={(e) => {
+								if (e.pointerType !== 'mouse') return;
+								setProbe(toDomain(e));
+								setHovering(true);
+							}}
+							onPointerLeave={() => setHovering(false)}
+						/>
+						{pinned && (
+							<span
+								class="pointer-events-none absolute size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-(--viz-ink) shadow-[0_0_0_1px_var(--viz-surface)]"
+								style={{ left: `${(probe.x + 1) * 50}%`, top: `${(1 - probe.y) * 50}%` }}
+								aria-hidden="true"
+							/>
+						)}
+					</div>
 					<div class="mt-2 flex min-h-5 flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-(--viz-muted-ink)">
 						<ul class="m-0 flex list-none flex-wrap gap-3 p-0">
 							{legend.map((name, i) => (
@@ -171,13 +228,9 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 								</li>
 							))}
 						</ul>
-						{hovering && (
-							<span class="font-mono tabular-nums">
-								{spec.describe
-									? spec.describe(state, probe, params)
-									: `(${probe.x.toFixed(2)}, ${probe.y.toFixed(2)})${prediction ? ` → ${prediction}` : ''}`}
-							</span>
-						)}
+						<span class="font-mono tabular-nums" aria-live={pinned ? 'polite' : 'off'}>
+							{(hovering || pinned) && readout}
+						</span>
 					</div>
 				</div>
 
@@ -196,11 +249,34 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 							{spec.datasets.map((d) => <option value={d}>{DATASET_LABELS[d]}</option>)}
 						</select>
 					</label>}
+					{editable && (
+						<fieldset class="m-0 border-0 p-0">
+							<legend class={`mb-1 p-0 ${fieldLabelClass}`}>Plot tool</legend>
+							<div class="flex flex-wrap gap-1.5">
+								{toolOptions(legend, spec.labeled).map((option) => (
+									<label class="flex min-h-9 cursor-pointer items-center rounded-md border border-(--viz-border) bg-(--viz-surface) px-2.5 text-sm font-medium text-(--viz-ink) transition-colors hover:border-(--viz-ink) has-checked:border-(--sl-color-accent) has-checked:bg-(--sl-color-accent) has-checked:text-(--on-accent) has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-(--sl-color-accent)">
+										<input
+											type="radio"
+											class="sr-only"
+											name={toolGroup}
+											checked={tool === option.value}
+											onChange={() => setTool(option.value)}
+										/>
+										{option.label}
+									</label>
+								))}
+							</div>
+						</fieldset>
+					)}
 					{spec.params.map((param) => (
 						<ParamControl
 							param={param}
 							value={params[param.key]}
-							onChange={(value) => restart(data, { ...params, [param.key]: value })}
+							onChange={(value) => {
+								const next = { ...params, [param.key]: value };
+								if (param.live) setParams(next);
+								else restart(data, next);
+							}}
 						/>
 					))}
 					<div class="grid grid-cols-2 gap-2">
@@ -230,15 +306,18 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 							New data
 						</button>}
 					</div>
-					{editable && (
+					{interactive && (
 						<p class="m-0 text-xs leading-relaxed text-(--viz-muted-ink)">
-							Click the plot to add a sample{spec.labeled ? ', Shift+click for class B' : ''}.
+							{editable
+								? 'Click or tap the plot to use the tool. From the keyboard, focus the plot, move with the arrow keys and press Enter.'
+								: 'Hover or tap the plot to read a location, or focus it and use the arrow keys.'}
 						</p>
 					)}
 				</div>
 			</div>
 
-			<p class="m-0 mt-3 min-h-10 text-sm leading-snug" aria-live="polite">{caption}</p>
+			<p class="m-0 mt-3 min-h-10 text-sm leading-snug">{caption}</p>
+			<p class="sr-only" aria-live="polite">{spokenCaption.current}</p>
 
 			<dl class="m-0 mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-(--viz-border) pt-3 sm:grid-cols-4">
 				{spec.metrics(state, data, params).map((m) => (

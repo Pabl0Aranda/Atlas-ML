@@ -31,4 +31,6 @@ const loaders: Record<AlgorithmId, () => Promise<AlgorithmSpec>> = {
 	'threshold-metrics': () => import('./specs/evaluation').then((m) => m.thresholdMetrics),
 };
 
+export const ALGORITHM_IDS = Object.keys(loaders) as AlgorithmId[];
+
 export const loadSpec = (id: AlgorithmId): Promise<AlgorithmSpec> => loaders[id]();

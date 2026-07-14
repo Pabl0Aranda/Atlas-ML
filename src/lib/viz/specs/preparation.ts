@@ -19,7 +19,7 @@ function fences(data: Dataset, k: number): SceneLine[] {
 
 export const dataCleaning: AlgorithmSpec<Stage> = {
 	datasets: ['dirty', 'trend-outliers', 'ellipse'],
-	params: [{ key: 'k', label: 'Fence multiplier k', value: 1.5, min: 0.5, max: 3, step: 0.1 }],
+	params: [{ key: 'k', label: 'Fence multiplier k', value: 1.5, min: 0.5, max: 3, step: 0.1, live: true }],
 	labeled: false,
 	speed: 1,
 	thumbnailSteps: 1,
@@ -60,7 +60,7 @@ function scaled(data: Dataset, method: number): Dataset {
 export const featureScaling: AlgorithmSpec<Stage> = {
 	datasets: ['wide', 'ellipse', 'dirty'],
 	params: [
-		{ key: 'method', label: 'Scaler', value: 1, options: [{ label: 'Min-max', value: 0 }, { label: 'Standardization', value: 1 }] },
+		{ key: 'method', label: 'Scaler', value: 1, live: true, options: [{ label: 'Min-max', value: 0 }, { label: 'Standardization', value: 1 }] },
 	],
 	labeled: false,
 	speed: 1,

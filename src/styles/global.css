@@ -9,7 +9,7 @@
 	--font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
 	--font-display: 'Space Grotesk Variable', 'Inter Variable', sans-serif;
 	--color-accent-200: #b9d3f5;
-	--color-accent-600: #2a78d6;
+	--color-accent-600: #2571cc;
 	--color-accent-900: #123a6b;
 	--color-accent-950: #0c2747;
 }
@@ -17,6 +17,7 @@
 /* Starlight's default theme is dark; light mode is the [data-theme] override.
    Series values are the validated data-viz palette for each surface. */
 :root {
+	--on-accent: #ffffff;
 	--viz-surface: #1a1a19;
 	--viz-panel: #20201f;
 	--viz-border: #3a3a37;
@@ -36,12 +37,12 @@
 	--viz-border: #d9d8d2;
 	--viz-grid: #e9e8e3;
 	--viz-ink: #0b0b0b;
-	--viz-muted: #a3a29b;
+	--viz-muted: #8a8982;
 	--viz-muted-ink: #52514e;
 	--viz-series-1: #2a78d6;
-	--viz-series-2: #eb6834;
-	--viz-series-3: #1baf7a;
-	--viz-series-4: #eda100;
+	--viz-series-2: #d95926;
+	--viz-series-3: #1a8a62;
+	--viz-series-4: #b27500;
 }
 
 h1,
@@ -171,7 +172,7 @@ a.atlas-card.grid {
 .page-jump-primary {
 	border-color: var(--sl-color-accent);
 	background: var(--sl-color-accent);
-	color: #fff;
+	color: var(--on-accent);
 }
 
 .source-details {

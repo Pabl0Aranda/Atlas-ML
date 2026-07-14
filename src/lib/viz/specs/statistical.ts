@@ -225,8 +225,8 @@ export const gaussianProcess: AlgorithmSpec<GpState> = {
 	datasets: ['curve', 'trend', 'trend-outliers'],
 	editable: false,
 	params: [
-		{ key: 'lengthScale', label: 'Length scale ℓ', value: 0.3, min: 0.05, max: 1, step: 0.05 },
-		{ key: 'noise', label: 'Noise σ', value: 0.1, min: 0.01, max: 0.5, step: 0.01 },
+		{ key: 'lengthScale', label: 'Length scale ℓ', value: 0.3, min: 0.05, max: 1, step: 0.05, live: true },
+		{ key: 'noise', label: 'Noise σ', value: 0.1, min: 0.01, max: 0.5, step: 0.01, live: true },
 	],
 	labeled: false,
 	speed: 1,
