@@ -54,7 +54,7 @@ export function sceneToSvg(scene: Scene, label: string): string {
 		})
 		.join('');
 	const points = scene.points
-		.map((p) => `<circle cx="${px(p.x)}" cy="${py(p.y)}" r="3" fill="${fill(p.cls)}" stroke="var(--viz-surface)"/>`)
+		.map((p) => `<circle cx="${px(p.x)}" cy="${py(p.y)}" r="${(3 * (p.scale ?? 1)).toFixed(1)}" fill="${p.muted ? 'var(--viz-muted)' : fill(p.cls)}" stroke="var(--viz-surface)"/>`)
 		.join('');
 	const markers = (scene.markers ?? [])
 		.map((m) => `<circle cx="${px(m.x)}" cy="${py(m.y)}" r="7" fill="${fill(m.cls)}" stroke="var(--viz-ink)" stroke-width="2"/>`)

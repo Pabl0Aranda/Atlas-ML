@@ -170,15 +170,16 @@ export function drawScene(ctx: CanvasRenderingContext2D, size: number, scene: Sc
 	for (const p of scene.points) {
 		const x = px(p.x);
 		const y = py(p.y);
+		const r = radius * (p.scale ?? 1);
 		if (p.ring) {
 			ctx.beginPath();
-			ctx.arc(x, y, radius + 4, 0, Math.PI * 2);
+			ctx.arc(x, y, r + 4, 0, Math.PI * 2);
 			ctx.strokeStyle = colors.ink;
 			ctx.lineWidth = 1.5;
 			ctx.stroke();
 		}
-		drawMark(ctx, x, y, radius, p.cls);
-		ctx.fillStyle = colors.series[p.cls % colors.series.length];
+		drawMark(ctx, x, y, r, p.cls);
+		ctx.fillStyle = p.muted ? colors.muted : colors.series[p.cls % colors.series.length];
 		ctx.strokeStyle = colors.surface;
 		ctx.lineWidth = 1.5;
 		ctx.fill();

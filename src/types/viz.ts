@@ -48,6 +48,10 @@ export interface ScenePoint {
 	cls: number;
 	/** Draws a ring, e.g. around support vectors. */
 	ring?: boolean;
+	/** Size relative to a normal point, e.g. a sample's boosting weight. */
+	scale?: number;
+	/** Draws in the neutral color, for points with no class such as noise. */
+	muted?: boolean;
 }
 
 export interface SceneLine {
