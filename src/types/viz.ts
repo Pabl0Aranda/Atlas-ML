@@ -4,6 +4,7 @@ export type AlgorithmId =
 	| 'linear-regression'
 	| 'polynomial-regression'
 	| 'decision-tree'
+	| 'random-forest'
 	| 'knn'
 	| 'svm'
 	| 'k-means'
@@ -133,7 +134,7 @@ export interface AlgorithmSpec<S = any> {
 	metrics(state: S, data: Dataset, params: Hyperparameters): Metric[];
 	caption(state: S, data: Dataset, params: Hyperparameters): string;
 	series?(state: S): Series;
-	diagram?(state: S, probe: { x: number; y: number }): Diagram;
+	diagram?(state: S, probe: { x: number; y: number }): Diagram | undefined;
 	/** Text shown for the location under the cursor. */
 	describe?(state: S, probe: { x: number; y: number }, params: Hyperparameters): string;
 }

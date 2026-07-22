@@ -5,6 +5,7 @@ const loaders: Record<AlgorithmId, () => Promise<AlgorithmSpec>> = {
 	'linear-regression': () => import('./specs/regression').then((m) => m.linearRegression),
 	'polynomial-regression': () => import('./specs/regression').then((m) => m.polynomialRegression),
 	'decision-tree': () => import('./specs/decisionTree').then((m) => m.decisionTree),
+	'random-forest': () => import('./specs/ensembles').then((m) => m.randomForest),
 	knn: () => import('./specs/knn').then((m) => m.knn),
 	svm: () => import('./specs/svm').then((m) => m.svm),
 	'k-means': () => import('./specs/kmeans').then((m) => m.kMeans),

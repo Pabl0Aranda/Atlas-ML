@@ -1,5 +1,9 @@
 import type { Dataset, DataPoint } from '../../types/ml';
 
+type Feature = 'x' | 'y';
+
+const ALL_FEATURES: Feature[] = ['x', 'y'];
+
 export type TreeNode =
 	| { kind: 'leaf'; prediction: number; samples: number; impurity: number }
 	| {
@@ -40,9 +44,9 @@ function majority(data: DataPoint[]): number {
 }
 
 /** Finds the axis-aligned split with the lowest weighted child impurity. */
-export function bestSplit(data: DataPoint[]): { feature: 'x' | 'y'; threshold: number; score: number } | null {
-	let best: { feature: 'x' | 'y'; threshold: number; score: number } | null = null;
-	for (const feature of ['x', 'y'] as const) {
+export function bestSplit(data: DataPoint[], features = ALL_FEATURES): { feature: Feature; threshold: number; score: number } | null {
+	let best: { feature: Feature; threshold: number; score: number } | null = null;
+	for (const feature of features) {
 		const sorted = [...data].sort((a, b) => a[feature] - b[feature]);
 		for (let i = 1; i < sorted.length; i++) {
 			if (sorted[i][feature] === sorted[i - 1][feature]) continue;
@@ -57,11 +61,11 @@ export function bestSplit(data: DataPoint[]): { feature: 'x' | 'y'; threshold: n
 	return best;
 }
 
-/** Recursively grows a CART tree down to maxDepth. */
-export function buildTree(data: Dataset, maxDepth: number, minSamples = 2): TreeNode {
+/** Recursively grows a CART tree down to maxDepth. Forests pass pickFeatures to limit each split. */
+export function buildTree(data: Dataset, maxDepth: number, minSamples = 2, pickFeatures = () => ALL_FEATURES): TreeNode {
 	const impurity = gini(data);
 	const base = { prediction: majority(data), samples: data.length, impurity };
-	const split = maxDepth > 0 && impurity > 0 && data.length >= minSamples ? bestSplit(data) : null;
+	const split = maxDepth > 0 && impurity > 0 && data.length >= minSamples ? bestSplit(data, pickFeatures()) : null;
 	if (!split) return { kind: 'leaf', ...base };
 	const { feature, threshold } = split;
 	return {
@@ -69,8 +73,8 @@ export function buildTree(data: Dataset, maxDepth: number, minSamples = 2): Tree
 		...base,
 		feature,
 		threshold,
-		left: buildTree(data.filter((p) => p[feature] <= threshold), maxDepth - 1, minSamples),
-		right: buildTree(data.filter((p) => p[feature] > threshold), maxDepth - 1, minSamples),
+		left: buildTree(data.filter((p) => p[feature] <= threshold), maxDepth - 1, minSamples, pickFeatures),
+		right: buildTree(data.filter((p) => p[feature] > threshold), maxDepth - 1, minSamples, pickFeatures),
 	};
 }
 

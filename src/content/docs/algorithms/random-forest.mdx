@@ -1,0 +1,74 @@
+---
+title: Random Forest
+description: Average many decorrelated decision trees, each trained on a bootstrap sample, into one stable classifier.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+One [decision tree](/algorithms/decision-tree/) is unstable: change a few samples and you can get a very different tree. A random forest turns that weakness into a strength. It grows many trees that each see a slightly different version of the problem, then lets them vote. Their individual mistakes differ, so most of them cancel out.
+
+## Mathematical Foundation
+
+Each tree $b$ trains on a bootstrap sample: $n$ draws from the data, with replacement. The forest predicts the class with the most votes:
+
+$$
+\hat{y}(x) = \arg\max_{c} \sum_{b=1}^{B} \mathbb{1}[\,T_b(x) = c\,]
+$$
+
+Averaging only helps when the trees disagree. For $B$ trees with variance $\sigma^2$ and pairwise correlation $\rho$, the variance of their average is:
+
+$$
+\rho\,\sigma^2 + \frac{1 - \rho}{B}\,\sigma^2
+$$
+
+More trees shrink the second term, but only lower correlation shrinks the first. That is why each split considers a random subset of the features.
+
+A bootstrap sample leaves out each point with probability $(1 - 1/n)^n \approx 0.37$. Those out-of-bag points act as a free validation set for that tree.
+
+## Step-by-Step Breakdown
+
+1. Draw a bootstrap sample of the training data.
+2. Grow a tree on it, choosing from a random subset of features at each split.
+3. Score the tree on the samples it never saw, and add those votes to the out-of-bag tally.
+4. Repeat until the forest has enough trees.
+5. Predict by majority vote.
+
+## Interactive Sandbox
+
+Each step adds one tree. The first tree gives a jagged boundary, and the region smooths out as more trees vote. Watch the gap between training accuracy and out-of-bag accuracy: the first is flattering, and the second is the honest estimate. This data has only two features, so each split here picks one at random.
+
+<Sandbox client:visible algorithm="random-forest" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="randomForest.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+model = RandomForestClassifier(n_estimators=200, oob_score=True, random_state=0).fit(X, y)
+print(model.oob_score_)
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- A strong default on tabular data, with little tuning.
+- Adding trees does not cause overfitting. Past a point it only costs time.
+- Out-of-bag scoring gives a validation estimate without a separate split.
+
+**Limitations**
+
+- Hundreds of trees are slower and larger than one, and far harder to read.
+- Boundaries are still built from axis-aligned splits.
+- Tuned [gradient boosting](/algorithms/gradient-boosting/) often scores higher on the same data.

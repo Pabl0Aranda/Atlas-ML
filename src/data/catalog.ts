@@ -41,7 +41,7 @@ export const CATALOG: CatalogEntry[] = [
 	{ name: 'K-Nearest Neighbors', family: 'Supervised Learning', aliases: 'KNN instance-based lazy', summary: 'Classifies a point by the vote of the closest samples.', page: { id: 'knn', thumbnail: 'moons' } },
 	{ name: 'Support Vector Machines', family: 'Supervised Learning', aliases: 'SVM SVC kernel SMO', summary: 'Finds the boundary with the widest margin between classes.', page: { id: 'svm', thumbnail: 'linear' } },
 	{ name: 'Decision Trees', family: 'Supervised Learning', aliases: 'CART gini', summary: 'Partitions the space with a hierarchy of axis-aligned questions.', page: { id: 'decision-tree', thumbnail: 'xor' } },
-	{ name: 'Random Forest', family: 'Supervised Learning', aliases: 'bagging ensemble trees', summary: 'Averages many decorrelated trees trained on bootstrap samples.', wiki: 'Random_forest' },
+	{ name: 'Random Forest', family: 'Supervised Learning', aliases: 'bagging ensemble trees', summary: 'Averages many decorrelated trees trained on bootstrap samples.', page: { id: 'random-forest', thumbnail: 'moons' } },
 	{ name: 'Gradient Boosting Machines', family: 'Supervised Learning', aliases: 'GBM GBDT ensemble', summary: 'Adds trees that each fit the gradient of the current loss.', wiki: 'Gradient_boosting' },
 	{ name: 'XGBoost', family: 'Supervised Learning', aliases: 'gradient boosting ensemble', summary: 'Regularized gradient boosting engineered for speed and scale.', wiki: 'XGBoost' },
 	{ name: 'LightGBM', family: 'Supervised Learning', aliases: 'gradient boosting histogram ensemble', summary: 'Histogram-based boosting that grows trees leaf by leaf.', wiki: 'LightGBM' },

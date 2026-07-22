@@ -9,7 +9,7 @@ interface State {
 	tree: TreeNode;
 }
 
-function treeDiagram(root: TreeNode): Diagram {
+export function treeDiagram(root: TreeNode): Diagram {
 	const nodes: DiagramNode[] = [];
 	const edges: Diagram['edges'] = [];
 	const levels = treeDepth(root) + 1;
