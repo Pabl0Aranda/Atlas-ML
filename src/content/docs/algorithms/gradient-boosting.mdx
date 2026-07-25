@@ -1,0 +1,82 @@
+---
+title: Gradient Boosting
+description: Build a strong classifier one small tree at a time, each one correcting the errors left by the trees before it.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+A [random forest](/algorithms/random-forest/) grows independent trees and averages them. Gradient boosting works in sequence instead. It starts with a crude guess, looks at what is still wrong, and adds a small tree aimed at exactly those errors. After many rounds, a long line of weak corrections adds up to a very accurate model.
+
+## Mathematical Foundation
+
+The model is a running sum of trees that outputs log-odds, where $\alpha$ is the learning rate:
+
+$$
+F_m(x) = F_{m-1}(x) + \alpha\, h_m(x), \qquad p(x) = \frac{1}{1 + e^{-F(x)}}
+$$
+
+Training minimizes the log loss:
+
+$$
+L = -\frac{1}{n} \sum_{i} \big[\, y_i \log p_i + (1 - y_i) \log(1 - p_i) \,\big]
+$$
+
+Its negative gradient with respect to $F(x_i)$ is simply the residual $r_i = y_i - p_i$. So each new tree fits these residuals, which is gradient descent carried out in function space.
+
+Each leaf then takes one Newton step, using the curvature of the loss:
+
+$$
+\gamma_{\text{leaf}} = \frac{\sum_{i \in \text{leaf}} r_i}{\sum_{i \in \text{leaf}} p_i (1 - p_i)}
+$$
+
+This site's engine also caps leaf values, so one confident leaf cannot overshoot.
+
+## Step-by-Step Breakdown
+
+1. Set $F_0$ to the log-odds of the positive class.
+2. Compute each sample's residual $r_i = y_i - p_i$.
+3. Fit a shallow regression tree to the residuals.
+4. Replace each leaf's value with its Newton step.
+5. Add the tree to the model, scaled by the learning rate, and repeat from step 2.
+
+## Interactive Sandbox
+
+Each step adds one shallow tree. Hover or tap to read the predicted probability at any location. Try lowering the learning rate: the loss curve falls more slowly, and in practice more trees at a smaller rate tend to generalize better. This sandbox only reports training metrics, which keep improving even after a real model would begin to overfit.
+
+<Sandbox client:visible algorithm="gradient-boosting" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="gradientBoosting.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.ensemble import GradientBoostingClassifier
+
+model = GradientBoostingClassifier(n_estimators=200, learning_rate=0.1, max_depth=2).fit(X, y)
+print(model.score(X_test, y_test))
+```
+</TabItem>
+</Tabs>
+
+XGBoost, LightGBM and CatBoost build on this same idea, and differ mostly in how they scale, regularize and handle categories.
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- Often the most accurate choice on tabular data.
+- Works with any differentiable loss, so it adapts to many tasks.
+- Shallow trees capture feature interactions without feature engineering.
+
+**Limitations**
+
+- Unlike a forest, it can overfit as trees are added, so use early stopping on a [validation set](/validation/overview/).
+- Trees depend on each other, so training is sequential.
+- Learning rate, tree count and depth interact, which makes tuning more involved.

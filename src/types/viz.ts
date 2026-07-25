@@ -5,6 +5,7 @@ export type AlgorithmId =
 	| 'polynomial-regression'
 	| 'decision-tree'
 	| 'random-forest'
+	| 'gradient-boosting'
 	| 'knn'
 	| 'svm'
 	| 'k-means'
