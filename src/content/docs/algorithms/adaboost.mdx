@@ -1,0 +1,89 @@
+---
+title: AdaBoost
+description: Combine one-split decision stumps by reweighting samples, so each new stump concentrates on earlier mistakes.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Imagine studying with flash cards and moving the ones you get wrong to the top of the pile. AdaBoost does the same with data. A decision stump, a tree with a single split, is barely better than guessing. But if each new stump pays extra attention to the samples the last ones missed, the group can become accurate even though each member is weak.
+
+## Mathematical Foundation
+
+Labels are $y_i \in \{-1, +1\}$ and every sample starts with weight $w_i = 1/n$. In round $t$, pick the stump $h_t$ with the lowest weighted error:
+
+$$
+\varepsilon_t = \sum_{i} w_i\, \mathbb{1}[\,h_t(x_i) \ne y_i\,]
+$$
+
+The stump earns a vote that grows as its error falls:
+
+$$
+\alpha_t = \frac{1}{2} \ln \frac{1 - \varepsilon_t}{\varepsilon_t}
+$$
+
+Then mistakes gain weight, correct samples lose it, and the weights are normalized to sum to 1:
+
+$$
+w_i \leftarrow w_i\, e^{-\alpha_t\, y_i\, h_t(x_i)}
+$$
+
+After this update, the samples the stump got wrong hold exactly half of the total weight, so that stump is no better than chance on the new weights. The next stump has to find something different. The final classifier is a weighted vote:
+
+$$
+H(x) = \operatorname{sign} \sum_{t} \alpha_t\, h_t(x)
+$$
+
+This procedure is equivalent to greedily minimizing the exponential loss below, which makes AdaBoost an early form of [gradient boosting](/algorithms/gradient-boosting/):
+
+$$
+L = \sum_{i} e^{-y_i F(x_i)}
+$$
+
+## Step-by-Step Breakdown
+
+1. Give every sample equal weight.
+2. Find the stump with the lowest weighted error.
+3. Stop if no stump beats chance, or if one is perfect.
+4. Compute the stump's vote $\alpha_t$.
+5. Raise the weight of its mistakes, lower the rest, normalize, and repeat from step 2.
+
+## Interactive Sandbox
+
+Each step adds one stump, drawn as a dashed line. Point size shows sample weight, so hard samples near the boundary swell as rounds pass. Then try **XOR**. A stump sees only one feature, and neither feature alone explains that pattern. After 40 rounds it reaches about 80% training accuracy, while **Moons** reaches 100%.
+
+<Sandbox client:visible algorithm="adaboost" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="adaBoost.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
+
+stump = DecisionTreeClassifier(max_depth=1)
+model = AdaBoostClassifier(estimator=stump, n_estimators=100).fit(X, y)
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- Simple, with very few settings to tune.
+- Turns almost any weak learner into a strong one.
+- Sample weights show which examples the model finds hardest.
+
+**Limitations**
+
+- The exponential loss punishes mistakes heavily, so label noise and outliers can dominate training.
+- Stumps see one feature at a time, so the sum struggles with interactions such as XOR.
+- Gradient boosting has largely replaced it in practice.

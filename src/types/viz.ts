@@ -6,6 +6,7 @@ export type AlgorithmId =
 	| 'decision-tree'
 	| 'random-forest'
 	| 'gradient-boosting'
+	| 'adaboost'
 	| 'knn'
 	| 'svm'
 	| 'k-means'

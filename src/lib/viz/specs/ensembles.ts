@@ -1,9 +1,10 @@
 import type { Dataset } from '../../../types/ml';
-import type { AlgorithmSpec } from '../../../types/viz';
+import type { AlgorithmSpec, SceneLine } from '../../../types/viz';
+import { adaBoostClassify, adaBoostStep, initAdaBoost, type AdaBoostState, type Stump } from '../../ml/adaBoost';
 import { boostingClassify, boostingProbability, boostingStep, initBoosting, type BoostingState } from '../../ml/gradientBoosting';
 import { accuracy } from '../../ml/knn';
 import { forestClassify, forestStep, initForest, type ForestState } from '../../ml/randomForest';
-import { classPoints, fixed, percent } from '../scene';
+import { classPoints, counted, fixed, percent } from '../scene';
 import { treeDiagram } from './decisionTree';
 
 const LEGEND = ['Class A', 'Class B'];
@@ -70,4 +71,51 @@ export const gradientBoosting: AlgorithmSpec<BoostingState> = {
 	},
 	series: (s) => ({ label: 'Log loss per tree added', values: s.lossHistory }),
 	describe: (s, probe) => `(${probe.x.toFixed(2)}, ${probe.y.toFixed(2)}) → P(B) = ${boostingProbability(s, probe.x, probe.y).toFixed(2)}`,
+};
+
+/** Keeps heavily weighted samples readable without letting them cover the plot. */
+const weightScale = (weight: number, count: number) => Math.min(3, Math.max(0.6, Math.sqrt(weight * count)));
+
+const stumpLine = ({ feature, threshold }: Stump): SceneLine => ({
+	tone: 'ink',
+	dashed: true,
+	path: feature === 'x' ? [[threshold, -1], [threshold, 1]] : [[-1, threshold], [1, threshold]],
+});
+
+const adaAccuracy = (s: AdaBoostState, data: Dataset) => accuracy(data, (x, y) => adaBoostClassify(s, x, y));
+
+export const adaBoost: AlgorithmSpec<AdaBoostState> = {
+	datasets: DATASETS,
+	params: [{ key: 'rounds', label: 'Rounds', value: 40, min: 1, max: 120, step: 1 }],
+	labeled: true,
+	speed: 1,
+	thumbnailSteps: 25,
+	legend: () => LEGEND,
+	init: (data) => initAdaBoost(data),
+	step: (s, data) => adaBoostStep(s, data),
+	isDone: (s, p) => s.finished || s.stumps.length >= p.rounds,
+	scene(s, data) {
+		const latest = s.stumps.at(-1);
+		return {
+			region: s.stumps.length ? (x, y) => adaBoostClassify(s, x, y) : undefined,
+			points: classPoints(data).map((p, i) => ({ ...p, scale: weightScale(s.weights[i], data.length) })),
+			lines: latest ? [stumpLine(latest)] : [],
+		};
+	},
+	metrics(s, data) {
+		const latest = s.stumps.at(-1);
+		return [
+			{ label: 'Stumps', value: String(s.stumps.length) },
+			{ label: 'Latest weighted error', value: latest ? percent(s.error) : '–' },
+			{ label: 'Latest vote α', value: latest ? fixed(latest.alpha) : '–' },
+			{ label: 'Training accuracy', value: latest ? percent(adaAccuracy(s, data)) : '–' },
+		];
+	},
+	caption(s) {
+		if (s.finished && !s.stumps.length) return 'No single split beats a coin flip on this data, so boosting has nothing to start from.';
+		if (s.finished) return `Stopped after ${counted(s.stumps.length, 'stump')}: no further stump can improve on the weighted samples.`;
+		if (!s.stumps.length) return 'Every sample starts with equal weight. Step to fit the best one-split stump.';
+		return 'The dashed line is the latest stump. Samples it got wrong grew, so the next stump focuses on them.';
+	},
+	series: (s) => ({ label: 'Training error per round', values: s.errorHistory }),
 };

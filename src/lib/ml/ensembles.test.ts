@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { adaBoostClassify, adaBoostStep, initAdaBoost } from './adaBoost';
 import { generateDataset } from './datasets';
 import { boostingClassify, boostingProbability, boostingStep, initBoosting } from './gradientBoosting';
 import { accuracy } from './knn';
@@ -79,5 +80,54 @@ describe('gradient boosting', () => {
 		const model = repeat(5, initBoosting(pure), (s) => boostingStep(s, pure, params));
 		expect(Number.isFinite(model.loss)).toBe(true);
 		expect(boostingClassify(model, 0, 0)).toBe(1);
+	});
+});
+
+describe('AdaBoost', () => {
+	const fit = (rounds: number, data = moons) => repeat(rounds, initAdaBoost(data), (s) => adaBoostStep(s, data));
+
+	it('starts uniform and keeps the weights a distribution', () => {
+		expect(initAdaBoost(moons).weights[0]).toBeCloseTo(1 / moons.length);
+		const sum = fit(10).weights.reduce((a, b) => a + b, 0);
+		expect(sum).toBeCloseTo(1);
+	});
+
+	it('raises the weight of samples the stump gets wrong', () => {
+		const model = fit(1);
+		const stump = model.stumps[0];
+		const start = 1 / moons.length;
+		moons.forEach((p, i) => {
+			const wrong = adaBoostClassify({ ...model, stumps: [stump] }, p.x, p.y) !== p.label;
+			if (wrong) expect(model.weights[i]).toBeGreaterThan(start);
+			else expect(model.weights[i]).toBeLessThan(start);
+		});
+	});
+
+	it('gives the misclassified samples half the weight after each round', () => {
+		const model = fit(1);
+		const wrong = moons.reduce((s, p, i) => s + (adaBoostClassify(model, p.x, p.y) !== p.label ? model.weights[i] : 0), 0);
+		expect(wrong).toBeCloseTo(0.5);
+	});
+
+	it('combines weak stumps into a strong classifier', () => {
+		const single = fit(1);
+		const model = fit(40);
+		const score = (m: typeof model) => accuracy(moons, (x, y) => adaBoostClassify(m, x, y));
+		expect(score(model)).toBeGreaterThan(score(single));
+		expect(score(model)).toBeGreaterThan(0.95);
+	});
+
+	it('stops when one stump is perfect', () => {
+		const separable: Dataset = [{ x: -0.5, y: 0, label: 0 }, { x: -0.4, y: 0, label: 0 }, { x: 0.4, y: 0, label: 1 }, { x: 0.5, y: 0, label: 1 }];
+		const model = fit(3, separable);
+		expect(model.stumps).toHaveLength(1);
+		expect(model.finished).toBe(true);
+		expect(Number.isFinite(model.stumps[0].alpha)).toBe(true);
+	});
+
+	it('stops when no stump beats chance', () => {
+		const xor: Dataset = [{ x: -1, y: -1, label: 0 }, { x: 1, y: 1, label: 0 }, { x: -1, y: 1, label: 1 }, { x: 1, y: -1, label: 1 }];
+		const model = repeat(50, initAdaBoost(xor), (s) => adaBoostStep(s, xor));
+		expect(model.finished).toBe(true);
 	});
 });

@@ -46,7 +46,7 @@ export const CATALOG: CatalogEntry[] = [
 	{ name: 'XGBoost', family: 'Supervised Learning', aliases: 'gradient boosting ensemble', summary: 'Regularized gradient boosting engineered for speed and scale.', wiki: 'XGBoost' },
 	{ name: 'LightGBM', family: 'Supervised Learning', aliases: 'gradient boosting histogram ensemble', summary: 'Histogram-based boosting that grows trees leaf by leaf.', wiki: 'LightGBM' },
 	{ name: 'CatBoost', family: 'Supervised Learning', aliases: 'gradient boosting categorical ensemble', summary: 'Gradient boosting with built-in handling of categorical features.', wiki: 'CatBoost' },
-	{ name: 'AdaBoost', family: 'Supervised Learning', aliases: 'adaptive boosting ensemble', summary: 'Reweights samples so each weak learner fixes earlier errors.', wiki: 'AdaBoost' },
+	{ name: 'AdaBoost', family: 'Supervised Learning', aliases: 'adaptive boosting ensemble', summary: 'Reweights samples so each weak learner fixes earlier errors.', page: { id: 'adaboost', thumbnail: 'moons' } },
 	{ name: 'Extra Trees', family: 'Supervised Learning', aliases: 'extremely randomized trees ensemble', summary: 'A forest whose split thresholds are drawn at random.', wiki: 'Random_forest#ExtraTrees' },
 
 	{ name: 'K-Means Clustering', family: 'Unsupervised Learning', aliases: 'Lloyd centroids', summary: 'Groups points around k centroids by alternating assign and update.', page: { id: 'k-means', thumbnail: 'blobs' } },

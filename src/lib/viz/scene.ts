@@ -11,6 +11,9 @@ export const fixed = (value: number, digits = 3): string =>
 
 export const percent = (value: number): string => `${(value * 100).toFixed(1)}%`;
 
+/** A count with its noun, such as "1 cluster" or "3 clusters". */
+export const counted = (count: number, noun: string): string => `${count} ${noun}${count === 1 ? '' : 's'}`;
+
 /** Marching squares: traces where f crosses level as short segments. */
 export function contour(
 	f: (x: number, y: number) => number,
