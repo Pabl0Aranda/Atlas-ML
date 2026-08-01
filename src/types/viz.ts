@@ -7,6 +7,7 @@ export type AlgorithmId =
 	| 'random-forest'
 	| 'gradient-boosting'
 	| 'adaboost'
+	| 'dbscan'
 	| 'knn'
 	| 'svm'
 	| 'k-means'

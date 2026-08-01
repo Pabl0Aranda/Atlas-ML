@@ -8,6 +8,7 @@ const loaders: Record<AlgorithmId, () => Promise<AlgorithmSpec>> = {
 	'random-forest': () => import('./specs/ensembles').then((m) => m.randomForest),
 	'gradient-boosting': () => import('./specs/ensembles').then((m) => m.gradientBoosting),
 	adaboost: () => import('./specs/ensembles').then((m) => m.adaBoost),
+	dbscan: () => import('./specs/clustering').then((m) => m.dbscan),
 	knn: () => import('./specs/knn').then((m) => m.knn),
 	svm: () => import('./specs/svm').then((m) => m.svm),
 	'k-means': () => import('./specs/kmeans').then((m) => m.kMeans),

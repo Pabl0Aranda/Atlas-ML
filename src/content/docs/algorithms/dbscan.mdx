@@ -1,0 +1,73 @@
+---
+title: DBSCAN
+description: Grow clusters outward from dense regions, finding any shape and labeling isolated points as noise.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Picture a rumor spreading through a crowd. Anyone standing in a dense group passes it to everyone nearby, and it travels as far as the crowd stays connected. People standing alone never hear it. DBSCAN finds clusters the same way, so a cluster can take any shape, and you never have to say how many to expect. That makes it a good contrast with [k-means](/algorithms/k-means/), which only finds round clusters and must assign every point.
+
+## Mathematical Foundation
+
+Two settings define density: a radius $\varepsilon$ and a count $\text{minPts}$. The neighborhood of a point includes the point itself:
+
+$$
+N_\varepsilon(p) = \{\, q : \lVert p - q \rVert \le \varepsilon \,\}
+$$
+
+Every point then falls into one of three roles:
+
+- **Core:** $|N_\varepsilon(p)| \ge \text{minPts}$.
+- **Border:** not core, but inside the neighborhood of a core point.
+- **Noise:** neither of the above.
+
+A cluster is a maximal set of core points connected through overlapping neighborhoods, plus their border points.
+
+## Step-by-Step Breakdown
+
+1. Pick an unvisited point and count its neighbors.
+2. If it is not core, mark it noise for now and go back to step 1.
+3. If it is core, start a new cluster and add its neighbors to a queue.
+4. Take each queued point. Add it to the cluster, and if it is also core, queue its neighbors too.
+5. When the queue empties, the cluster is complete. Return to step 1.
+
+A point marked noise can still join a cluster later as a border point. Border points that are near two clusters go to whichever reaches them first, so that part of the result depends on the visiting order.
+
+## Interactive Sandbox
+
+Each step examines one point, and the dashed circle shows its neighborhood. Grey points are unvisited, or noise once examined. On **Moons**, the cluster flows along each curve, which k-means cannot do. Then try a smaller $\varepsilon$ and watch each moon break into fragments. On **Circles**, the sparser outer ring shows the method's main weakness: one radius has to suit every region.
+
+<Sandbox client:visible algorithm="dbscan" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="dbscan.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.cluster import DBSCAN
+
+labels = DBSCAN(eps=0.15, min_samples=4).fit_predict(X)  # -1 marks noise
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- Finds clusters of arbitrary shape.
+- Chooses the number of clusters by itself.
+- Flags outliers instead of forcing them into a cluster.
+
+**Limitations**
+
+- Struggles when clusters have very different densities, since $\varepsilon$ is global.
+- Sensitive to $\varepsilon$, and distances need [scaled features](/data-preparation/processing/).
+- Distance loses meaning in high dimensions, which weakens the density idea.
