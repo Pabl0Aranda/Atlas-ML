@@ -1,0 +1,77 @@
+---
+title: Hierarchical Clustering
+description: Merge the closest clusters step by step to build a tree of nested groups, then cut it at the level you need.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+## Intuition & Overview
+
+Think of a family tree built backwards. Start with every sample alone, then repeatedly join the two most similar groups until only one remains. The result is not a single clustering but a whole hierarchy, called a dendrogram. You can cut it at any height to get as many clusters as you need. This bottom-up version is known as agglomerative clustering.
+
+## Mathematical Foundation
+
+The method needs a distance between clusters, not only between points. That choice is the linkage:
+
+$$
+d_{\text{single}}(A, B) = \min_{a \in A,\, b \in B} \lVert a - b \rVert
+$$
+
+$$
+d_{\text{complete}}(A, B) = \max_{a \in A,\, b \in B} \lVert a - b \rVert
+$$
+
+$$
+d_{\text{average}}(A, B) = \frac{1}{|A|\,|B|} \sum_{a \in A} \sum_{b \in B} \lVert a - b \rVert
+$$
+
+Single linkage can follow long, thin shapes, because one close pair is enough to join two clusters. The same property causes chaining, where a few stray points bridge groups that should stay apart. Complete linkage prefers compact clusters, and average linkage sits between them.
+
+## Step-by-Step Breakdown
+
+1. Make every sample its own cluster.
+2. Measure the linkage distance between every pair of clusters.
+3. Merge the closest pair, and record the distance as the merge height.
+4. Repeat from step 2 until the target number of clusters remains, or one cluster is left.
+5. To choose a cut, look for a large jump in merge height. It means two clearly separate groups were forced together.
+
+## Interactive Sandbox
+
+Each step performs one merge. Points stay grey until they join a group. Press **Play** on **Moons** with single linkage: it recovers both moons exactly. Switch to complete linkage and it cuts across them, because it only allows compact clusters. Then set **Stop at k clusters** to 1 to see the final merge, which joins the two moons at the largest distance so far. That jump marks the natural cut.
+
+The dendrogram shows only the latest merges, and earlier ones collapse into leaves labeled with their size. Colors can change between steps until few clusters remain, since the plot has only four class colors.
+
+<Sandbox client:visible algorithm="hierarchical-clustering" />
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="hierarchical.ts" />
+</TabItem>
+<TabItem label="SciPy and scikit-learn">
+```python
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.cluster import AgglomerativeClustering
+
+labels = AgglomerativeClustering(n_clusters=2, linkage="single").fit_predict(X)
+dendrogram(linkage(X, method="single"))
+```
+</TabItem>
+</Tabs>
+
+## Strengths, Limitations & Real-world Trade-offs
+
+**Strengths**
+
+- No need to fix the number of clusters before seeing the tree.
+- The dendrogram shows structure at every scale, which suits data such as taxonomies.
+- Deterministic, with no random starting point.
+
+**Limitations**
+
+- Standard implementations need at least $O(n^2)$ time and memory, which rules out very large datasets.
+- Merges are greedy and can never be undone.
+- The result depends heavily on the linkage, as the sandbox shows.

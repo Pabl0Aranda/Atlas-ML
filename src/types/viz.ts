@@ -8,6 +8,7 @@ export type AlgorithmId =
 	| 'gradient-boosting'
 	| 'adaboost'
 	| 'dbscan'
+	| 'hierarchical-clustering'
 	| 'knn'
 	| 'svm'
 	| 'k-means'

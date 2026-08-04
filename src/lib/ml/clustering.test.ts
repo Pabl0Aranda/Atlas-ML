@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { generateDataset } from './datasets';
 import { clusterCount, dbscanStep, initDbscan, NOISE, type DbscanParams } from './dbscan';
+import { hierarchicalLabels, hierarchicalStep, initHierarchical, Linkage } from './hierarchical';
 import type { Dataset } from '../../types/ml';
 
 const at = (x: number, y: number) => ({ x, y, label: 0 });
+
+/** Share of points grouped the same way as their true label, for two groups. */
+function agreement(labels: number[], data: Dataset): number {
+	const same = labels.filter((l, i) => (l === labels[0]) === (data[i].label === data[0].label)).length;
+	return same / labels.length;
+}
 
 /** True labels found inside each cluster, ignoring noise. */
 const labelsPerCluster = (labels: number[], data: Dataset, count: number) =>
@@ -58,5 +65,58 @@ describe('DBSCAN', () => {
 		const state = run(chain, { eps: 0.001, minPoints: 2 });
 		expect(state.labels.every((l) => l === NOISE)).toBe(true);
 		expect(clusterCount(state)).toBe(0);
+	});
+});
+
+describe('hierarchical clustering', () => {
+	const mergeTo = (data: Dataset, k: number, linkage: Linkage) => {
+		let state = initHierarchical(data);
+		while (state.clusters.length > k) state = hierarchicalStep(state, data, linkage);
+		return state;
+	};
+
+	const line = [at(0, 0), at(0.1, 0), at(0.3, 0), at(0.7, 0)];
+
+	it('starts with one cluster per point', () => {
+		expect(initHierarchical(line).clusters).toHaveLength(4);
+	});
+
+	it('merges the closest pair first', () => {
+		const state = hierarchicalStep(initHierarchical(line), line, Linkage.Single);
+		expect(state.clusters.find((c) => c.members.length === 2)!.members.sort()).toEqual([0, 1]);
+		expect(state.merges[0].height).toBeCloseTo(0.1);
+	});
+
+	it('measures clusters by nearest, farthest or average pair', () => {
+		const height = (linkage: Linkage) => mergeTo(line, 2, linkage).merges[1].height;
+		expect(height(Linkage.Single)).toBeCloseTo(0.2);
+		expect(height(Linkage.Complete)).toBeCloseTo(0.3);
+		expect(height(Linkage.Average)).toBeCloseTo(0.25);
+	});
+
+	it('merges n - 1 times into one cluster, with every point kept once', () => {
+		const data = generateDataset('blobs', 30);
+		const state = mergeTo(data, 1, Linkage.Average);
+		expect(state.merges).toHaveLength(29);
+		expect([...state.clusters[0].members].sort((a, b) => a - b)).toEqual(data.map((_, i) => i));
+	});
+
+	it('never lowers the merge height with complete linkage', () => {
+		const { merges } = mergeTo(generateDataset('blobs', 40), 1, Linkage.Complete);
+		for (let i = 1; i < merges.length; i++) expect(merges[i].height).toBeGreaterThanOrEqual(merges[i - 1].height - 1e-12);
+	});
+
+	it('follows the moons with single linkage, unlike complete linkage', () => {
+		const moons = generateDataset('moons');
+		const score = (linkage: Linkage) => {
+			const state = mergeTo(moons, 2, linkage);
+			return agreement(hierarchicalLabels(state, moons.length), moons);
+		};
+		expect(score(Linkage.Single)).toBeGreaterThan(score(Linkage.Complete));
+	});
+
+	it('labels every point with a cluster index', () => {
+		const state = mergeTo(line, 2, Linkage.Single);
+		expect(hierarchicalLabels(state, 4)).toEqual([0, 0, 0, 1]);
 	});
 });

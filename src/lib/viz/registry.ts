@@ -9,6 +9,7 @@ const loaders: Record<AlgorithmId, () => Promise<AlgorithmSpec>> = {
 	'gradient-boosting': () => import('./specs/ensembles').then((m) => m.gradientBoosting),
 	adaboost: () => import('./specs/ensembles').then((m) => m.adaBoost),
 	dbscan: () => import('./specs/clustering').then((m) => m.dbscan),
+	'hierarchical-clustering': () => import('./specs/clustering').then((m) => m.hierarchicalClustering),
 	knn: () => import('./specs/knn').then((m) => m.knn),
 	svm: () => import('./specs/svm').then((m) => m.svm),
 	'k-means': () => import('./specs/kmeans').then((m) => m.kMeans),

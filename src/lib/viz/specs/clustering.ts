@@ -1,9 +1,14 @@
 import type { Dataset } from '../../../types/ml';
-import type { AlgorithmSpec, SceneLine, ScenePoint } from '../../../types/viz';
+import type { AlgorithmSpec, Diagram, DiagramNode, SceneLine, ScenePoint } from '../../../types/viz';
 import { dbscanStep, initDbscan, NOISE, UNVISITED, type DbscanState } from '../../ml/dbscan';
-import { counted } from '../scene';
+import { hierarchicalStep, initHierarchical, Linkage, type HierarchicalState } from '../../ml/hierarchical';
+import { counted, fixed } from '../scene';
 
 const CIRCLE_SEGMENTS = 40;
+/** The plot has four class colors, so smaller clusters only get colors once few remain. */
+const COLORED_CLUSTERS = 4;
+/** Fifteen nodes is the most a diagram draws with labels. */
+const DENDROGRAM_MERGES = 7;
 
 const ring = (x: number, y: number, radius: number): SceneLine => ({
 	tone: 'muted',
@@ -57,4 +62,76 @@ export const dbscan: AlgorithmSpec<DbscanState> = {
 		{ label: 'Noise', value: String(s.labels.filter((l) => l === NOISE).length) },
 	],
 	caption: (s, _, p) => dbscanCaption(s, p.minPoints),
+};
+
+/** Singletons stay grey until few clusters remain, because early colors would mean nothing. */
+function hierarchicalPoints(s: HierarchicalState, data: Dataset): ScenePoint[] {
+	const colorAll = s.clusters.length <= COLORED_CLUSTERS;
+	const colored = s.clusters.filter((c) => colorAll || c.members.length > 1);
+	const points: ScenePoint[] = data.map((p) => ({ x: p.x, y: p.y, cls: 0, muted: true }));
+	colored.forEach((cluster, cls) => {
+		for (const i of cluster.members) points[i] = { x: data[i].x, y: data[i].y, cls };
+	});
+	return points;
+}
+
+/** The top of the dendrogram. Earlier merges collapse into leaves labeled by their size. */
+function dendrogram(s: HierarchicalState): Diagram | undefined {
+	const recent = s.merges.slice(-DENDROGRAM_MERGES);
+	if (!recent.length) return undefined;
+	const top = Math.max(...recent.map((m) => m.height), 1e-9);
+	const byId = new Map(recent.map((m) => [m.into, m]));
+	const children = new Set(recent.flatMap((m) => [m.a, m.b]));
+	const nodes: DiagramNode[] = [];
+	const edges: Diagram['edges'] = [];
+	let leaves = 0;
+
+	const visit = (id: number, size: number): number => {
+		const index = nodes.length;
+		const merge = byId.get(id);
+		if (!merge) {
+			nodes.push({ x: leaves++, y: 1, label: String(size), strength: 0.3 });
+			return index;
+		}
+		nodes.push({ x: 0, y: 1 - merge.height / top, label: merge.height.toFixed(2) });
+		const left = visit(merge.a, merge.sizeA);
+		const right = visit(merge.b, merge.sizeB);
+		edges.push({ from: index, to: left }, { from: index, to: right });
+		nodes[index].x = (nodes[left].x + nodes[right].x) / 2;
+		return index;
+	};
+	for (const merge of recent) {
+		if (!children.has(merge.into)) visit(merge.into, merge.sizeA + merge.sizeB);
+	}
+	for (const node of nodes) node.x = leaves > 1 ? node.x / (leaves - 1) : 0.5;
+	return { title: 'Latest merges: height is merge distance, leaves show cluster size', nodes, edges };
+}
+
+export const hierarchicalClustering: AlgorithmSpec<HierarchicalState> = {
+	datasets: ['moons', 'blobs', 'circles'],
+	params: [
+		{ key: 'linkage', label: 'Linkage', value: Linkage.Single, options: [{ label: 'Single (nearest pair)', value: Linkage.Single }, { label: 'Complete (farthest pair)', value: Linkage.Complete }, { label: 'Average', value: Linkage.Average }] },
+		{ key: 'k', label: 'Stop at k clusters', value: 2, min: 1, max: 4, step: 1 },
+	],
+	labeled: false,
+	speed: 2,
+	thumbnailSteps: 118,
+	legend: (p) => Array.from({ length: p.k }, (_, i) => `Cluster ${i + 1}`),
+	init: (data) => initHierarchical(data),
+	step: (s, data, p) => hierarchicalStep(s, data, p.linkage as Linkage),
+	isDone: (s, p) => s.clusters.length <= p.k,
+	scene: (s, data) => ({ points: hierarchicalPoints(s, data) }),
+	metrics: (s) => [
+		{ label: 'Clusters', value: String(s.clusters.length) },
+		{ label: 'Merges', value: String(s.merges.length) },
+		{ label: 'Latest merge distance', value: s.merges.length ? fixed(s.merges.at(-1)!.height) : '–' },
+	],
+	caption(s, _, p) {
+		const latest = s.merges.at(-1);
+		if (!latest) return 'Every point starts as its own cluster. Step to merge the two closest clusters.';
+		if (s.clusters.length <= p.k) return `Stopped at ${counted(s.clusters.length, 'cluster')}. A sudden jump in merge distance marks a natural place to cut the tree.`;
+		return `Merged clusters of ${latest.sizeA} and ${latest.sizeB} points at distance ${latest.height.toFixed(3)}.`;
+	},
+	series: (s) => ({ label: 'Merge distance per merge', values: s.merges.map((m) => m.height) }),
+	diagram: (s) => dendrogram(s),
 };
