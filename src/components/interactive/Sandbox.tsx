@@ -1,55 +1,14 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'preact/hooks';
-import { drawGrid, drawScene, readPlotColors } from '@/lib/viz/canvas';
 import { DATASET_LABELS, generateDataset } from '@/lib/ml/datasets';
 import { moveProbe, probeStep, toolOptions, type PlotTool, type Point2D } from '@/lib/viz/interaction';
 import { loadSpec } from '@/lib/viz/registry';
 import { defaultParams } from '@/lib/viz/scene';
 import type { Dataset, DatasetKind, Hyperparameters } from '@/types/ml';
-import type { AlgorithmId, AlgorithmSpec, ParamSpec } from '@/types/viz';
+import type { AlgorithmId, AlgorithmSpec } from '@/types/viz';
+import { buttonClass, fieldLabelClass, MetricList, ParamControl, PlotLegend, primaryButtonClass, selectClass, SPEEDS, TICK_MS } from './controls';
 import DiagramView from './DiagramView';
 import HistoryChart from './HistoryChart';
-
-const TICK_MS = 140;
-const buttonClass =
-	'cursor-pointer rounded-md border border-(--viz-border) bg-(--viz-surface) px-3 py-1.5 text-sm font-medium text-(--viz-ink) transition-colors hover:border-(--viz-ink) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--sl-color-accent) disabled:cursor-not-allowed disabled:opacity-45';
-const primaryButtonClass =
-	'cursor-pointer rounded-md border border-(--sl-color-accent) bg-(--sl-color-accent) px-3 py-1.5 text-sm font-semibold text-(--on-accent) transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--sl-color-accent) disabled:cursor-not-allowed disabled:opacity-45';
-const SPEEDS = [1, 2, 4];
-const fieldLabelClass = 'text-xs font-medium text-(--viz-muted-ink)';
-
-function ParamControl({ param, value, onChange }: { param: ParamSpec; value: number; onChange: (v: number) => void }) {
-	if (param.options) {
-		return (
-			<label class="flex flex-col gap-1">
-				<span class={fieldLabelClass}>{param.label}</span>
-				<select
-					class="rounded-md border border-(--viz-border) bg-(--viz-surface) px-2 py-1.5 text-sm text-(--viz-ink)"
-					value={value}
-					onChange={(e) => onChange(Number(e.currentTarget.value))}
-				>
-					{param.options.map((o) => <option value={o.value}>{o.label}</option>)}
-				</select>
-			</label>
-		);
-	}
-	return (
-		<label class="flex flex-col gap-1">
-			<span class={`flex justify-between ${fieldLabelClass}`}>
-				{param.label}
-				<output class="font-mono tabular-nums text-(--viz-ink)">{value}</output>
-			</span>
-			<input
-				type="range"
-				class="w-full accent-(--sl-color-accent)"
-				min={param.min}
-				max={param.max}
-				step={param.step}
-				value={value}
-				onInput={(e) => onChange(Number(e.currentTarget.value))}
-			/>
-		</label>
-	);
-}
+import PlotCanvas from './PlotCanvas';
 
 function Runner({ spec }: { spec: AlgorithmSpec }) {
 	const [kind, setKind] = useState<DatasetKind>(spec.datasets[0]);
@@ -64,8 +23,6 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 	/** Keeps the readout and cursor visible after a tap or a key press, when no mouse is hovering. */
 	const [pinned, setPinned] = useState(false);
 	const [tool, setTool] = useState<PlotTool>(0);
-	const [theme, setTheme] = useState(0);
-	const [width, setWidth] = useState(0);
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const pointerType = useRef('mouse');
 	const toolGroup = useId();
@@ -73,8 +30,6 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 	const done = spec.isDone(state, params);
 	const editable = spec.editable !== false;
 	const scene = useMemo(() => spec.scene(state, data, params), [state, data, params]);
-
-	const aspect = scene.grid ? scene.grid.rows / scene.grid.cols : 1;
 
 	const restart = (nextData: Dataset, nextParams: Hyperparameters) => {
 		setPlaying(false);
@@ -98,31 +53,6 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 		const timer = setInterval(() => setState((s: unknown) => advance(s, spec.speed * speed)), TICK_MS);
 		return () => clearInterval(timer);
 	}, [playing, done, data, params, speed]);
-
-	useEffect(() => {
-		const canvas = canvasRef.current!;
-		const resize = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
-		resize.observe(canvas);
-		const themes = new MutationObserver(() => setTheme((t) => t + 1));
-		themes.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-		return () => {
-			resize.disconnect();
-			themes.disconnect();
-		};
-	}, []);
-
-	useEffect(() => {
-		const canvas = canvasRef.current!;
-		if (!width) return;
-		const ratio = window.devicePixelRatio || 1;
-		canvas.width = Math.round(width * ratio);
-		canvas.height = Math.round(width * aspect * ratio);
-		const ctx = canvas.getContext('2d')!;
-		ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-		const colors = readPlotColors(canvas);
-		if (scene.grid) drawGrid(ctx, width, scene.grid, colors);
-		else drawScene(ctx, width, scene, colors);
-	}, [scene, width, theme]);
 
 	const toDomain = (event: MouseEvent) => {
 		const rect = canvasRef.current!.getBoundingClientRect();
@@ -182,10 +112,10 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 			<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_14rem]">
 				<div>
 					<div class="relative">
-						<canvas
-							ref={canvasRef}
+						<PlotCanvas
+							scene={scene}
+							canvasRef={canvasRef}
 							class={`block w-full touch-manipulation rounded-lg border border-(--viz-border) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--sl-color-accent) ${editable ? 'cursor-crosshair' : ''}`}
-							style={{ aspectRatio: String(1 / aspect) }}
 							role={interactive ? 'application' : 'img'}
 							aria-roledescription={interactive ? 'plot' : undefined}
 							aria-label={interactive ? `Interactive plot. Arrow keys move the cursor${editable ? ', Enter applies the selected tool' : ''}.` : caption}
@@ -213,21 +143,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 						)}
 					</div>
 					<div class="mt-2 flex min-h-5 flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-(--viz-muted-ink)">
-						<ul class="m-0 flex list-none flex-wrap gap-3 p-0">
-							{legend.map((name, i) => (
-								<li class="m-0 flex items-center gap-1.5">
-									<svg width="10" height="10" viewBox="-6 -6 12 12" aria-hidden="true">
-										{[
-											<circle r="5" fill="var(--viz-series-1)" />,
-											<rect x="-5" y="-5" width="10" height="10" fill="var(--viz-series-2)" />,
-											<path d="M0-6 6 5H-6Z" fill="var(--viz-series-3)" />,
-											<path d="M0-6 6 0 0 6-6 0Z" fill="var(--viz-series-4)" />,
-										][i % 4]}
-									</svg>
-									{name}
-								</li>
-							))}
-						</ul>
+						<PlotLegend legend={legend} />
 						<span class="font-mono tabular-nums" aria-live={pinned ? 'polite' : 'off'}>
 							{(hovering || pinned) && readout}
 						</span>
@@ -238,7 +154,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 					{spec.datasets.length > 0 && <label class="flex flex-col gap-1">
 						<span class={fieldLabelClass}>Dataset</span>
 						<select
-							class="rounded-md border border-(--viz-border) bg-(--viz-surface) px-2 py-1.5 text-sm text-(--viz-ink)"
+							class={selectClass}
 							value={kind}
 							onChange={(e) => {
 								const next = e.currentTarget.value as DatasetKind;
@@ -319,14 +235,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 			<p class="m-0 mt-3 min-h-10 text-sm leading-snug">{caption}</p>
 			<p class="sr-only" aria-live="polite">{spokenCaption.current}</p>
 
-			<dl class="m-0 mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-(--viz-border) pt-3 sm:grid-cols-4">
-				{spec.metrics(state, data, params).map((m) => (
-					<div class="m-0">
-						<dt class="text-xs text-(--viz-muted-ink)">{m.label}</dt>
-						<dd class="m-0 font-mono text-base tabular-nums">{m.value}</dd>
-					</div>
-				))}
-			</dl>
+			<MetricList class="mt-3 border-t border-(--viz-border) pt-3 sm:grid-cols-4" metrics={spec.metrics(state, data, params)} />
 
 			{(series || diagram) && (
 				<div class="mt-3 grid gap-4 border-t border-(--viz-border) pt-3">
