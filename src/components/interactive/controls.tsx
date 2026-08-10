@@ -60,6 +60,26 @@ export function PlotLegend({ legend }: { legend: string[] }) {
 	);
 }
 
+export function TimelineControl({ index, length, onSeek }: { index: number; length: number; onSeek: (index: number) => void }) {
+	return (
+		<label class="flex items-center gap-3">
+			<span class={fieldLabelClass}>Timeline</span>
+			<input
+				type="range"
+				class="min-w-0 flex-1 accent-(--sl-color-accent)"
+				min={0}
+				max={length - 1}
+				step={1}
+				value={index}
+				disabled={length < 2}
+				aria-valuetext={`Frame ${index + 1} of ${length}`}
+				onInput={(e) => onSeek(Number(e.currentTarget.value))}
+			/>
+			<output class="font-mono text-xs tabular-nums text-(--viz-muted-ink)">{index + 1}/{length}</output>
+		</label>
+	);
+}
+
 export function MetricList({ metrics, class: extra = '' }: { metrics: Metric[]; class?: string }) {
 	return (
 		<dl class={`m-0 grid grid-cols-2 gap-x-4 gap-y-2 ${extra}`}>

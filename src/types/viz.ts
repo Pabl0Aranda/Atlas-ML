@@ -126,6 +126,11 @@ export interface AlgorithmSpec<S = any> {
 	labeled: boolean;
 	/** False when clicking the plot should not add samples. Defaults to true. */
 	editable?: boolean;
+	/**
+	 * Copies the parts of a state that step changes in place. Without it, states must be
+	 * immutable, because the timeline keeps earlier frames.
+	 */
+	snapshot?(state: S): S;
 	/** Steps per animation tick while playing. */
 	speed: number;
 	/** Steps used for the static catalog thumbnail. */

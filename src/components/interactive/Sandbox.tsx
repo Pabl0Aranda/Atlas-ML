@@ -3,9 +3,10 @@ import { DATASET_LABELS, generateDataset } from '@/lib/ml/datasets';
 import { moveProbe, probeStep, toolOptions, type PlotTool, type Point2D } from '@/lib/viz/interaction';
 import { loadSpec } from '@/lib/viz/registry';
 import { defaultParams } from '@/lib/viz/scene';
+import { createTimeline, currentFrame, pushFrame, seekFrame, type Timeline } from '@/lib/viz/timeline';
 import type { Dataset, DatasetKind, Hyperparameters } from '@/types/ml';
 import type { AlgorithmId, AlgorithmSpec } from '@/types/viz';
-import { buttonClass, fieldLabelClass, MetricList, ParamControl, PlotLegend, primaryButtonClass, selectClass, SPEEDS, TICK_MS } from './controls';
+import { buttonClass, fieldLabelClass, MetricList, ParamControl, PlotLegend, primaryButtonClass, selectClass, SPEEDS, TICK_MS, TimelineControl } from './controls';
 import DiagramView from './DiagramView';
 import HistoryChart from './HistoryChart';
 import PlotCanvas from './PlotCanvas';
@@ -15,7 +16,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 	const [seed, setSeed] = useState(7);
 	const [params, setParams] = useState<Hyperparameters>(() => defaultParams(spec));
 	const [data, setData] = useState<Dataset>(() => (spec.datasets.length ? generateDataset(spec.datasets[0]) : []));
-	const [state, setState] = useState(() => spec.init(data, params));
+	const [timeline, setTimeline] = useState<Timeline<unknown>>(() => createTimeline(spec.init(data, params)));
 	const [playing, setPlaying] = useState(false);
 	const [speed, setSpeed] = useState(1);
 	const [probe, setProbe] = useState({ x: 0.3, y: 0.3 });
@@ -27,6 +28,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 	const pointerType = useRef('mouse');
 	const toolGroup = useId();
 
+	const state = currentFrame(timeline);
 	const done = spec.isDone(state, params);
 	const editable = spec.editable !== false;
 	const scene = useMemo(() => spec.scene(state, data, params), [state, data, params]);
@@ -35,13 +37,20 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 		setPlaying(false);
 		setData(nextData);
 		setParams(nextParams);
-		setState(spec.init(nextData, nextParams));
+		setTimeline(createTimeline(spec.init(nextData, nextParams)));
 	};
 
-	const advance = (current: unknown, count: number) => {
-		let next = current;
+	/** Steps a copy, so frames already on the timeline never change. */
+	const advance = (current: Timeline<unknown>, count: number) => {
+		const start = currentFrame(current);
+		let next = spec.snapshot ? spec.snapshot(start) : start;
 		for (let i = 0; i < count && !spec.isDone(next, params); i++) next = spec.step(next, data, params);
-		return next;
+		return pushFrame(current, next);
+	};
+
+	const seek = (index: number) => {
+		setPlaying(false);
+		setTimeline((t) => seekFrame(t, index));
 	};
 
 	useEffect(() => {
@@ -50,7 +59,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 			setPlaying(false);
 			return;
 		}
-		const timer = setInterval(() => setState((s: unknown) => advance(s, spec.speed * speed)), TICK_MS);
+		const timer = setInterval(() => setTimeline((t) => advance(t, spec.speed * speed)), TICK_MS);
 		return () => clearInterval(timer);
 	}, [playing, done, data, params, speed]);
 
@@ -148,6 +157,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 							{(hovering || pinned) && readout}
 						</span>
 					</div>
+					<div class="mt-3"><TimelineControl index={timeline.index} length={timeline.frames.length} onSeek={seek} /></div>
 				</div>
 
 				<div class="flex flex-col gap-3">
@@ -199,8 +209,11 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 						<button type="button" class={primaryButtonClass} disabled={done} onClick={() => setPlaying(!playing)}>
 							{playing ? 'Pause' : 'Play'}
 						</button>
-						<button type="button" class={buttonClass} disabled={done || playing} onClick={() => setState(advance(state, 1))}>
+						<button type="button" class={buttonClass} disabled={done || playing} onClick={() => setTimeline((t) => advance(t, 1))}>
 							Step
+						</button>
+						<button type="button" class={buttonClass} disabled={timeline.index === 0} onClick={() => seek(timeline.index - 1)}>
+							Back
 						</button>
 						<button type="button" class={done ? primaryButtonClass : buttonClass} onClick={() => restart(data, params)}>Reset</button>
 						<button
@@ -212,7 +225,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 						</button>
 						{spec.datasets.length > 0 && <button
 							type="button"
-							class={`${buttonClass} col-span-2`}
+							class={buttonClass}
 							onClick={() => {
 								const next = seed + 1;
 								setSeed(next);

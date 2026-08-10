@@ -28,6 +28,8 @@ const toParams = (p: Hyperparameters): DqnParams => ({
 export const deepQNetwork: AlgorithmSpec<DqnState> = {
 	datasets: [],
 	editable: false,
+	// Training updates the network and replay buffer in place, for speed.
+	snapshot: (s) => ({ ...s, online: structuredClone(s.online), buffer: [...s.buffer] }),
 	params: [
 		{ key: 'world', label: 'World', value: 0, options: [{ label: 'Cliff', value: 0 }, { label: 'Rooms', value: 1 }] },
 		{ key: 'learningRate', label: 'Learning rate α', value: 1, min: 0.1, max: 2, step: 0.1 },

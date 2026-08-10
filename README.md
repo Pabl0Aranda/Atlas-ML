@@ -21,6 +21,8 @@ Built with Astro, Starlight, Tailwind CSS and Preact islands.
 3. Add a page in `src/content/docs/algorithms/`.
 4. Add `page` to its entry in `src/data/catalog.ts`, which also adds it to the sidebar. Algorithms without a page only need a catalog entry.
 
+Spec states must be immutable, because the sandbox timeline keeps earlier frames. A spec that trains in place for speed must provide `snapshot`, and the contract tests check this.
+
 ## Deployment
 
 Set `SITE_URL` to the public origin when building, for example `SITE_URL=https://example.com npm run build`. It turns on the sitemap, canonical URLs and social image tags.

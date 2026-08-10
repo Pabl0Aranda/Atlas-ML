@@ -7,6 +7,8 @@ import type { AlgorithmSpec, Scene } from '../../types/viz';
 
 /** Longer than any spec's default run; a spec that hits this never finishes. */
 const MAX_STEPS = 100000;
+/** Sandbox ticks to record, which reaches past the first update of the slowest learners. */
+const FRAME_TICKS = 12;
 
 const dataFor = (spec: AlgorithmSpec): Dataset => (spec.datasets.length ? generateDataset(spec.datasets[0]) : []);
 
@@ -39,6 +41,27 @@ describe.each(ALGORITHM_IDS)('%s spec', (id) => {
 		}
 		expect(steps).toBeLessThan(MAX_STEPS);
 		expectValidFrame(spec, state, data, params);
+	}, 120000);
+
+	it('keeps recorded frames intact while the run continues', async () => {
+		const spec = await loadSpec(id);
+		const data = dataFor(spec);
+		const params = defaultParams(spec);
+		const view = (state: unknown) => {
+			const scene = spec.scene(state, data, params);
+			const probes = [-0.6, -0.2, 0.2, 0.6].flatMap((x) => [-0.6, 0.2].map((y) => scene.region?.(x, y)));
+			return JSON.stringify([scene.points, scene.lines, scene.grid, probes, spec.metrics(state, data, params)]);
+		};
+		const copy = spec.snapshot ?? ((s: unknown) => s);
+		let frame = spec.init(data, params);
+		const recorded: [unknown, string][] = [];
+		for (let tick = 0; tick < FRAME_TICKS && !spec.isDone(frame, params); tick++) {
+			recorded.push([frame, view(frame)]);
+			let next = copy(frame);
+			for (let i = 0; i < spec.speed && !spec.isDone(next, params); i++) next = spec.step(next, data, params);
+			frame = next;
+		}
+		for (const [state, seen] of recorded) expect(view(state)).toBe(seen);
 	}, 120000);
 
 	it('only marks a parameter live when the run does not depend on it', async () => {

@@ -34,6 +34,8 @@ function criticCells(s: PpoState, world: GridWorld) {
 export const proximalPolicyOptimization: AlgorithmSpec<PpoState> = {
 	datasets: [],
 	editable: false,
+	// Each update trains both networks in place, for speed.
+	snapshot: (s) => ({ ...s, policy: structuredClone(s.policy), critic: structuredClone(s.critic) }),
 	params: [
 		{ key: 'world', label: 'World', value: 1, options: [{ label: 'Rooms', value: 1 }, { label: 'Cliff', value: 0 }] },
 		{ key: 'learningRate', label: 'Learning rate α', value: 0.3, min: 0.1, max: 2, step: 0.1 },
