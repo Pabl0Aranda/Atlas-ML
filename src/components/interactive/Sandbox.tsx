@@ -1,21 +1,20 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'preact/hooks';
-import { DATASET_LABELS, generateDataset } from '@/lib/ml/datasets';
+import { DATASET_LABELS } from '@/lib/ml/datasets';
 import { moveProbe, probeStep, toolOptions, type PlotTool, type Point2D } from '@/lib/viz/interaction';
 import { loadSpec } from '@/lib/viz/registry';
-import { defaultParams } from '@/lib/viz/scene';
+import { composeData, decodeSetup, encodeSetup, type SandboxSetup } from '@/lib/viz/sandboxSetup';
 import { createTimeline, currentFrame, pushFrame, seekFrame, type Timeline } from '@/lib/viz/timeline';
-import type { Dataset, DatasetKind, Hyperparameters } from '@/types/ml';
+import type { DatasetKind } from '@/types/ml';
 import type { AlgorithmId, AlgorithmSpec } from '@/types/viz';
-import { buttonClass, fieldLabelClass, MetricList, ParamControl, PlotLegend, primaryButtonClass, selectClass, SPEEDS, TICK_MS, TimelineControl } from './controls';
+import { buttonClass, CopyLinkButton, fieldLabelClass, MetricList, ParamControl, PlotLegend, primaryButtonClass, selectClass, SPEEDS, TICK_MS, TimelineControl } from './controls';
 import DiagramView from './DiagramView';
 import HistoryChart from './HistoryChart';
 import PlotCanvas from './PlotCanvas';
 
 function Runner({ spec }: { spec: AlgorithmSpec }) {
-	const [kind, setKind] = useState<DatasetKind>(spec.datasets[0]);
-	const [seed, setSeed] = useState(7);
-	const [params, setParams] = useState<Hyperparameters>(() => defaultParams(spec));
-	const [data, setData] = useState<Dataset>(() => (spec.datasets.length ? generateDataset(spec.datasets[0]) : []));
+	const [setup, setSetup] = useState<SandboxSetup>(() => decodeSetup(window.location.search, spec));
+	const data = useMemo(() => composeData(setup), [setup.dataset, setup.seed, setup.added]);
+	const { params } = setup;
 	const [timeline, setTimeline] = useState<Timeline<unknown>>(() => createTimeline(spec.init(data, params)));
 	const [playing, setPlaying] = useState(false);
 	const [speed, setSpeed] = useState(1);
@@ -33,11 +32,10 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 	const editable = spec.editable !== false;
 	const scene = useMemo(() => spec.scene(state, data, params), [state, data, params]);
 
-	const restart = (nextData: Dataset, nextParams: Hyperparameters) => {
+	const restart = (next: SandboxSetup) => {
 		setPlaying(false);
-		setData(nextData);
-		setParams(nextParams);
-		setTimeline(createTimeline(spec.init(nextData, nextParams)));
+		setSetup(next);
+		setTimeline(createTimeline(spec.init(composeData(next), next.params)));
 	};
 
 	/** Steps a copy, so frames already on the timeline never change. */
@@ -73,7 +71,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 
 	const applyTool = ({ x, y }: Point2D) => {
 		if (!editable || tool === 'inspect') return;
-		restart([...data, { x, y, label: tool }], params);
+		restart({ ...setup, added: [...setup.added, { x, y, label: tool }] });
 	};
 
 	const onPlotClick = (event: MouseEvent) => {
@@ -165,12 +163,8 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 						<span class={fieldLabelClass}>Dataset</span>
 						<select
 							class={selectClass}
-							value={kind}
-							onChange={(e) => {
-								const next = e.currentTarget.value as DatasetKind;
-								setKind(next);
-								restart(generateDataset(next, 120, seed), params);
-							}}
+							value={setup.dataset}
+							onChange={(e) => restart({ ...setup, dataset: e.currentTarget.value as DatasetKind, added: [] })}
 						>
 							{spec.datasets.map((d) => <option value={d}>{DATASET_LABELS[d]}</option>)}
 						</select>
@@ -199,9 +193,9 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 							param={param}
 							value={params[param.key]}
 							onChange={(value) => {
-								const next = { ...params, [param.key]: value };
-								if (param.live) setParams(next);
-								else restart(data, next);
+								const next = { ...setup, params: { ...params, [param.key]: value } };
+								if (param.live) setSetup(next);
+								else restart(next);
 							}}
 						/>
 					))}
@@ -215,7 +209,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 						<button type="button" class={buttonClass} disabled={timeline.index === 0} onClick={() => seek(timeline.index - 1)}>
 							Back
 						</button>
-						<button type="button" class={done ? primaryButtonClass : buttonClass} onClick={() => restart(data, params)}>Reset</button>
+						<button type="button" class={done ? primaryButtonClass : buttonClass} onClick={() => restart(setup)}>Reset</button>
 						<button
 							type="button"
 							class={buttonClass}
@@ -226,14 +220,16 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 						{spec.datasets.length > 0 && <button
 							type="button"
 							class={buttonClass}
-							onClick={() => {
-								const next = seed + 1;
-								setSeed(next);
-								restart(generateDataset(kind, 120, next), params);
-							}}
+							onClick={() => restart({ ...setup, seed: setup.seed + 1, added: [] })}
 						>
 							New data
 						</button>}
+						<CopyLinkButton
+							label="Copy link to this setup"
+							class="col-span-2"
+							query={() => encodeSetup(setup, spec)}
+							anchor={document.getElementById('interactive-sandbox') ? '#interactive-sandbox' : ''}
+						/>
 					</div>
 					{interactive && (
 						<p class="m-0 text-xs leading-relaxed text-(--viz-muted-ink)">
@@ -248,7 +244,10 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 			<p class="m-0 mt-3 min-h-10 text-sm leading-snug">{caption}</p>
 			<p class="sr-only" aria-live="polite">{spokenCaption.current}</p>
 
-			<MetricList class="mt-3 border-t border-(--viz-border) pt-3 sm:grid-cols-4" metrics={spec.metrics(state, data, params)} />
+			<MetricList
+				class="mt-3 border-t border-(--viz-border) pt-3 sm:grid-cols-4"
+				metrics={spec.metrics(state, data, params)}
+			/>
 
 			{(series || diagram) && (
 				<div class="mt-3 grid gap-4 border-t border-(--viz-border) pt-3">

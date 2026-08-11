@@ -1,7 +1,9 @@
+import { useState } from 'preact/hooks';
 import type { Metric, ParamSpec } from '@/types/viz';
 
 export const TICK_MS = 140;
 export const SPEEDS = [1, 2, 4];
+const LINK_NOTICE_MS = 2500;
 
 export const buttonClass =
 	'cursor-pointer rounded-md border border-(--viz-border) bg-(--viz-surface) px-3 py-1.5 text-sm font-medium text-(--viz-ink) transition-colors hover:border-(--viz-ink) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--sl-color-accent) disabled:cursor-not-allowed disabled:opacity-45';
@@ -90,5 +92,26 @@ export function MetricList({ metrics, class: extra = '' }: { metrics: Metric[]; 
 				</div>
 			))}
 		</dl>
+	);
+}
+
+/** Puts a setup in the address bar and copies it, for browsers that allow the clipboard. */
+export function CopyLinkButton({ label, class: extra = '', query, anchor = '' }: { label: string; class?: string; query: () => string; anchor?: string }) {
+	const [notice, setNotice] = useState('');
+	const copy = async () => {
+		const search = query();
+		window.history.replaceState(null, '', `${window.location.pathname}${search ? `?${search}` : ''}${anchor}`);
+		try {
+			await navigator.clipboard.writeText(window.location.href);
+			setNotice('Link copied');
+		} catch {
+			setNotice('Link is in the address bar');
+		}
+		setTimeout(() => setNotice(''), LINK_NOTICE_MS);
+	};
+	return (
+		<button type="button" class={`${buttonClass} ${extra}`} onClick={copy}>
+			<span aria-live="polite">{notice || label}</span>
+		</button>
 	);
 }
