@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { generateDataset } from '../ml/datasets';
-import { composeData, decodeSetup, defaultSetup, encodeSetup } from './sandboxSetup';
+import { composeData, decodeSetup, defaultSetup, encodeSetup, testAccuracy } from './sandboxSetup';
 import type { AlgorithmSpec } from '../../types/viz';
 
 const spec = {
@@ -11,10 +11,11 @@ const spec = {
 		{ key: 'kernel', label: 'Kernel', value: 0, options: [{ label: 'A', value: 0 }, { label: 'B', value: 1 }] },
 	],
 	labeled: true,
+	holdout: true,
 	legend: () => ['Class A', 'Class B'],
 } as unknown as AlgorithmSpec;
 
-const unlabeled = { ...spec, labeled: false } as AlgorithmSpec;
+const unlabeled = { ...spec, labeled: false, holdout: false } as AlgorithmSpec;
 const fixedPlot = { ...spec, editable: false, datasets: [] } as unknown as AlgorithmSpec;
 
 describe('share links', () => {
@@ -27,6 +28,7 @@ describe('share links', () => {
 			dataset: 'circles' as const,
 			seed: 12,
 			params: { k: 7, seed: 4, kernel: 1 },
+			holdout: true,
 			added: [{ x: 0.125, y: -0.5, label: 1 }],
 		};
 		expect(decodeSetup(encodeSetup(setup, spec), spec)).toEqual(setup);
@@ -40,7 +42,7 @@ describe('share links', () => {
 	});
 
 	it('ignores values the spec does not allow', () => {
-		const decoded = decodeSetup('?dataset=nope&seed=abc&p_k=NaN&p_kernel=5&p_other=1', spec);
+		const decoded = decodeSetup('?dataset=nope&seed=abc&p_k=NaN&p_kernel=5&p_other=1&holdout=maybe', spec);
 		expect(decoded).toEqual(defaultSetup(spec));
 	});
 
@@ -60,23 +62,52 @@ describe('share links', () => {
 		expect(decodeSetup('?added=0.1,0.2,0', unlabeled).added).toEqual([{ x: 0.1, y: 0.2, label: 0 }]);
 	});
 
-	it('ignores samples on specs that do not support them', () => {
+	it('ignores holdout and samples on specs that do not support them', () => {
+		expect(decodeSetup('?holdout=1', unlabeled).holdout).toBe(false);
 		expect(decodeSetup('?added=0.1,0.2,0', fixedPlot).added).toEqual([]);
 	});
 
 	it('handles specs without datasets', () => {
 		expect(defaultSetup(fixedPlot).dataset).toBeUndefined();
-		expect(composeData(defaultSetup(fixedPlot))).toEqual([]);
+		expect(composeData(defaultSetup(fixedPlot))).toEqual({ train: [], test: [] });
 	});
 });
 
 describe('composeData', () => {
-	it('regenerates the dataset from its seed', () => {
-		expect(composeData(defaultSetup(spec))).toEqual(generateDataset('moons', 120, 7));
+	it('uses every generated sample when nothing is held out', () => {
+		const { train, test } = composeData(defaultSetup(spec));
+		expect(train).toEqual(generateDataset('moons', 120, 7));
+		expect(test).toEqual([]);
 	});
 
-	it('adds samples placed by hand', () => {
+	it('holds out a quarter, keeping the class balance', () => {
+		const { train, test } = composeData({ ...defaultSetup(spec), holdout: true });
+		expect(test).toHaveLength(30);
+		expect(train).toHaveLength(90);
+		expect(test.filter((p) => p.label === 0)).toHaveLength(15);
+	});
+
+	it('regenerates the same split from the same setup', () => {
+		const setup = { ...defaultSetup(spec), holdout: true };
+		expect(composeData(setup)).toEqual(composeData(setup));
+	});
+
+	it('always trains on added samples', () => {
 		const added = [{ x: 0.5, y: 0.5, label: 1 }];
-		expect(composeData({ ...defaultSetup(spec), added }).at(-1)).toEqual(added[0]);
+		const { train, test } = composeData({ ...defaultSetup(spec), holdout: true, added });
+		expect(train.at(-1)).toEqual(added[0]);
+		expect(test).not.toContainEqual(added[0]);
+	});
+});
+
+describe('testAccuracy', () => {
+	it('scores the classifier on the held-out samples', () => {
+		const test = [{ x: -1, y: 0, label: 0 }, { x: 1, y: 0, label: 1 }, { x: 1, y: 1, label: 0 }];
+		expect(testAccuracy((x) => (x > 0 ? 1 : 0), test)).toBeCloseTo(2 / 3);
+	});
+
+	it('has no score without a classifier or samples', () => {
+		expect(testAccuracy(undefined, [{ x: 0, y: 0, label: 0 }])).toBeNull();
+		expect(testAccuracy(() => 0, [])).toBeNull();
 	});
 });

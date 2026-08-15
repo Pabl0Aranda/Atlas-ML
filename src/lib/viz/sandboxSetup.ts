@@ -1,11 +1,14 @@
 import { generateDataset } from '../ml/datasets';
-import type { Dataset, DatasetKind, Hyperparameters } from '../../types/ml';
-import type { AlgorithmSpec, ParamSpec } from '../../types/viz';
-import { defaultParams } from './scene';
+import { accuracy } from '../ml/knn';
+import { trainTestSplit } from '../ml/preprocessing';
+import type { Classifier, Dataset, DatasetKind, Hyperparameters } from '../../types/ml';
+import type { AlgorithmSpec, Metric, ParamSpec, Scene } from '../../types/viz';
+import { defaultParams, percent } from './scene';
 
 const SAMPLES = 120;
 export const DEFAULT_SEED = 7;
 const MAX_SEED = 1_000_000;
+const TEST_SHARE = 0.25;
 const MAX_ADDED = 200;
 /** Keeps links short. Three decimals are finer than a pixel on the plot. */
 const ADDED_DIGITS = 3;
@@ -17,6 +20,8 @@ export interface SandboxSetup {
 	dataset?: DatasetKind;
 	seed: number;
 	params: Hyperparameters;
+	/** Keeps part of the data out of training, to score the model honestly. */
+	holdout: boolean;
 	/** Samples placed by hand on top of the generated dataset. */
 	added: Dataset;
 }
@@ -25,12 +30,36 @@ export const defaultSetup = (spec: AlgorithmSpec): SandboxSetup => ({
 	dataset: spec.datasets[0],
 	seed: DEFAULT_SEED,
 	params: defaultParams(spec),
+	holdout: false,
 	added: [],
 });
 
-/** The generated dataset, plus any samples placed by hand. */
-export function composeData({ dataset, seed, added }: SandboxSetup): Dataset {
-	return [...(dataset ? generateDataset(dataset, SAMPLES, seed) : []), ...added];
+/** Builds the training data, plus the held-out samples the model never sees. */
+export function composeData({ dataset, seed, holdout, added }: SandboxSetup): { train: Dataset; test: Dataset } {
+	const generated = dataset ? generateDataset(dataset, SAMPLES, seed) : [];
+	if (!holdout) return { train: [...generated, ...added], test: [] };
+	const isTest = trainTestSplit(generated, TEST_SHARE, true, seed);
+	return {
+		train: [...generated.filter((_, i) => !isTest[i]), ...added],
+		test: generated.filter((_, i) => isTest[i]),
+	};
+}
+
+export function testAccuracy(region: Classifier | undefined, test: Dataset): number | null {
+	return region && test.length ? accuracy(test, region) : null;
+}
+
+/** The Test accuracy metric, when samples are held out. */
+export function heldOutMetrics(region: Classifier | undefined, test: Dataset): Metric[] {
+	if (!test.length) return [];
+	const score = testAccuracy(region, test);
+	return [{ label: 'Test accuracy', value: score === null ? '–' : percent(score) }];
+}
+
+/** Adds held-out samples to a scene as hollow points. */
+export function withHeldOut(scene: Scene, test: Dataset): Scene {
+	if (!test.length) return scene;
+	return { ...scene, points: [...scene.points, ...test.map((p) => ({ x: p.x, y: p.y, cls: p.label, hollow: true }))] };
 }
 
 const round = (value: number) => Number(value.toFixed(ADDED_DIGITS));
@@ -49,6 +78,7 @@ export function encodeSetup(setup: SandboxSetup, spec: AlgorithmSpec): string {
 	if (setup.dataset !== base.dataset) query.set('dataset', setup.dataset!);
 	if (setup.seed !== base.seed) query.set('seed', String(setup.seed));
 	encodeParams(query, setup.params, spec, PARAM_PREFIX);
+	if (setup.holdout) query.set('holdout', '1');
 	if (setup.added.length) {
 		query.set('added', setup.added.map((p) => `${round(p.x)},${round(p.y)},${p.label}`).join(';'));
 	}
@@ -93,6 +123,7 @@ export function decodeSetup(search: string, spec: AlgorithmSpec): SandboxSetup {
 		dataset,
 		seed: decodeSeed(query),
 		params,
+		holdout: Boolean(spec.holdout) && query.get('holdout') === '1',
 		added: decodeAdded(query.get('added'), spec, params),
 	};
 }

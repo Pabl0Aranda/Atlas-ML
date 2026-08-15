@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'preact/hooks';
 import { DATASET_LABELS } from '@/lib/ml/datasets';
 import { moveProbe, probeStep, toolOptions, type PlotTool, type Point2D } from '@/lib/viz/interaction';
 import { loadSpec } from '@/lib/viz/registry';
-import { composeData, decodeSetup, encodeSetup, type SandboxSetup } from '@/lib/viz/sandboxSetup';
+import { composeData, decodeSetup, encodeSetup, heldOutMetrics, withHeldOut, type SandboxSetup } from '@/lib/viz/sandboxSetup';
 import { createTimeline, currentFrame, pushFrame, seekFrame, type Timeline } from '@/lib/viz/timeline';
 import type { DatasetKind } from '@/types/ml';
 import type { AlgorithmId, AlgorithmSpec } from '@/types/viz';
@@ -13,7 +13,7 @@ import PlotCanvas from './PlotCanvas';
 
 function Runner({ spec }: { spec: AlgorithmSpec }) {
 	const [setup, setSetup] = useState<SandboxSetup>(() => decodeSetup(window.location.search, spec));
-	const data = useMemo(() => composeData(setup), [setup.dataset, setup.seed, setup.added]);
+	const { train: data, test } = useMemo(() => composeData(setup), [setup.dataset, setup.seed, setup.holdout, setup.added]);
 	const { params } = setup;
 	const [timeline, setTimeline] = useState<Timeline<unknown>>(() => createTimeline(spec.init(data, params)));
 	const [playing, setPlaying] = useState(false);
@@ -30,12 +30,13 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 	const state = currentFrame(timeline);
 	const done = spec.isDone(state, params);
 	const editable = spec.editable !== false;
-	const scene = useMemo(() => spec.scene(state, data, params), [state, data, params]);
+	const modelScene = useMemo(() => spec.scene(state, data, params), [state, data, params]);
+	const scene = useMemo(() => withHeldOut(modelScene, test), [modelScene, test]);
 
 	const restart = (next: SandboxSetup) => {
 		setPlaying(false);
 		setSetup(next);
-		setTimeline(createTimeline(spec.init(composeData(next), next.params)));
+		setTimeline(createTimeline(spec.init(composeData(next).train, next.params)));
 	};
 
 	/** Steps a copy, so frames already on the timeline never change. */
@@ -169,6 +170,17 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 							{spec.datasets.map((d) => <option value={d}>{DATASET_LABELS[d]}</option>)}
 						</select>
 					</label>}
+					{spec.holdout && (
+						<label class="flex cursor-pointer items-center gap-2 text-sm">
+							<input
+								type="checkbox"
+								class="accent-(--sl-color-accent)"
+								checked={setup.holdout}
+								onChange={(e) => restart({ ...setup, holdout: e.currentTarget.checked })}
+							/>
+							Hold out 25% for testing
+						</label>
+					)}
 					{editable && (
 						<fieldset class="m-0 border-0 p-0">
 							<legend class={`mb-1 p-0 ${fieldLabelClass}`}>Plot tool</legend>
@@ -236,6 +248,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 							{editable
 								? 'Click or tap the plot to use the tool. From the keyboard, focus the plot, move with the arrow keys and press Enter.'
 								: 'Hover or tap the plot to read a location, or focus it and use the arrow keys.'}
+							{test.length > 0 && ' Hollow points are held out: the model never trains on them.'}
 						</p>
 					)}
 				</div>
@@ -246,7 +259,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 
 			<MetricList
 				class="mt-3 border-t border-(--viz-border) pt-3 sm:grid-cols-4"
-				metrics={spec.metrics(state, data, params)}
+				metrics={[...spec.metrics(state, data, params), ...heldOutMetrics(modelScene.region, test)]}
 			/>
 
 			{(series || diagram) && (

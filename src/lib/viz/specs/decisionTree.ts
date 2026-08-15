@@ -42,6 +42,7 @@ export const decisionTree: AlgorithmSpec<State> = {
 	datasets: ['xor', 'moons', 'circles', 'linear', 'outliers'],
 	params: [{ key: 'maxDepth', label: 'Max depth', value: 5, min: 1, max: 6, step: 1 }],
 	labeled: true,
+	holdout: true,
 	speed: 1,
 	thumbnailSteps: 4,
 	legend: () => ['Class A', 'Class B'],

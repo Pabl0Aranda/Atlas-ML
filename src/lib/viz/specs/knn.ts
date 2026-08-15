@@ -12,6 +12,7 @@ export const knn: AlgorithmSpec<State> = {
 	datasets: ['moons', 'circles', 'xor', 'outliers', 'linear'],
 	params: [{ key: 'k', label: 'Neighbors k', value: 1, min: 1, max: MAX_K, step: 2 }],
 	labeled: true,
+	holdout: true,
 	speed: 1,
 	thumbnailSteps: 2,
 	legend: () => ['Class A', 'Class B'],

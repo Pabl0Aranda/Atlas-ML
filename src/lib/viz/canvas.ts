@@ -179,8 +179,9 @@ export function drawScene(ctx: CanvasRenderingContext2D, size: number, scene: Sc
 			ctx.stroke();
 		}
 		drawMark(ctx, x, y, r, p.cls);
-		ctx.fillStyle = p.muted ? colors.muted : colors.series[p.cls % colors.series.length];
-		ctx.strokeStyle = colors.surface;
+		const color = p.muted ? colors.muted : colors.series[p.cls % colors.series.length];
+		ctx.fillStyle = p.hollow ? colors.surface : color;
+		ctx.strokeStyle = p.hollow ? color : colors.surface;
 		ctx.lineWidth = 1.5;
 		ctx.fill();
 		ctx.stroke();

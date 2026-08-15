@@ -57,6 +57,8 @@ export interface ScenePoint {
 	scale?: number;
 	/** Draws in the neutral color, for points with no class such as noise. */
 	muted?: boolean;
+	/** Draws an outline only, for held-out samples the model never trained on. */
+	hollow?: boolean;
 }
 
 export interface SceneLine {
@@ -126,6 +128,8 @@ export interface AlgorithmSpec<S = any> {
 	labeled: boolean;
 	/** False when clicking the plot should not add samples. Defaults to true. */
 	editable?: boolean;
+	/** True for classifiers whose region can be scored on held-out samples. */
+	holdout?: boolean;
 	/**
 	 * Copies the parts of a state that step changes in place. Without it, states must be
 	 * immutable, because the timeline keeps earlier frames.

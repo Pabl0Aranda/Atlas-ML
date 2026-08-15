@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { generateDataset } from '../ml/datasets';
 import { ALGORITHM_IDS, loadSpec } from './registry';
+import { composeData, defaultSetup, testAccuracy } from './sandboxSetup';
 import { defaultParams } from './scene';
 import type { Dataset, Hyperparameters } from '../../types/ml';
 import type { AlgorithmSpec, Scene } from '../../types/viz';
@@ -62,6 +63,17 @@ describe.each(ALGORITHM_IDS)('%s spec', (id) => {
 			frame = next;
 		}
 		for (const [state, seen] of recorded) expect(view(state)).toBe(seen);
+	}, 120000);
+
+	it('scores held-out samples only with a region that predicts labels', async () => {
+		const spec = await loadSpec(id);
+		if (!spec.holdout) return;
+		expect(spec.labeled).toBe(true);
+		const { train, test } = composeData({ ...defaultSetup(spec), holdout: true });
+		const params = defaultParams(spec);
+		let state = spec.init(train, params);
+		for (let i = 0; i < 400 && !spec.isDone(state, params); i++) state = spec.step(state, train, params);
+		expect(testAccuracy(spec.scene(state, train, params).region, test)).toBeGreaterThan(0.6);
 	}, 120000);
 
 	it('only marks a parameter live when the run does not depend on it', async () => {

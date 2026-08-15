@@ -20,6 +20,7 @@ export const svm: AlgorithmSpec<SvmState> = {
 		{ key: 'gamma', label: 'RBF width γ', value: 5, min: 0.5, max: 30, step: 0.5 },
 	],
 	labeled: true,
+	holdout: true,
 	speed: 1,
 	thumbnailSteps: 30,
 	legend: () => ['Class A (−1)', 'Class B (+1)'],

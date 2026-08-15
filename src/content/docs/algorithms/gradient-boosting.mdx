@@ -45,7 +45,7 @@ This site's engine also caps leaf values, so one confident leaf cannot overshoot
 
 ## Interactive Sandbox
 
-Each step adds one shallow tree. Hover or tap to read the predicted probability at any location. Try lowering the learning rate: the loss curve falls more slowly, and in practice more trees at a smaller rate tend to generalize better. This sandbox only reports training metrics, which keep improving even after a real model would begin to overfit.
+Each step adds one shallow tree. Hover or tap to read the predicted probability at any location. Try lowering the learning rate: the loss curve falls more slowly, and in practice more trees at a smaller rate tend to generalize better. Training metrics keep improving even after a model begins to overfit, so tick **Hold out 25% for testing** to see the score that matters.
 
 <Sandbox client:visible algorithm="gradient-boosting" />
 
