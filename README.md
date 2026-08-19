@@ -20,6 +20,7 @@ Built with Astro, Starlight, Tailwind CSS and Preact islands.
 2. Add a spec in `src/lib/viz/specs/` and register it in `src/lib/viz/registry.ts`. Add its id to `AlgorithmId`.
 3. Add a page in `src/content/docs/algorithms/`.
 4. Add `page` to its entry in `src/data/catalog.ts`, which also adds it to the sidebar. Algorithms without a page only need a catalog entry.
+5. Optionally, add guided presets in `src/lib/viz/presets.ts`. Run each one before writing its note, so the figures are real.
 
 Spec states must be immutable, because the sandbox timeline keeps earlier frames. A spec that trains in place for speed must provide `snapshot`, and the contract tests check this.
 

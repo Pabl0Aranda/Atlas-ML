@@ -53,7 +53,7 @@ $$
 
 ## Interactive Sandbox
 
-Each step adds one stump, drawn as a dashed line. Point size shows sample weight, so hard samples near the boundary swell as rounds pass. Then try **XOR**. A stump sees only one feature, and neither feature alone explains that pattern. After 40 rounds it reaches about 80% training accuracy, while **Moons** reaches 100%.
+Each step adds one stump, drawn as a dashed line. Point size shows sample weight, so hard samples near the boundary swell as rounds pass. Then try the **Memorizing XOR** preset. A stump sees only one feature, and neither feature alone explains that pattern. Training accuracy climbs to about 77%, but accuracy on held-out samples stays near 50%, so the ensemble has memorized noise and learned nothing.
 
 <Sandbox client:visible algorithm="adaboost" />
 

@@ -2,7 +2,8 @@ import { useEffect, useId, useMemo, useRef, useState } from 'preact/hooks';
 import { DATASET_LABELS } from '@/lib/ml/datasets';
 import { moveProbe, probeStep, toolOptions, type PlotTool, type Point2D } from '@/lib/viz/interaction';
 import { loadSpec } from '@/lib/viz/registry';
-import { composeData, decodeSetup, encodeSetup, heldOutMetrics, withHeldOut, type SandboxSetup } from '@/lib/viz/sandboxSetup';
+import { PRESETS, type Preset } from '@/lib/viz/presets';
+import { composeData, decodeSetup, defaultSetup, encodeSetup, heldOutMetrics, withHeldOut, type SandboxSetup } from '@/lib/viz/sandboxSetup';
 import { createTimeline, currentFrame, pushFrame, seekFrame, type Timeline } from '@/lib/viz/timeline';
 import type { DatasetKind } from '@/types/ml';
 import type { AlgorithmId, AlgorithmSpec } from '@/types/viz';
@@ -11,11 +12,12 @@ import DiagramView from './DiagramView';
 import HistoryChart from './HistoryChart';
 import PlotCanvas from './PlotCanvas';
 
-function Runner({ spec }: { spec: AlgorithmSpec }) {
+function Runner({ spec, presets }: { spec: AlgorithmSpec; presets: Preset[] }) {
 	const [setup, setSetup] = useState<SandboxSetup>(() => decodeSetup(window.location.search, spec));
 	const { train: data, test } = useMemo(() => composeData(setup), [setup.dataset, setup.seed, setup.holdout, setup.added]);
 	const { params } = setup;
 	const [timeline, setTimeline] = useState<Timeline<unknown>>(() => createTimeline(spec.init(data, params)));
+	const [activePreset, setActivePreset] = useState<Preset | null>(null);
 	const [playing, setPlaying] = useState(false);
 	const [speed, setSpeed] = useState(1);
 	const [probe, setProbe] = useState({ x: 0.3, y: 0.3 });
@@ -33,10 +35,19 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 	const modelScene = useMemo(() => spec.scene(state, data, params), [state, data, params]);
 	const scene = useMemo(() => withHeldOut(modelScene, test), [modelScene, test]);
 
-	const restart = (next: SandboxSetup) => {
+	const restart = (next: SandboxSetup, preset: Preset | null = null) => {
 		setPlaying(false);
+		setActivePreset(preset);
 		setSetup(next);
 		setTimeline(createTimeline(spec.init(composeData(next).train, next.params)));
+	};
+
+	const applyPreset = (preset: Preset) => {
+		const base = defaultSetup(spec);
+		restart(
+			{ ...base, dataset: preset.dataset ?? base.dataset, params: { ...base.params, ...preset.params }, holdout: preset.holdout ?? false },
+			preset,
+		);
 	};
 
 	/** Steps a copy, so frames already on the timeline never change. */
@@ -221,7 +232,7 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 						<button type="button" class={buttonClass} disabled={timeline.index === 0} onClick={() => seek(timeline.index - 1)}>
 							Back
 						</button>
-						<button type="button" class={done ? primaryButtonClass : buttonClass} onClick={() => restart(setup)}>Reset</button>
+						<button type="button" class={done ? primaryButtonClass : buttonClass} onClick={() => restart(setup, activePreset)}>Reset</button>
 						<button
 							type="button"
 							class={buttonClass}
@@ -254,6 +265,25 @@ function Runner({ spec }: { spec: AlgorithmSpec }) {
 				</div>
 			</div>
 
+			{presets.length > 0 && (
+				<div class="mt-3 border-t border-(--viz-border) pt-3">
+					<p class={`m-0 ${fieldLabelClass}`}>Try this</p>
+					<div class="mt-1.5 flex flex-wrap gap-1.5">
+						{presets.map((preset) => (
+							<button
+								type="button"
+								class={preset === activePreset ? primaryButtonClass : buttonClass}
+								aria-pressed={preset === activePreset}
+								onClick={() => applyPreset(preset)}
+							>
+								{preset.label}
+							</button>
+						))}
+					</div>
+					{activePreset && <p class="m-0 mt-2 text-sm leading-snug">{activePreset.note}</p>}
+				</div>
+			)}
+
 			<p class="m-0 mt-3 min-h-10 text-sm leading-snug">{caption}</p>
 			<p class="sr-only" aria-live="polite">{spokenCaption.current}</p>
 
@@ -280,5 +310,5 @@ export default function Sandbox({ algorithm }: { algorithm: AlgorithmId }) {
 	if (!spec) {
 		return <div class="not-content my-8 h-[36rem] animate-pulse rounded-2xl border border-(--viz-border) bg-(--viz-panel)" aria-label="Loading sandbox" />;
 	}
-	return <Runner spec={spec} />;
+	return <Runner spec={spec} presets={PRESETS[algorithm] ?? []} />;
 }

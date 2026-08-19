@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { generateDataset } from '../ml/datasets';
+import { PRESETS } from './presets';
 import { ALGORITHM_IDS, loadSpec } from './registry';
 import { composeData, defaultSetup, testAccuracy } from './sandboxSetup';
 import { defaultParams } from './scene';
@@ -75,6 +76,23 @@ describe.each(ALGORITHM_IDS)('%s spec', (id) => {
 		for (let i = 0; i < 400 && !spec.isDone(state, params); i++) state = spec.step(state, train, params);
 		expect(testAccuracy(spec.scene(state, train, params).region, test)).toBeGreaterThan(0.6);
 	}, 120000);
+
+	it('only offers presets the spec can apply', async () => {
+		const spec = await loadSpec(id);
+		for (const preset of PRESETS[id] ?? []) {
+			if (preset.dataset) expect(spec.datasets).toContain(preset.dataset);
+			if (preset.holdout) expect(spec.holdout).toBe(true);
+			for (const [key, value] of Object.entries(preset.params ?? {})) {
+				const param = spec.params.find((p) => p.key === key);
+				expect(param, `${preset.label}: ${key}`).toBeDefined();
+				if (param!.options) expect(param!.options.map((o) => o.value)).toContain(value);
+				else {
+					expect(value).toBeGreaterThanOrEqual(param!.min!);
+					expect(value).toBeLessThanOrEqual(param!.max!);
+				}
+			}
+		}
+	});
 
 	it('only marks a parameter live when the run does not depend on it', async () => {
 		const spec = await loadSpec(id);
