@@ -1,0 +1,28 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import Compare from '@/components/interactive/Compare';
+import { FEATURED } from '@/data/catalog';
+import { loadSpec } from '@/lib/viz/registry';
+
+// Guides and gridworld agents have nothing to run side by side on shared data.
+const algorithms = FEATURED.filter((e) => !e.page!.path);
+const options = (
+	await Promise.all(
+		algorithms.map(async (e) => ({ id: e.page!.id, name: e.name, datasets: (await loadSpec(e.page!.id)).datasets })),
+	)
+)
+	.filter((o) => o.datasets.length > 0)
+	.sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<StarlightPage
+	frontmatter={{
+		title: 'Compare algorithms',
+		description: 'Run two machine learning algorithms side by side on the same data, step by step.',
+		template: 'splash',
+	}}
+	hasSidebar={false}
+>
+	<p>Pick two algorithms, or the same one with different settings. Both train on identical data and advance together, so any difference you see comes from the algorithms.</p>
+	<Compare client:load options={options} />
+</StarlightPage>

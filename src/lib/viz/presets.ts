@@ -1,5 +1,6 @@
 import type { DatasetKind, Hyperparameters } from '../../types/ml';
 import type { AlgorithmId } from '../../types/viz';
+import type { ComparePreset } from './compareSetup';
 
 /** A guided starting point that makes one idea visible. */
 export interface Preset {
@@ -79,3 +80,14 @@ export const PRESETS: Partial<Record<AlgorithmId, Preset[]>> = {
 		{ label: 'Heavy penalty', note: 'Press Play. The L1 penalty drives weights to exactly zero, leaving only 1 of 9 terms. That is the difference from ridge.', params: { lambda: 0.2 } },
 	],
 };
+
+export const COMPARE_PRESETS: ComparePreset[] = [
+	{ label: 'KNN vs SVM', note: 'Press Play. KNN raises k as it runs, so its Test accuracy starts at 100% and falls to about 87% by k = 41. The RBF SVM finishes at 100%.', a: 'knn', b: 'svm', dataset: 'moons', paramsB: { kernel: 1 }, holdout: true },
+	{ label: 'Ridge vs Lasso', note: 'Press Play. Both use the same penalty, λ = 0.05. Ridge shrinks weights but keeps all 9 terms, while Lasso keeps only 1.', a: 'ridge-regression', b: 'lasso-regression', dataset: 'curve', paramsA: { lambda: 0.05 }, paramsB: { lambda: 0.05 } },
+	{ label: 'k-means vs DBSCAN', note: 'Press Play. k-means can only draw straight boundaries, so about 83% of samples land with their own moon. DBSCAN follows the curves and gets about 99%, leaving 1 point as noise.', a: 'k-means', b: 'dbscan', dataset: 'moons', paramsA: { k: 2 } },
+	{ label: 'Tree vs Forest', note: 'Press Play. Both end at 90% Test accuracy here, and the forest touches about 97% along the way. With only 30 held-out samples, one split cannot settle which is better.', a: 'decision-tree', b: 'random-forest', dataset: 'outliers', holdout: true },
+	{ label: 'Linear vs RBF SVM', note: 'Press Play. The same algorithm with a different kernel: the straight boundary ends at about 83% Test accuracy, and the curved one at 100%.', a: 'svm', b: 'svm', dataset: 'moons', paramsA: { kernel: 0 }, paramsB: { kernel: 1 }, holdout: true },
+	{ label: 'Single vs complete linkage', note: 'Press Play. Single linkage recovers both moons exactly. Complete linkage cuts across them, so only about 85% of samples land with their own moon.', a: 'hierarchical-clustering', b: 'hierarchical-clustering', dataset: 'moons', paramsA: { linkage: 0 }, paramsB: { linkage: 1 } },
+	{ label: 'AdaBoost vs Gradient Boosting', note: 'Press Play. Stumps see one feature at a time, so AdaBoost ends at 50% Test accuracy. Depth 2 trees see both features together, and Gradient Boosting reaches 100%.', a: 'adaboost', b: 'gradient-boosting', dataset: 'xor', holdout: true },
+	{ label: 'Logistic Regression vs MLP', note: 'Press Play. By epoch 3,000 the straight boundary is near 43% Test accuracy, and the network has wrapped around the inner circle for 100%.', a: 'logistic-regression', b: 'mlp', dataset: 'circles', holdout: true },
+];

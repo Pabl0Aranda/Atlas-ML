@@ -46,6 +46,7 @@ export default defineConfig({
 			],
 			sidebar: [
 				{ label: 'Catalog', link: '/catalog/' },
+				{ label: 'Compare', link: '/compare/' },
 				{ label: 'Data Preparation', collapsed: true, items: [{ autogenerate: { directory: 'data-preparation' } }] },
 				{ label: 'Validation', collapsed: true, items: [{ autogenerate: { directory: 'validation' } }] },
 				{ label: 'Testing', collapsed: true, items: [{ autogenerate: { directory: 'testing' } }] },
