@@ -1,4 +1,5 @@
 import type { AlgorithmSpec } from '../../../types/viz';
+import { PLANE_METRIC_OPTIONS, type PlaneMetric } from '../../ml/distance';
 import { knnClassify, knnLeaveOneOut } from '../../ml/knn';
 import { classPoints, percent } from '../scene';
 
@@ -10,7 +11,10 @@ interface State {
 
 export const knn: AlgorithmSpec<State> = {
 	datasets: ['moons', 'circles', 'xor', 'outliers', 'linear'],
-	params: [{ key: 'k', label: 'Neighbors k', value: 1, min: 1, max: MAX_K, step: 2 }],
+	params: [
+		{ key: 'k', label: 'Neighbors k', value: 1, min: 1, max: MAX_K, step: 2 },
+		{ key: 'metric', label: 'Distance', value: 0, live: true, options: PLANE_METRIC_OPTIONS },
+	],
 	labeled: true,
 	holdout: true,
 	speed: 1,
@@ -19,10 +23,10 @@ export const knn: AlgorithmSpec<State> = {
 	init: (_, p) => ({ k: p.k }),
 	step: (s) => ({ k: s.k + 2 }),
 	isDone: (s) => s.k >= MAX_K,
-	scene: (s, data) => ({ region: (x, y) => knnClassify(data, s.k, x, y), points: classPoints(data) }),
-	metrics: (s, data) => [
+	scene: (s, data, p) => ({ region: (x, y) => knnClassify(data, s.k, x, y, p.metric as PlaneMetric), points: classPoints(data) }),
+	metrics: (s, data, p) => [
 		{ label: 'k', value: String(s.k) },
-		{ label: 'Leave-one-out accuracy', value: percent(knnLeaveOneOut(data, s.k)) },
+		{ label: 'Leave-one-out accuracy', value: percent(knnLeaveOneOut(data, s.k, p.metric as PlaneMetric)) },
 	],
 	caption: (s) =>
 		s.k === 1

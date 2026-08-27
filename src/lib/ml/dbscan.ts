@@ -1,4 +1,5 @@
 import type { Dataset } from '../../types/ml';
+import { planeDistance, PlaneMetric } from './distance';
 
 export const NOISE = -1;
 export const UNVISITED = -2;
@@ -8,6 +9,7 @@ export interface DbscanParams {
 	eps: number;
 	/** Neighbors needed, counting the point itself, to be a core point. */
 	minPoints: number;
+	metric?: PlaneMetric;
 }
 
 export interface DbscanState {
@@ -36,16 +38,16 @@ export function initDbscan(data: Dataset): DbscanState {
 }
 
 /** Every point within eps of point i, including i itself. */
-function neighbors(data: Dataset, i: number, eps: number): number[] {
+function neighbors(data: Dataset, i: number, eps: number, metric: PlaneMetric): number[] {
 	const result: number[] = [];
 	data.forEach((p, j) => {
-		if ((p.x - data[i].x) ** 2 + (p.y - data[i].y) ** 2 <= eps ** 2) result.push(j);
+		if (planeDistance(metric, p.x, p.y, data[i].x, data[i].y) <= eps) result.push(j);
 	});
 	return result;
 }
 
 /** One step examines one point: the next in the cluster, or else the next unvisited. */
-export function dbscanStep(state: DbscanState, data: Dataset, { eps, minPoints }: DbscanParams): DbscanState {
+export function dbscanStep(state: DbscanState, data: Dataset, { eps, minPoints, metric = PlaneMetric.Euclidean }: DbscanParams): DbscanState {
 	const expanding = state.queue.length > 0;
 	const point = expanding ? state.queue[0] : state.visited.indexOf(false);
 	if (point < 0) return { ...state, current: null, finished: true };
@@ -56,7 +58,7 @@ export function dbscanStep(state: DbscanState, data: Dataset, { eps, minPoints }
 	const queue = expanding ? state.queue.slice(1) : [];
 	let clusters = state.clusters;
 
-	const around = neighbors(data, point, eps);
+	const around = neighbors(data, point, eps, metric);
 	visited[point] = true;
 	core[point] = around.length >= minPoints;
 

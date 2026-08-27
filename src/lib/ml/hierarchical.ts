@@ -1,4 +1,5 @@
 import type { Dataset } from '../../types/ml';
+import { planeDistance, PlaneMetric } from './distance';
 
 export const Linkage = { Single: 0, Complete: 1, Average: 2 } as const;
 export type Linkage = (typeof Linkage)[keyof typeof Linkage];
@@ -30,13 +31,13 @@ export function initHierarchical(data: Dataset): HierarchicalState {
 }
 
 /** Summarizes all pairwise distances between two clusters into one number. */
-function clusterDistance(a: Cluster, b: Cluster, data: Dataset, linkage: Linkage): number {
+function clusterDistance(a: Cluster, b: Cluster, data: Dataset, linkage: Linkage, metric: PlaneMetric): number {
 	let nearest = Infinity;
 	let farthest = 0;
 	let total = 0;
 	for (const i of a.members) {
 		for (const j of b.members) {
-			const d = Math.hypot(data[i].x - data[j].x, data[i].y - data[j].y);
+			const d = planeDistance(metric, data[i].x, data[i].y, data[j].x, data[j].y);
 			nearest = Math.min(nearest, d);
 			farthest = Math.max(farthest, d);
 			total += d;
@@ -48,14 +49,14 @@ function clusterDistance(a: Cluster, b: Cluster, data: Dataset, linkage: Linkage
 }
 
 /** Merges the two closest clusters. */
-export function hierarchicalStep(state: HierarchicalState, data: Dataset, linkage: Linkage): HierarchicalState {
+export function hierarchicalStep(state: HierarchicalState, data: Dataset, linkage: Linkage, metric: PlaneMetric = PlaneMetric.Euclidean): HierarchicalState {
 	const { clusters } = state;
 	if (clusters.length < 2) return state;
 
 	let [first, second, height] = [0, 1, Infinity];
 	for (let i = 0; i < clusters.length; i++) {
 		for (let j = i + 1; j < clusters.length; j++) {
-			const d = clusterDistance(clusters[i], clusters[j], data, linkage);
+			const d = clusterDistance(clusters[i], clusters[j], data, linkage, metric);
 			if (d < height) [first, second, height] = [i, j, d];
 		}
 	}

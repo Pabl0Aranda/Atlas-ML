@@ -1,9 +1,10 @@
 import type { Dataset } from '../../types/ml';
+import { planeDistance, PlaneMetric } from './distance';
 
 /** Majority vote among the k closest points. Ties go to the nearest neighbor's class. */
-export function knnClassify(data: Dataset, k: number, x: number, y: number): number {
+export function knnClassify(data: Dataset, k: number, x: number, y: number, metric: PlaneMetric = PlaneMetric.Euclidean): number {
 	const neighbors = data
-		.map((p) => ({ label: p.label, d: (p.x - x) ** 2 + (p.y - y) ** 2 }))
+		.map((p) => ({ label: p.label, d: planeDistance(metric, p.x, p.y, x, y) }))
 		.sort((a, b) => a.d - b.d)
 		.slice(0, k);
 	const votes = new Map<number, number>();
@@ -18,11 +19,11 @@ export function accuracy(data: Dataset, classify: (x: number, y: number) => numb
 }
 
 /** Leave-one-out accuracy: honest for KNN, where training accuracy at k=1 is always 100%. */
-export function knnLeaveOneOut(data: Dataset, k: number): number {
+export function knnLeaveOneOut(data: Dataset, k: number, metric: PlaneMetric = PlaneMetric.Euclidean): number {
 	if (data.length < 2) return 0;
 	const hits = data.filter((p, i) => {
 		const rest = data.filter((_, j) => j !== i);
-		return knnClassify(rest, k, p.x, p.y) === p.label;
+		return knnClassify(rest, k, p.x, p.y, metric) === p.label;
 	});
 	return hits.length / data.length;
 }

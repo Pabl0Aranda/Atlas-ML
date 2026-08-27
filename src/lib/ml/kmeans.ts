@@ -1,4 +1,6 @@
 import type { Dataset } from '../../types/ml';
+import { planeDistance, PlaneMetric } from './distance';
+import { quantile } from './preprocessing';
 import { createRng } from './random';
 
 export interface Centroid {
@@ -16,11 +18,17 @@ export interface KMeansState {
 	converged: boolean;
 }
 
-export function nearestCentroid(centroids: Centroid[], x: number, y: number): number {
+/** What each algorithm minimizes: squared distance for k-means, plain distance for k-medians. */
+function pointCost(metric: PlaneMetric, c: Centroid, x: number, y: number): number {
+	const d = planeDistance(metric, c.x, c.y, x, y);
+	return metric === PlaneMetric.Euclidean ? d * d : d;
+}
+
+export function nearestCentroid(centroids: Centroid[], x: number, y: number, metric: PlaneMetric = PlaneMetric.Euclidean): number {
 	let best = 0;
 	let bestDistance = Infinity;
 	centroids.forEach((c, i) => {
-		const d = (c.x - x) ** 2 + (c.y - y) ** 2;
+		const d = pointCost(metric, c, x, y);
 		if (d < bestDistance) {
 			best = i;
 			bestDistance = d;
@@ -29,45 +37,43 @@ export function nearestCentroid(centroids: Centroid[], x: number, y: number): nu
 	return best;
 }
 
-function assign(data: Dataset, centroids: Centroid[]) {
-	const assignments = data.map((p) => nearestCentroid(centroids, p.x, p.y));
-	const inertia = data.reduce((s, p, i) => {
-		const c = centroids[assignments[i]];
-		return s + (p.x - c.x) ** 2 + (p.y - c.y) ** 2;
-	}, 0);
+function assign(data: Dataset, centroids: Centroid[], metric: PlaneMetric) {
+	const assignments = data.map((p) => nearestCentroid(centroids, p.x, p.y, metric));
+	const inertia = data.reduce((s, p, i) => s + pointCost(metric, centroids[assignments[i]], p.x, p.y), 0);
 	return { assignments, inertia };
 }
 
 /** k-means++ seeding: each new centroid is sampled proportionally to squared distance. */
-export function initKMeans(data: Dataset, k: number, seed = 11): KMeansState {
+export function initKMeans(data: Dataset, k: number, seed = 11, metric: PlaneMetric = PlaneMetric.Euclidean): KMeansState {
 	const rng = createRng(seed);
 	const first = data[Math.floor(rng() * data.length)];
 	const centroids: Centroid[] = [{ x: first.x, y: first.y }];
 	while (centroids.length < Math.min(k, data.length)) {
 		const weights = data.map((p) => {
-			const c = centroids[nearestCentroid(centroids, p.x, p.y)];
-			return (p.x - c.x) ** 2 + (p.y - c.y) ** 2;
+			return pointCost(metric, centroids[nearestCentroid(centroids, p.x, p.y, metric)], p.x, p.y);
 		});
 		let target = rng() * weights.reduce((s, w) => s + w, 0);
 		let index = weights.findIndex((w) => (target -= w) <= 0);
 		if (index < 0) index = data.length - 1;
 		centroids.push({ x: data[index].x, y: data[index].y });
 	}
-	const { assignments, inertia } = assign(data, centroids);
+	const { assignments, inertia } = assign(data, centroids, metric);
 	return { centroids, assignments, iteration: 0, inertia, inertiaHistory: [inertia], converged: false };
 }
 
-/** One Lloyd iteration: move each centroid to its cluster mean, then reassign. */
-export function kMeansStep(state: KMeansState, data: Dataset): KMeansState {
+/**
+ * One Lloyd iteration: move each centroid to the center of its cluster, then reassign.
+ * The mean minimizes squared Euclidean distance, but Manhattan distance needs the median.
+ */
+export function kMeansStep(state: KMeansState, data: Dataset, metric: PlaneMetric = PlaneMetric.Euclidean): KMeansState {
+	const center = (values: number[]) =>
+		metric === PlaneMetric.Euclidean ? values.reduce((s, v) => s + v, 0) / values.length : quantile(values, 0.5);
 	const centroids = state.centroids.map((c, i) => {
 		const members = data.filter((_, j) => state.assignments[j] === i);
 		if (!members.length) return c;
-		return {
-			x: members.reduce((s, p) => s + p.x, 0) / members.length,
-			y: members.reduce((s, p) => s + p.y, 0) / members.length,
-		};
+		return { x: center(members.map((p) => p.x)), y: center(members.map((p) => p.y)) };
 	});
-	const { assignments, inertia } = assign(data, centroids);
+	const { assignments, inertia } = assign(data, centroids, metric);
 	return {
 		centroids,
 		assignments,

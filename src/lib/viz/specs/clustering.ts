@@ -1,22 +1,21 @@
 import type { Dataset } from '../../../types/ml';
 import type { AlgorithmSpec, Diagram, DiagramNode, SceneLine, ScenePoint } from '../../../types/viz';
 import { dbscanStep, initDbscan, NOISE, UNVISITED, type DbscanState } from '../../ml/dbscan';
+import { metricBall, PLANE_METRIC_OPTIONS, type PlaneMetric } from '../../ml/distance';
 import { hierarchicalStep, initHierarchical, Linkage, type HierarchicalState } from '../../ml/hierarchical';
 import { counted, fixed } from '../scene';
 
-const CIRCLE_SEGMENTS = 40;
 /** The plot has four class colors, so smaller clusters only get colors once few remain. */
 const COLORED_CLUSTERS = 4;
 /** Fifteen nodes is the most a diagram draws with labels. */
 const DENDROGRAM_MERGES = 7;
 
-const ring = (x: number, y: number, radius: number): SceneLine => ({
+const metricParam = { key: 'metric', label: 'Distance', value: 0, options: PLANE_METRIC_OPTIONS };
+
+const neighborhood = (metric: PlaneMetric, x: number, y: number, radius: number): SceneLine => ({
 	tone: 'muted',
 	dashed: true,
-	path: Array.from({ length: CIRCLE_SEGMENTS + 1 }, (_, i) => {
-		const angle = (i / CIRCLE_SEGMENTS) * Math.PI * 2;
-		return [x + radius * Math.cos(angle), y + radius * Math.sin(angle)];
-	}),
+	path: metricBall(metric, x, y, radius),
 });
 
 function dbscanPoints(s: DbscanState, data: Dataset): ScenePoint[] {
@@ -32,7 +31,7 @@ function dbscanPoints(s: DbscanState, data: Dataset): ScenePoint[] {
 function dbscanCaption(s: DbscanState, minPoints: number): string {
 	const noise = s.labels.filter((l) => l === NOISE).length;
 	if (s.finished) return `Found ${counted(s.clusters, 'cluster')} and ${counted(noise, 'noise point')}, shown in grey. The number of clusters was never an input.`;
-	if (s.current === null) return 'Every point starts unvisited. Step to examine them one at a time. The dashed circle is the ε neighborhood.';
+	if (s.current === null) return 'Every point starts unvisited. Step to examine them one at a time. The dashed outline is the ε neighborhood.';
 	if (s.core[s.current]) return `This core point has at least ${minPoints} neighbors, so cluster ${s.labels[s.current] + 1} spreads to all of them.`;
 	if (s.labels[s.current] === NOISE) return 'Too few neighbors, and no cluster has reached this point. It is noise for now.';
 	return `A border point: it joins cluster ${s.labels[s.current] + 1}, but has too few neighbors to spread it further.`;
@@ -43,17 +42,18 @@ export const dbscan: AlgorithmSpec<DbscanState> = {
 	params: [
 		{ key: 'eps', label: 'Radius ε', value: 0.15, min: 0.05, max: 0.4, step: 0.01 },
 		{ key: 'minPoints', label: 'Min points', value: 4, min: 2, max: 10, step: 1 },
+		metricParam,
 	],
 	labeled: false,
 	speed: 1,
 	thumbnailSteps: 300,
 	legend: () => ['Cluster 1', 'Cluster 2', 'Cluster 3', 'Cluster 4'],
 	init: (data) => initDbscan(data),
-	step: (s, data, p) => dbscanStep(s, data, { eps: p.eps, minPoints: p.minPoints }),
+	step: (s, data, p) => dbscanStep(s, data, { eps: p.eps, minPoints: p.minPoints, metric: p.metric as PlaneMetric }),
 	isDone: (s) => s.finished,
 	scene(s, data, p) {
 		const current = s.current === null ? null : data[s.current];
-		return { points: dbscanPoints(s, data), lines: current ? [ring(current.x, current.y, p.eps)] : [] };
+		return { points: dbscanPoints(s, data), lines: current ? [neighborhood(p.metric as PlaneMetric, current.x, current.y, p.eps)] : [] };
 	},
 	metrics: (s, data) => [
 		{ label: 'Examined', value: `${s.visited.filter(Boolean).length} of ${data.length}` },
@@ -112,13 +112,14 @@ export const hierarchicalClustering: AlgorithmSpec<HierarchicalState> = {
 	params: [
 		{ key: 'linkage', label: 'Linkage', value: Linkage.Single, options: [{ label: 'Single (nearest pair)', value: Linkage.Single }, { label: 'Complete (farthest pair)', value: Linkage.Complete }, { label: 'Average', value: Linkage.Average }] },
 		{ key: 'k', label: 'Stop at k clusters', value: 2, min: 1, max: 4, step: 1 },
+		metricParam,
 	],
 	labeled: false,
 	speed: 2,
 	thumbnailSteps: 118,
 	legend: (p) => Array.from({ length: p.k }, (_, i) => `Cluster ${i + 1}`),
 	init: (data) => initHierarchical(data),
-	step: (s, data, p) => hierarchicalStep(s, data, p.linkage as Linkage),
+	step: (s, data, p) => hierarchicalStep(s, data, p.linkage as Linkage, p.metric as PlaneMetric),
 	isDone: (s, p) => s.clusters.length <= p.k,
 	scene: (s, data) => ({ points: hierarchicalPoints(s, data) }),
 	metrics: (s) => [
