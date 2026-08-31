@@ -67,6 +67,8 @@ export const PRESETS: Partial<Record<AlgorithmId, Preset[]>> = {
 		{ label: 'ε too small', note: 'Press Play. Each moon shatters: 6 clusters, and 51 samples written off as noise.', dataset: 'moons', params: { eps: 0.08 } },
 		{ label: 'ε too large', note: 'Press Play. Neighborhoods bridge the gap, so both moons merge into 1 cluster.', dataset: 'moons', params: { eps: 0.4 } },
 		{ label: 'Uneven density', note: 'Press Play. One radius has to suit both rings. The sparser outer ring breaks up, for 8 clusters in total.', dataset: 'circles', params: { eps: 0.15 } },
+		{ label: 'Manhattan diamonds', note: 'Press Play. At the same ε, a diamond covers less area than a circle, so the moons break into 5 clusters. Raise ε to 0.18 and the 2 moons return: each metric needs its own radius.', dataset: 'moons', params: { metric: 1 } },
+		{ label: 'Chebyshev squares', note: 'Press Play. A square covers more area than a circle, so every sample finds enough neighbors: 2 clusters and no noise.', dataset: 'moons', params: { metric: 2 } },
 	],
 	'hierarchical-clustering': [
 		{ label: 'Follow the moons', note: 'Press Play. Single linkage needs just one close pair to merge, so it traces each moon and recovers both exactly.', dataset: 'moons', params: { linkage: 0 } },
@@ -90,4 +92,5 @@ export const COMPARE_PRESETS: ComparePreset[] = [
 	{ label: 'Single vs complete linkage', note: 'Press Play. Single linkage recovers both moons exactly. Complete linkage cuts across them, so only about 85% of samples land with their own moon.', a: 'hierarchical-clustering', b: 'hierarchical-clustering', dataset: 'moons', paramsA: { linkage: 0 }, paramsB: { linkage: 1 } },
 	{ label: 'AdaBoost vs Gradient Boosting', note: 'Press Play. Stumps see one feature at a time, so AdaBoost ends at 50% Test accuracy. Depth 2 trees see both features together, and Gradient Boosting reaches 100%.', a: 'adaboost', b: 'gradient-boosting', dataset: 'xor', holdout: true },
 	{ label: 'Logistic Regression vs MLP', note: 'Press Play. By epoch 3,000 the straight boundary is near 43% Test accuracy, and the network has wrapped around the inner circle for 100%.', a: 'logistic-regression', b: 'mlp', dataset: 'circles', holdout: true },
+	{ label: 'Euclidean vs Manhattan', note: 'Press Play. The same DBSCAN settings with a different distance: circles find the 2 moons, while the smaller diamonds break them into 5 clusters.', a: 'dbscan', b: 'dbscan', dataset: 'moons', paramsB: { metric: 1 } },
 ];
