@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { generateDataset } from '../ml/datasets';
-import { cosineDistance, euclidean, inverseCovariance2d, mahalanobis, manhattan } from '../ml/distance';
+import { cosineDistance, euclidean, inverseCovariance2d, klDivergence, mahalanobis, manhattan, wasserstein } from '../ml/distance';
 import {
 	allDistances,
+	distributionBins,
+	distributionScene,
 	EXPLORER_METRICS,
 	explorerLevels,
 	explorerScene,
 	measure,
+	timeSeriesComparison,
+	wordSet,
 	type ExplorerContext,
 	type ExplorerMetric,
 } from './distanceDemos';
@@ -70,5 +74,70 @@ describe('explorerScene', () => {
 		const origin = { x: 0, y: 0 };
 		expect(measure('cosine', origin, b, context)).toBe(1);
 		expect(() => explorerScene('cosine', origin, b, context)).not.toThrow();
+	});
+});
+
+describe('wordSet', () => {
+	it('ignores case, punctuation and repeats', () => {
+		expect(wordSet('The cat, the CAT!')).toEqual(new Set(['the', 'cat']));
+	});
+
+	it('is empty for blank text', () => {
+		expect(wordSet('   ').size).toBe(0);
+	});
+});
+
+describe('timeSeriesComparison', () => {
+	it('sees no difference without a shift', () => {
+		const { pointwise, warped } = timeSeriesComparison(0);
+		expect(pointwise).toBeCloseTo(0);
+		expect(warped).toBeCloseTo(0);
+	});
+
+	it('forgives a shift that a pointwise comparison punishes', () => {
+		const { pointwise, warped } = timeSeriesComparison(10);
+		expect(pointwise).toBeGreaterThan(warped * 3);
+	});
+
+	it('draws both series and the alignment between them', () => {
+		const { scene } = timeSeriesComparison(6);
+		const solid = scene.lines!.filter((l) => l.tone === 'ink');
+		expect(solid).toHaveLength(2);
+		expect(scene.lines!.filter((l) => l.tone === 'muted').length).toBeGreaterThan(5);
+	});
+
+	it('stays inside the plot', () => {
+		const { scene } = timeSeriesComparison(12);
+		for (const line of scene.lines!) for (const [x, y] of line.path) expect(Math.max(Math.abs(x), Math.abs(y))).toBeLessThanOrEqual(1);
+	});
+});
+
+describe('distributions', () => {
+	it('sums each histogram to 1', () => {
+		expect(distributionBins(0, 0.2).values.reduce((s, v) => s + v, 0)).toBeCloseTo(1);
+	});
+
+	it('gives Wasserstein distance equal to the shift between equal shapes', () => {
+		const p = distributionBins(-0.2, 0.15);
+		const q = distributionBins(0.2, 0.15);
+		expect(wasserstein(p.values, q.values, p.width)).toBeCloseTo(0.4, 2);
+	});
+
+	it('gives different KL divergence each way for different widths', () => {
+		const p = distributionBins(0, 0.1).values;
+		const q = distributionBins(0, 0.3).values;
+		expect(klDivergence(p, q)).toBeLessThan(klDivergence(q, p));
+	});
+
+	it('stays finite when the two barely overlap', () => {
+		const p = distributionBins(-0.8, 0.05).values;
+		const q = distributionBins(0.8, 0.05).values;
+		expect(Number.isFinite(klDivergence(p, q))).toBe(true);
+	});
+
+	it('draws one curve per distribution inside the plot', () => {
+		const lines = distributionScene(distributionBins(0, 0.05).values, distributionBins(0.3, 0.2).values).lines!;
+		expect(lines).toHaveLength(2);
+		for (const line of lines) for (const [, y] of line.path) expect(Math.abs(y)).toBeLessThanOrEqual(1);
 	});
 });

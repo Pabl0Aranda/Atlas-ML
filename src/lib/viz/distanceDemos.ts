@@ -1,6 +1,6 @@
 import type { Dataset } from '../../types/ml';
 import type { Metric, Scene, SceneLine } from '../../types/viz';
-import { chebyshev, cosineDistance, euclidean, mahalanobis, manhattan, minkowski } from '../ml/distance';
+import { chebyshev, cosineDistance, dtw, euclidean, mahalanobis, manhattan, minkowski } from '../ml/distance';
 import type { Point2D } from './interaction';
 import { contour } from './scene';
 
@@ -74,4 +74,54 @@ export function explorerScene(metric: ExplorerMetric, a: Point2D, b: Point2D, co
 		],
 		markers: [{ ...a, cls: 0 }, { ...b, cls: 1 }],
 	};
+}
+
+/** The distinct words in a text, ignoring case and punctuation. */
+export const wordSet = (text: string): Set<string> => new Set(text.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? []);
+
+const SERIES_LENGTH = 48;
+const BUMP_CENTER = 15;
+const BUMP_WIDTH = 4;
+const ALIGNMENT_STRIDE = 4;
+
+const bump = (center: number) =>
+	Array.from({ length: SERIES_LENGTH }, (_, i) => Math.exp(-((i - center) ** 2) / (2 * BUMP_WIDTH ** 2)));
+
+/** Compares a signal with a time-shifted copy, point by point and with dynamic time warping. */
+export function timeSeriesComparison(shift: number): { pointwise: number; warped: number; scene: Scene } {
+	const first = bump(BUMP_CENTER);
+	const second = bump(BUMP_CENTER + shift);
+	const { distance, path } = dtw(first, second);
+	const x = (i: number) => -0.95 + (1.9 * i) / (SERIES_LENGTH - 1);
+	const top = (i: number) => 0.2 + 0.65 * first[i];
+	const bottom = (i: number) => -0.85 + 0.65 * second[i];
+	const curve = (y: (i: number) => number): SceneLine => ({ tone: 'ink', path: first.map((_, i) => [x(i), y(i)]) });
+	const alignment = path
+		.filter((_, n) => n % ALIGNMENT_STRIDE === 0)
+		.map(([i, j]): SceneLine => ({ tone: 'muted', path: [[x(i), top(i)], [x(j), bottom(j)]] }));
+	return {
+		pointwise: first.reduce((sum, value, i) => sum + Math.abs(value - second[i]), 0),
+		warped: distance,
+		scene: { points: [], lines: [...alignment, curve(top), curve(bottom)] },
+	};
+}
+
+const BINS = 81;
+const BIN_WIDTH = 2 / (BINS - 1);
+
+/** A Gaussian as a histogram on shared bins from -1 to 1. */
+export function distributionBins(mean: number, sd: number): { values: number[]; width: number } {
+	const raw = Array.from({ length: BINS }, (_, i) => Math.exp(-((-1 + i * BIN_WIDTH - mean) ** 2) / (2 * sd ** 2)));
+	const total = raw.reduce((sum, v) => sum + v, 0);
+	return { values: raw.map((v) => v / total), width: BIN_WIDTH };
+}
+
+export function distributionScene(p: number[], q: number[]): Scene {
+	const peak = Math.max(...p, ...q);
+	const curve = (values: number[], dashed: boolean): SceneLine => ({
+		tone: 'ink',
+		dashed,
+		path: values.map((v, i) => [-1 + i * BIN_WIDTH, -0.9 + (1.7 * v) / peak]),
+	});
+	return { points: [], lines: [curve(p, false), curve(q, true)] };
 }
