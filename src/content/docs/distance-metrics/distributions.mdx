@@ -1,0 +1,88 @@
+---
+title: KL Divergence and Wasserstein Distance
+description: Ways to compare whole probability distributions, and why they behave so differently.
+sidebar:
+  label: Distributions
+  order: 6
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import DistributionDemo from '@/components/interactive/DistributionDemo';
+
+Sometimes the things you compare are not single samples but whole distributions: a model's predictions against the real data, or this month's data against last month's. These two measures answer that in very different ways.
+
+## KL divergence
+
+Kullback-Leibler divergence measures how much information is lost when you use $Q$ to approximate $P$:
+
+$$
+D_{\text{KL}}(P \,\|\, Q) = \sum_{i} p_i \log \frac{p_i}{q_i}
+$$
+
+It is 0 only when the two distributions are identical, and it grows as they differ. With a natural logarithm, the unit is nats.
+
+KL divergence is everywhere in machine learning. Minimizing cross-entropy, the loss used to train most classifiers, is equivalent to minimizing the KL divergence from the true labels to the model's predictions. Variational autoencoders use it directly.
+
+### Not a distance at all
+
+Despite how often it is called one, KL divergence is not a true metric. It is not symmetric, so the direction matters:
+
+$$
+D_{\text{KL}}(P \,\|\, Q) \ne D_{\text{KL}}(Q \,\|\, P)
+$$
+
+Take $P = (0.5, 0.5, 0, 0)$ and $Q = (0.25, 0.25, 0.25, 0.25)$. Then $D_{\text{KL}}(P \,\|\, Q) = \log 2 \approx 0.693$, while $D_{\text{KL}}(Q \,\|\, P)$ is infinite, because $Q$ puts probability where $P$ has none.
+
+That infinity is a practical problem. Whenever $q_i = 0$ and $p_i > 0$, the divergence blows up, however small $p_i$ is.
+
+## Wasserstein distance
+
+Also called the earth mover's distance, this treats each distribution as a pile of earth. It is the least work needed to reshape one pile into the other, where work is mass multiplied by the distance moved.
+
+In one dimension it has a simple form, using the cumulative distributions $F_P$ and $F_Q$:
+
+$$
+W_1(P, Q) = \int \lvert F_P(x) - F_Q(x) \rvert \, dx
+$$
+
+Moving all the mass from one end of three unit-spaced bins to the other takes a Wasserstein distance of 2, because all of it travels two steps.
+
+Wasserstein distance is a true metric, and it understands geometry. If two equally shaped distributions are shifted apart, it equals the size of the shift. It stays finite and keeps growing even when they do not overlap at all. Wasserstein GANs use this property, because it gives a useful training signal when real and generated data are still far apart.
+
+## Compare them
+
+Drag the sliders. Change only one spread to see the two KL values disagree. Then pull the means far apart, and notice that Wasserstein distance grows in step with the gap, while KL divergence shoots up.
+
+<DistributionDemo client:visible />
+
+Both distributions here are Gaussians drawn on the same bins. Exact Gaussians never reach zero, so KL divergence stays finite, even if it gets very large.
+
+## Which one to use
+
+| Goal | Use |
+| --- | --- |
+| A training loss for a probabilistic model | KL divergence, usually through cross-entropy |
+| Measuring how far apart two distributions are | Wasserstein |
+| Distributions that may not overlap | Wasserstein |
+| Detecting a shift in your data over time | Wasserstein, or a statistical test |
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+```ts
+import { klDivergence, wasserstein } from '@/lib/ml/distance';
+
+klDivergence([0.5, 0.5, 0, 0], [0.25, 0.25, 0.25, 0.25]); // 0.693...
+wasserstein([1, 0, 0], [0, 0, 1], 1); // 2
+```
+</TabItem>
+<TabItem label="SciPy">
+```python
+from scipy.stats import entropy, wasserstein_distance
+
+entropy([0.5, 0.5, 0, 0], [0.25, 0.25, 0.25, 0.25])  # 0.693...
+wasserstein_distance([0, 1, 2], [0, 1, 2], [1, 0, 0], [0, 0, 1])  # 2.0
+```
+</TabItem>
+</Tabs>

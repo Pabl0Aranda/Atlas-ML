@@ -38,6 +38,8 @@ Neither step can increase $J$, and there are finitely many partitions, so the al
 
 Try **Moons** to see the method fail: k-means can only draw straight boundaries between centroids, so it cuts through curved clusters.
 
+The **Distance** control switches to Manhattan distance, which turns the algorithm into k-medians. It needs [a different update step](/distance-metrics/geometric/#why-k-means-needs-a-different-update), because the mean only suits squared Euclidean distance.
+
 <Sandbox client:visible algorithm="k-means" />
 
 ## Code

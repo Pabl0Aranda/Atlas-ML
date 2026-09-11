@@ -1,0 +1,105 @@
+---
+title: Euclidean, Manhattan and Chebyshev
+description: The geometric distances, and how Minkowski distance connects them through a single parameter.
+sidebar:
+  label: Geometric distances
+  order: 2
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import DistanceExplorer from '@/components/interactive/DistanceExplorer';
+
+These are the distances most people meet first. They all compare two numeric vectors feature by feature, and differ only in how they combine those differences.
+
+As a running example, take the points $(0, 0)$ and $(3, 4)$.
+
+## Euclidean distance
+
+The length of a straight line between two points:
+
+$$
+d(x, y) = \sqrt{\sum_{i} (x_i - y_i)^2}
+$$
+
+For the example, $\sqrt{3^2 + 4^2} = 5$.
+
+Squaring makes large differences count far more than small ones, so one bad feature can dominate the result. It is the natural default for scaled numeric data, and it is what [k-means](/algorithms/k-means/) is built around.
+
+## Manhattan distance
+
+The distance traveled along a grid, like walking city blocks. It is also called the $L_1$ distance or taxicab distance:
+
+$$
+d(x, y) = \sum_{i} \lvert x_i - y_i \rvert
+$$
+
+For the example, $3 + 4 = 7$.
+
+Differences are not squared, so a single large one has less influence than under Euclidean distance. That makes Manhattan distance a common choice when data has outliers or many dimensions.
+
+## Chebyshev distance
+
+Only the largest single difference counts:
+
+$$
+d(x, y) = \max_{i} \lvert x_i - y_i \rvert
+$$
+
+For the example, $\max(3, 4) = 4$.
+
+This is how many moves a chess king needs to cross a board, because a diagonal step covers both directions at once. It suits problems where the worst feature decides the outcome, such as a tolerance check where every measurement must stay within a limit.
+
+## Minkowski distance
+
+One formula covers the whole family, with an exponent $p$:
+
+$$
+d(x, y) = \Big( \sum_{i} \lvert x_i - y_i \rvert^{p} \Big)^{1/p}
+$$
+
+Setting $p = 1$ gives Manhattan distance, and $p = 2$ gives Euclidean distance. As $p$ grows, the largest difference takes over, so the limit is Chebyshev distance. Below $p = 1$ the triangle inequality fails, so it is no longer a true metric.
+
+Choose **Minkowski** below and drag $p$. The rings swell from a diamond, through a circle, towards a square.
+
+<DistanceExplorer client:visible initialMetric="minkowski" />
+
+## Why the shape matters
+
+The rings show which points count as equally far away. At the same radius, a diamond covers less area than a circle, and a square covers more. That changes results: an algorithm with a fixed radius finds fewer neighbors with Manhattan distance and more with Chebyshev distance.
+
+You can see this in the [DBSCAN](/algorithms/dbscan/) presets. With $\varepsilon = 0.15$ on the moons data, Manhattan distance breaks the moons into 5 clusters, and raising $\varepsilon$ to 0.18 brings back both moons. A radius tuned for one metric does not carry over to another.
+
+## Why k-means needs a different update
+
+Switching metric is not always a simple swap. Each [k-means](/algorithms/k-means/) iteration moves a centroid to the point that minimizes total cost in its cluster:
+
+$$
+\arg\min_{c} \sum_{i} (x_i - c)^2 = \text{mean}, \qquad \arg\min_{c} \sum_{i} \lvert x_i - c \rvert = \text{median}
+$$
+
+The mean is only the right answer for squared Euclidean distance. Using Manhattan distance with a mean update would no longer minimize anything consistent, and the cost could rise between iterations. So the correct Manhattan version updates with medians, which is called k-medians. That is what the **Distance** control in the k-means sandbox does. As a bonus, a median barely moves when an outlier joins a cluster.
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+```ts
+import { chebyshev, euclidean, manhattan, minkowski } from '@/lib/ml/distance';
+
+euclidean([0, 0], [3, 4]); // 5
+manhattan([0, 0], [3, 4]); // 7
+chebyshev([0, 0], [3, 4]); // 4
+minkowski([0, 0], [3, 4], 3); // between Chebyshev and Euclidean
+```
+</TabItem>
+<TabItem label="SciPy">
+```python
+from scipy.spatial import distance
+
+distance.euclidean([0, 0], [3, 4])  # 5.0
+distance.cityblock([0, 0], [3, 4])  # 7
+distance.chebyshev([0, 0], [3, 4])  # 4
+distance.minkowski([0, 0], [3, 4], p=3)
+```
+</TabItem>
+</Tabs>

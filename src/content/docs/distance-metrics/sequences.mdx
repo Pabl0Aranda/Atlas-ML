@@ -1,0 +1,80 @@
+---
+title: Levenshtein and Dynamic Time Warping
+description: Distances for sequences that can differ in length or timing, such as words and time series.
+sidebar:
+  label: Sequences
+  order: 5
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { EditDistanceDemo } from '@/components/interactive/TextDistanceDemo';
+import TimeSeriesDemo from '@/components/interactive/TimeSeriesDemo';
+
+Comparing sequences position by position breaks down when one is longer, or runs slightly ahead of the other. Both distances here solve that the same way: they search for the best alignment first, using dynamic programming.
+
+## Levenshtein distance
+
+Also called edit distance, this is the fewest insertions, deletions and substitutions that turn one string into another. Turning `kitten` into `sitting` takes 3 edits: substitute the `k`, substitute the `e`, and insert a `g`.
+
+Let $D_{i,j}$ be the distance between the first $i$ characters of one string and the first $j$ of the other. Each cell only needs its three neighbors:
+
+$$
+D_{i,j} = \min \begin{cases} D_{i-1,j} + 1 & \text{deletion} \\ D_{i,j-1} + 1 & \text{insertion} \\ D_{i-1,j-1} + c & \text{substitution} \end{cases}
+$$
+
+Here $c$ is 0 if the two characters match, and 1 otherwise. The first row and column count up from 0, because building a string from nothing takes one edit per character. The answer ends up in the bottom-right cell, which is highlighted below.
+
+<EditDistanceDemo client:visible />
+
+The table has one cell per pair of characters, so the cost is $O(nm)$ for strings of lengths $n$ and $m$. It powers spell checkers, fuzzy search and record matching, and related alignment methods compare DNA.
+
+## Dynamic time warping
+
+Two recordings of the same word differ in speed, and two heartbeats rarely line up exactly. A point-by-point comparison punishes this, because a small shift in time creates large differences at every step.
+
+Dynamic time warping, or DTW, lets one point match several points on the other sequence, so the two can stretch and compress to line up:
+
+$$
+D_{i,j} = \lvert a_i - b_j \rvert + \min(D_{i-1,j-1},\; D_{i-1,j},\; D_{i,j-1})
+$$
+
+This is the same idea as the edit table, but with the cost of pairing two values instead of a fixed edit cost. Following the cheapest route back through the table gives the alignment.
+
+Move the slider below. The point-by-point difference climbs quickly as the signals separate, while DTW stays low because it can line the bumps back up.
+
+<TimeSeriesDemo client:visible />
+
+### Not a true metric
+
+DTW breaks the [metric rules](/distance-metrics/overview/#what-makes-a-true-metric). Different sequences can be at distance 0: $(0, 1, 2)$ and $(0, 0, 1, 1, 2, 2)$ align perfectly. It also breaks the triangle inequality in general. It works very well in practice, but neighbor-search methods that rely on that inequality do not apply.
+
+### What to watch for
+
+- Without limits, warping can match points that are far apart in time. Real systems usually restrict how far the alignment may stray from the diagonal, which also makes it faster.
+- Like the edit table, the cost is $O(nm)$, which adds up for long series.
+- Signals should be on a comparable scale first, for example [standardized](/data-preparation/processing/).
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+```ts
+import { dtw, levenshtein } from '@/lib/ml/distance';
+
+levenshtein('kitten', 'sitting'); // 3
+
+const { distance, path } = dtw([0, 1, 2], [0, 0, 1, 1, 2, 2]);
+// distance is 0, and path lists the matched index pairs
+```
+</TabItem>
+<TabItem label="Python libraries">
+```python
+from rapidfuzz.distance import Levenshtein
+from dtaidistance import dtw
+
+Levenshtein.distance("kitten", "sitting")  # 3
+dtw.distance(series_a, series_b)
+```
+These two libraries are separate installs. DTW implementations use different cost functions, so their numbers may not match this site's.
+</TabItem>
+</Tabs>

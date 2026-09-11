@@ -56,6 +56,7 @@ export default defineConfig({
 					items: familySidebar(family),
 				})),
 				{ label: 'Concepts', collapsed: true, items: [{ autogenerate: { directory: 'concepts' } }] },
+				{ label: 'Distance Metrics', collapsed: true, items: [{ autogenerate: { directory: 'distance-metrics' } }] },
 			],
 		}),
 		preact(),

@@ -1,0 +1,85 @@
+---
+title: Why Distance Matters
+description: How distance functions shape machine learning, which one to choose, and how to compare them interactively.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+import DistanceExplorer from '@/components/interactive/DistanceExplorer';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+
+Many algorithms never see your data as you do. They only ask one question: how far apart are these two samples? Whatever answers that question decides what counts as "similar", so it quietly shapes the model. [KNN](/algorithms/knn/) picks neighbors with it, [k-means](/algorithms/k-means/) assigns clusters with it, [DBSCAN](/algorithms/dbscan/) measures density with it, and [hierarchical clustering](/algorithms/hierarchical-clustering/) merges groups with it.
+
+There is no single correct distance. The right one depends on what your data is and what "similar" should mean for your problem.
+
+## See the difference
+
+Each metric below draws different rings around point A, so the same two points can be near under one metric and far under another. Pick a metric, then move the points.
+
+<DistanceExplorer client:visible />
+
+## The distances in this section
+
+| Distance | Works on | Typical use | True metric? |
+| --- | --- | --- | --- |
+| [Euclidean](/distance-metrics/geometric/) | Numeric vectors | The default for scaled numeric data | Yes |
+| [Manhattan](/distance-metrics/geometric/) | Numeric vectors | Grid-like movement, less sensitive to one large difference | Yes |
+| [Chebyshev](/distance-metrics/geometric/) | Numeric vectors | When the worst single difference decides | Yes |
+| [Minkowski](/distance-metrics/geometric/) | Numeric vectors | Tuning between the three above | Yes, for $p \ge 1$ |
+| [Cosine](/distance-metrics/direction-and-shape/) | Numeric vectors | Text and embeddings, where direction matters more than length | No |
+| [Mahalanobis](/distance-metrics/direction-and-shape/) | Numeric vectors | Correlated features, outlier detection | Yes |
+| [Hamming](/distance-metrics/sets-and-categories/) | Equal-length sequences | Binary codes, error detection | Yes |
+| [Jaccard](/distance-metrics/sets-and-categories/) | Sets | Tags, shopping baskets, document overlap | Yes |
+| [Levenshtein](/distance-metrics/sequences/) | Strings | Spelling, fuzzy matching, DNA | Yes |
+| [Dynamic time warping](/distance-metrics/sequences/) | Time series | Signals that run at different speeds | No |
+| [KL divergence](/distance-metrics/distributions/) | Probability distributions | Training generative and probabilistic models | No |
+| [Wasserstein](/distance-metrics/distributions/) | Probability distributions | Comparing distributions that barely overlap | Yes |
+
+## What makes a true metric
+
+In mathematics, a distance $d$ is a metric only if it meets all of these rules for any $x$, $y$ and $z$:
+
+$$
+d(x, y) = 0 \iff x = y
+$$
+
+$$
+d(x, y) = d(y, x)
+$$
+
+$$
+d(x, z) \le d(x, y) + d(y, z)
+$$
+
+The first says only identical things are at distance zero. The second is symmetry. The third, the triangle inequality, says a detour is never shorter than the direct route.
+
+Plenty of useful measures break these rules, and that is fine. It only matters when an algorithm relies on them. For example, some fast neighbor-search structures use the triangle inequality to skip samples, so they cannot be used with a measure that breaks it.
+
+## Which one should I use?
+
+1. **Numeric features on similar scales:** start with Euclidean.
+2. **Numeric features with outliers, or many dimensions:** try Manhattan, which does not square differences.
+3. **Correlated features:** use Mahalanobis, or decorrelate first with [PCA](/algorithms/pca/).
+4. **Text or embeddings:** use cosine, because document length should not count as a difference.
+5. **Sets or tags:** use Jaccard.
+6. **Categories or binary codes of equal length:** use Hamming.
+7. **Strings of different lengths:** use Levenshtein.
+8. **Time series with shifts in time:** use dynamic time warping.
+9. **Probability distributions:** use KL divergence as a training loss, and Wasserstein to measure how far apart two distributions are.
+
+## Scale your features first
+
+Geometric distances add up differences across features, so a feature measured in thousands drowns out one measured in fractions. Income would decide everything and age would barely count. [Scale your features](/data-preparation/processing/) before you use any of them. Mahalanobis is the exception, because it accounts for each feature's spread by itself.
+
+Distances also lose contrast in high dimensions, where the nearest and farthest samples end up at similar distances. This is one reason [KNN](/algorithms/knn/) struggles with many features.
+
+## Try it on real algorithms
+
+The sandboxes for [KNN](/algorithms/knn/), [k-means](/algorithms/k-means/), [DBSCAN](/algorithms/dbscan/) and [hierarchical clustering](/algorithms/hierarchical-clustering/) all have a **Distance** control. You can also [compare two distances side by side](/compare/?a=dbscan&b=dbscan&dataset=moons&b_metric=1). With the same settings on the moons data, DBSCAN finds both moons with Euclidean distance, but breaks them into 5 clusters with Manhattan distance.
+
+## Code
+
+Every distance in this section comes from one file, which is also what the demos run.
+
+<AlgorithmSource file="distance.ts" />

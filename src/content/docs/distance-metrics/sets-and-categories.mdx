@@ -1,0 +1,79 @@
+---
+title: Hamming and Jaccard
+description: Distances for data that is not numeric, such as categories, binary codes and sets.
+sidebar:
+  label: Sets and categories
+  order: 4
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { SetDistanceDemo } from '@/components/interactive/TextDistanceDemo';
+
+Not all data lives on a number line. "Red" is not halfway between "blue" and "green", and a list of tags has no coordinates. These distances compare such data directly.
+
+## Hamming distance
+
+The number of positions where two sequences of equal length differ:
+
+$$
+d(x, y) = \sum_{i} \mathbb{1}[\,x_i \ne y_i\,]
+$$
+
+For example, `karolin` and `kathrin` differ in 3 positions.
+
+It comes from error-correcting codes, where it counts how many bits were flipped in transmission. In machine learning it suits rows of categorical features or binary fingerprints. Dividing by the length gives the share of positions that differ, which is easier to compare across datasets.
+
+Hamming distance is undefined for sequences of different lengths. One inserted character shifts every later position, so for text you usually want [Levenshtein distance](/distance-metrics/sequences/) instead.
+
+## Jaccard distance
+
+Jaccard similarity is the size of the overlap divided by the size of the union, and Jaccard distance is one minus that:
+
+$$
+d(A, B) = 1 - \frac{\lvert A \cap B \rvert}{\lvert A \cup B \rvert}
+$$
+
+For example, $\{1, 2, 3\}$ and $\{2, 3, 4\}$ share 2 of 4 distinct elements, so their distance is 0.5.
+
+The key property is that shared absences do not count. Two shoppers who each bought three things out of a million products are not similar because of the 999,990 items neither bought. Only what they actually have matters. That suits sparse data such as tags, shopping baskets and the words in a document.
+
+Order and repetition are ignored, because these are sets. If two empty sets need comparing, this site's code treats them as identical.
+
+## Try it
+
+Hamming distance below compares characters by position, while Jaccard distance compares the sets of words. Insert a single letter at the start of one text and watch what happens to each.
+
+<SetDistanceDemo client:visible />
+
+## Which one to use
+
+| Your data | Use |
+| --- | --- |
+| Fixed-length rows where every position matters | Hamming |
+| Sets where only presence counts | Jaccard |
+| Strings of different lengths | [Levenshtein](/distance-metrics/sequences/) |
+| Word counts where frequency matters | [Cosine](/distance-metrics/direction-and-shape/) |
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+```ts
+import { hamming, jaccardDistance } from '@/lib/ml/distance';
+
+hamming('karolin', 'kathrin'); // 3
+jaccardDistance(new Set([1, 2, 3]), new Set([2, 3, 4])); // 0.5
+```
+</TabItem>
+<TabItem label="SciPy">
+```python
+from scipy.spatial import distance
+
+# SciPy returns the share of positions that differ, not the count.
+distance.hamming(list("karolin"), list("kathrin"))  # 0.428...
+
+# SciPy's jaccard takes boolean vectors, not sets.
+distance.jaccard([1, 1, 1, 0], [0, 1, 1, 1])  # 0.5
+```
+</TabItem>
+</Tabs>

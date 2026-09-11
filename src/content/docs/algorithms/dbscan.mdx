@@ -39,7 +39,9 @@ A point marked noise can still join a cluster later as a border point. Border po
 
 ## Interactive Sandbox
 
-Each step examines one point, and the dashed circle shows its neighborhood. Grey points are unvisited, or noise once examined. On **Moons**, the cluster flows along each curve, which k-means cannot do. Then try a smaller $\varepsilon$ and watch each moon break into fragments. On **Circles**, the sparser outer ring shows the method's main weakness: one radius has to suit every region.
+Each step examines one point, and the dashed outline shows its neighborhood. Grey points are unvisited, or noise once examined. On **Moons**, the cluster flows along each curve, which k-means cannot do. Then try a smaller $\varepsilon$ and watch each moon break into fragments. On **Circles**, the sparser outer ring shows the method's main weakness: one radius has to suit every region.
+
+The **Distance** control changes the neighborhood's shape to a diamond or a square. The same $\varepsilon$ then covers a different area, so [each metric needs its own radius](/distance-metrics/geometric/#why-the-shape-matters).
 
 <Sandbox client:visible algorithm="dbscan" />
 

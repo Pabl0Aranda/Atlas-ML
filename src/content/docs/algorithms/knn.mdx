@@ -36,6 +36,8 @@ At $k = 1$, the decision regions form the Voronoi diagram of the samples. Larger
 
 Each step raises $k$ by two. Accuracy is measured leave-one-out, because training accuracy at $k = 1$ is always 100% and tells you nothing.
 
+Use the **Distance** control to change what "nearest" means, and the boundary redraws at once. Read more in [distance metrics](/distance-metrics/overview/).
+
 <Sandbox client:visible algorithm="knn" />
 
 ## Code
@@ -65,5 +67,5 @@ print(cross_val_score(model, X, y, cv=5).mean())
 **Limitations**
 
 - Naive prediction costs $O(nd)$ per query, and all the data must stay in memory.
-- It is sensitive to feature scale.
+- It is sensitive to feature scale, like [any geometric distance](/distance-metrics/overview/#scale-your-features-first).
 - In high dimensions distances concentrate, so "nearest" loses meaning.

@@ -1,0 +1,90 @@
+---
+title: Cosine and Mahalanobis
+description: Distances that look past raw coordinates, to compare direction or to account for the shape of the data.
+sidebar:
+  label: Direction and shape
+  order: 3
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import DistanceExplorer from '@/components/interactive/DistanceExplorer';
+
+[Geometric distances](/distance-metrics/geometric/) take coordinates at face value. These two do not: cosine distance ignores how long a vector is, and Mahalanobis distance adjusts for how the data is spread.
+
+## Cosine distance
+
+Cosine similarity is the cosine of the angle between two vectors, and cosine distance is one minus that:
+
+$$
+d(x, y) = 1 - \frac{x \cdot y}{\lVert x \rVert \, \lVert y \rVert}
+$$
+
+The result is 0 for vectors pointing the same way, 1 for perpendicular ones, and 2 for opposite ones. Length does not matter at all, so $(1, 2)$ and $(2, 4)$ are at distance 0.
+
+This is exactly what you want for text. A long document and a short one on the same topic use words in similar proportions, so their word-count vectors point in a similar direction even though one is much longer. The same reasoning makes cosine distance a common choice for comparing embeddings.
+
+### Not a true metric
+
+Cosine distance breaks two of the [metric rules](/distance-metrics/overview/#what-makes-a-true-metric). Different vectors can be at distance 0, as above. It can also break the triangle inequality. Take $a = (1, 0)$, $b = (1, 1)$ and $c = (0, 1)$:
+
+$$
+d(a, c) = 1 \;>\; d(a, b) + d(b, c) \approx 0.293 + 0.293
+$$
+
+The detour through $b$ looks shorter than the direct route. If an algorithm needs a true metric, the angle itself, $\arccos$ of the similarity, is one for vectors of unit length.
+
+A vector of all zeros has no direction, so the formula divides by zero. This site's code treats it as unrelated to everything, at distance 1.
+
+<DistanceExplorer client:visible initialMetric="cosine" />
+
+Rings become rays here, because every point along a ray from the origin has the same direction. Dashed lines show the two directions being compared.
+
+## Mahalanobis distance
+
+Mahalanobis distance measures in units of the data's own spread, where $\Sigma$ is the covariance matrix:
+
+$$
+d(x, y) = \sqrt{(x - y)^{\top} \, \Sigma^{-1} \, (x - y)}
+$$
+
+Think of it as stretching space until the data forms a round cloud, then measuring with an ordinary ruler. A step along the direction the data naturally varies counts for little, and the same step across it counts for a lot.
+
+If features are uncorrelated and have unit variance, $\Sigma$ is the identity matrix, and this becomes plain Euclidean distance.
+
+That makes it useful for outlier detection. A point can look close to the center by Euclidean distance, yet be highly unusual because it breaks the pattern between features. Someone 190 cm tall weighing 50 kg is not extreme on either measure alone, but the combination is rare.
+
+<DistanceExplorer client:visible initialMetric="mahalanobis" />
+
+Rings here follow the shape of the grey samples, whose covariance defines the metric. Each ring marks one more unit of spread.
+
+### What to watch for
+
+- It needs a reliable covariance estimate, which takes many more samples than features.
+- The covariance must be invertible, so features that are perfectly correlated need handling first. This site's code adds a tiny value to the diagonal, for that reason.
+- It describes one elliptical cloud. Data with several separate groups needs a covariance per group, as in [Gaussian mixture models](/algorithms/gaussian-mixture-models/).
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+```ts
+import { cosineDistance, inverseCovariance2d, mahalanobis } from '@/lib/ml/distance';
+
+cosineDistance([1, 2], [2, 4]); // 0: same direction
+
+const inverse = inverseCovariance2d(data);
+mahalanobis([0, 0], [0.3, 0.3], inverse);
+```
+</TabItem>
+<TabItem label="SciPy">
+```python
+import numpy as np
+from scipy.spatial import distance
+
+distance.cosine([1, 2], [2, 4])  # 0.0
+
+inverse = np.linalg.inv(np.cov(X, rowvar=False))
+distance.mahalanobis([0, 0], [0.3, 0.3], inverse)
+```
+</TabItem>
+</Tabs>
