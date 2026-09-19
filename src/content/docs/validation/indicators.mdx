@@ -1,0 +1,183 @@
+---
+title: Performance Indicators
+description: Why indicators decide which model you ship, and what each classification, regression and clustering indicator means.
+sidebar:
+  label: Indicators
+  order: 4
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import ConfusionExplorer from '@/components/interactive/ConfusionExplorer';
+
+An indicator, also called a metric, turns a model's behavior into a number you can compare. It may look like a reporting detail, but it is one of the most important decisions in a project, because the indicator defines what "better" means.
+
+## Why Indicators Matter
+
+- **They define success.** Every model comparison, tuning run and early stop follows the indicator you chose. Pick the wrong one and you will carefully optimize the wrong thing.
+- **They reveal what a model gets wrong.** A single score can hide a model that fails on the cases you care about most.
+- **They connect the model to the real problem.** A missed tumor and a false alarm have very different costs, and a good indicator reflects that.
+- **They make comparisons fair.** Candidates, baselines and past versions can only be compared on the same indicator and the same data.
+- **They reveal problems early.** A large gap between training and validation scores points to [overfitting](/concepts/bias-variance/), and a score that seems too good often points to [leakage](/data-preparation/overview/#data-leakage).
+
+### A Warning in Numbers
+
+Take 1,000 people, of whom 10 have a disease. Compare a lazy model that always says "healthy" with a real screening model:
+
+| Indicator | Always "healthy" | Screening model |
+| --- | --- | --- |
+| Accuracy | **99.0%** | 95.8% |
+| Recall | 0% | **80.0%** |
+| Precision | Undefined | 16.7% |
+| Balanced accuracy | 50.0% | **88.0%** |
+| MCC | 0.000 | **0.354** |
+
+Accuracy prefers the model that finds nobody. No indicator is wrong here, but each answers a different question, so you need to ask the right one.
+
+## Try It
+
+Edit any cell, or load an example, and watch which indicators move. The cost fields show how a business view of errors can change the winner.
+
+<ConfusionExplorer client:visible />
+
+## Classification Indicators
+
+All of these come from the four cells of the [confusion matrix](/validation/validation-matrices/): true positives (TP), false positives (FP), true negatives (TN) and false negatives (FN). Below, $N$ is the total number of samples, $P$ is precision and $R$ is recall.
+
+| Indicator | Formula | The question it answers |
+| --- | --- | --- |
+| Accuracy | $\dfrac{TP + TN}{N}$ | How often is the model right overall? |
+| Error rate | $1 - \text{Accuracy}$ | How often is it wrong? |
+| Precision | $\dfrac{TP}{TP + FP}$ | When it raises an alarm, how often is the alarm real? |
+| Recall (sensitivity) | $\dfrac{TP}{TP + FN}$ | How many real positives does it catch? |
+| Specificity | $\dfrac{TN}{TN + FP}$ | How many real negatives does it leave alone? |
+| False positive rate | $\dfrac{FP}{FP + TN}$ | How often does a negative trigger an alarm? |
+| False negative rate | $\dfrac{FN}{FN + TP}$ | How often does it miss a positive? |
+| Negative predictive value | $\dfrac{TN}{TN + FN}$ | When it says negative, can you trust it? |
+| Balanced accuracy | Mean of recall and specificity | How good is it on each class, counted equally? |
+| F1 | $\dfrac{2PR}{P + R}$ | Are precision and recall both good? |
+| F-beta | $\dfrac{(1 + \beta^2) PR}{\beta^2 P + R}$ | The same, with recall counted $\beta$ times as much |
+
+### Two Indicators That Are Hard to Fool
+
+**Matthews correlation coefficient (MCC)** is the correlation between predictions and labels. It uses all four cells, so it stays low unless the model does well on both classes. It runs from $-1$ (always wrong) through 0 (no better than chance) to 1 (perfect).
+
+$$
+\text{MCC} = \frac{TP \cdot TN - FP \cdot FN}{\sqrt{(TP + FP)(TP + FN)(TN + FP)(TN + FN)}}
+$$
+
+**Cohen's kappa** measures agreement beyond chance, where $p_o$ is the observed agreement and $p_e$ is the agreement expected by chance. A kappa of 0 means the model adds nothing over guessing from the class shares.
+
+$$
+\kappa = \frac{p_o - p_e}{1 - p_e}
+$$
+
+### Indicators for Probabilities and Rankings
+
+These judge the model's scores, before any threshold is applied.
+
+| Indicator | What it measures | How to read it |
+| --- | --- | --- |
+| [ROC AUC](/testing/classification-metrics/) | Chance that a random positive scores above a random negative | 0.5 is chance and 1 is perfect. It can look strong on rare classes |
+| PR AUC (average precision) | Precision across all levels of recall | Compare it with the share of positives, which is what chance scores |
+| Log loss | How surprised the model is by the true labels | Lower is better. Confident mistakes are punished heavily |
+| Brier score | Mean squared error of the predicted probabilities | Lower is better, with 0 being perfect |
+
+$$
+\text{Log loss} = -\frac{1}{n} \sum_i \big[\, y_i \log p_i + (1 - y_i) \log(1 - p_i) \,\big]
+$$
+
+$$
+\text{Brier} = \frac{1}{n} \sum_i (p_i - y_i)^2
+$$
+
+### More Than Two Classes
+
+Each class gets its own precision, recall and F1, which then need combining:
+
+- **Macro average:** the plain mean over classes. Every class counts equally, so a weak rare class lowers the score.
+- **Weighted average:** the mean weighted by class size. A large class can hide a weak small one.
+- **Micro average:** pools every decision. For single-label problems it equals accuracy.
+
+## Regression Indicators
+
+These summarize the errors $e_i = y_i - \hat{y}_i$. More detail, including residual plots, is in [regression metrics](/testing/regression-metrics/).
+
+| Indicator | Formula | How to read it |
+| --- | --- | --- |
+| MAE | $\dfrac{1}{n} \sum_i \lvert e_i \rvert$ | The typical error, in the target's units. Resists outliers |
+| MSE | $\dfrac{1}{n} \sum_i e_i^2$ | Squared units, so harder to explain. Often the training loss |
+| RMSE | $\sqrt{\text{MSE}}$ | Back in the target's units. Punishes large errors more than MAE |
+| MAPE | $\dfrac{100\%}{n} \sum_i \lvert e_i / y_i \rvert$ | Percentage error. Breaks down when targets are near zero |
+| $R^2$ | $1 - \dfrac{\text{SSE}}{\text{SST}}$ | Share of variance explained. 0 matches predicting the mean, and it can go negative |
+| Adjusted $R^2$ | See below | $R^2$ with a penalty for each of the $p$ features |
+
+Here SSE is the sum of squared errors, and SST is the total squared distance from the mean. Adjusted $R^2$ is:
+
+$$
+R^2_{\text{adj}} = 1 - (1 - R^2) \frac{n - 1}{n - p - 1}
+$$
+
+If RMSE is much larger than MAE, a few large errors are driving your score.
+
+## Clustering Indicators
+
+Clustering has no single right answer, so indicators fall into two groups.
+
+| Indicator | Needs true labels? | How to read it |
+| --- | --- | --- |
+| Silhouette score | No | From $-1$ to 1. High means points sit close to their own cluster and far from others |
+| Davies-Bouldin index | No | Lower is better. Compares each cluster's spread with its distance to the nearest cluster |
+| Inertia | No | Total squared distance to centroids. It always falls as $k$ rises, so look for an elbow |
+| Adjusted Rand index | Yes | 0 is chance and 1 is perfect agreement with the labels |
+
+Indicators without labels tend to favor round, compact clusters. They can rate [k-means](/algorithms/k-means/) above [DBSCAN](/algorithms/dbscan/) on moon shapes even when DBSCAN finds the true groups, so always look at the result too.
+
+## How to Choose
+
+1. **Start from the decision.** Ask what the model's output will be used for.
+2. **Price the errors.** Decide which mistake is worse, and by how much.
+3. **Check the class balance.** With rare classes, avoid accuracy and prefer recall, precision, MCC or PR AUC.
+4. **Pick one primary indicator** for comparing models, so tuning has a clear goal.
+5. **Add guardrail indicators** that must stay acceptable, such as "recall of at least 90%".
+6. **Compare with a baseline**, such as always predicting the majority class or the mean.
+
+| Situation | Good primary indicator |
+| --- | --- |
+| Balanced classes, similar error costs | Accuracy or F1 |
+| Misses are costly, such as disease screening | Recall, or F-beta with $\beta = 2$ |
+| False alarms are costly, such as spam filters | Precision |
+| Rare positive class | PR AUC or MCC |
+| Probabilities drive decisions | Log loss or Brier score |
+| Forecast errors in real units | MAE or RMSE |
+
+## Common Mistakes
+
+- **Trusting one number.** Always read the [confusion matrix](/validation/validation-matrices/) beside it.
+- **Chasing the metric.** Once an indicator becomes the target, a model can improve it without improving the real outcome.
+- **Quoting training scores.** Only held-out data gives an honest answer.
+- **Choosing after looking.** Picking the indicator that flatters your model is a form of [leakage](/data-preparation/overview/#data-leakage). Decide first.
+- **Ignoring uncertainty.** A two-point gain on 100 samples can be pure chance. See [confidence intervals](/testing/overview/#confidence-intervals).
+- **Averaging away subgroups.** A good overall score can hide failure on one group.
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="indicators.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.metrics import (
+    balanced_accuracy_score, cohen_kappa_score, fbeta_score, log_loss,
+    matthews_corrcoef, mean_absolute_error, silhouette_score,
+)
+
+print(balanced_accuracy_score(y_val, predictions))
+print(matthews_corrcoef(y_val, predictions))
+print(cohen_kappa_score(y_val, predictions))
+print(fbeta_score(y_val, predictions, beta=2))
+print(log_loss(y_val, probabilities))
+```
+</TabItem>
+</Tabs>

@@ -75,4 +75,4 @@ print(roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]))
 
 - The default threshold of 0.5 is rarely the right one. Choose it from the cost of errors, on [validation](/validation/overview/) data rather than on the test set.
 - ROC AUC can look strong on very rare classes even when precision is poor.
-- Always read the confusion matrix too, since one summary number hides which errors occur.
+- Always read the confusion matrix too, since one summary number hides which errors occur. [Validation matrices](/validation/validation-matrices/) explain how, and [indicators](/validation/indicators/) define many more metrics.

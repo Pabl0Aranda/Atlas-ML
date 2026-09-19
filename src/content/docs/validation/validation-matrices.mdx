@@ -1,0 +1,219 @@
+---
+title: Validation Matrices
+description: The confusion matrix and the other grids used to judge models, with their uses, how to read them, and why they matter.
+sidebar:
+  label: Validation Matrices
+  order: 5
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import ConfusionExplorer from '@/components/interactive/ConfusionExplorer';
+
+A single [indicator](/validation/indicators/) compresses a model into one number. A matrix keeps the detail: it shows where a model succeeds, which mistakes it makes, and how stable its results are.
+
+| Matrix | Rows and columns | The question it answers |
+| --- | --- | --- |
+| [Binary confusion matrix](#binary-confusion-matrix) | Actual and predicted class | What kinds of mistakes does the model make? |
+| [Multi-class confusion matrix](#multi-class-confusion-matrix) | Actual and predicted class | Which classes get mixed up? |
+| [Normalized confusion matrix](#normalized-confusion-matrix) | Actual and predicted class, as rates | How good is the model per class, whatever its size? |
+| [Cost matrix](#cost-matrix) | Actual and predicted class, as prices | What do these mistakes actually cost? |
+| [Fold score matrix](#fold-score-matrix) | Models and folds | Is one model really better, and is it stable? |
+| [Hyperparameter grid](#hyperparameter-grid) | Two settings | Which settings work, and how sensitive are they? |
+| [Paired comparison table](#paired-comparison-table) | Model A and model B outcomes | Is the difference between two models real? |
+
+## Binary Confusion Matrix
+
+The foundation of all the others. It counts every prediction by what was predicted and what was true.
+
+| | Predicted positive | Predicted negative |
+| --- | --- | --- |
+| **Actually positive** | True positive (TP) | False negative (FN) |
+| **Actually negative** | False positive (FP) | True negative (TN) |
+
+**Uses:** any two-class problem, such as fraud, disease or spam. It is the source of precision, recall, F1 and most other [indicators](/validation/indicators/).
+
+**How to read it:**
+
+1. Start with the diagonal, TP and TN. Those are the correct predictions.
+2. Then read the other two cells separately, because they are different mistakes. FN are the misses, and FP are the false alarms.
+3. Read along the top row for recall: how many real positives were caught?
+4. Read down the left column for precision: how many alarms were real?
+5. Compare row totals to see how imbalanced the classes are.
+
+**Why it matters:** two models with the same accuracy can make completely different mistakes, and only the matrix shows that. It also makes a useless model easy to spot, since a model that always predicts one class leaves one column empty.
+
+:::caution[Check the layout first]
+Layouts differ between tools. scikit-learn puts actual classes on rows and sorts labels, so for labels 0 and 1 it prints `[[TN, FP], [FN, TP]]`, with TP at the bottom right. That is the opposite corner from the table above. Other tools swap rows and columns. Always check before reading a matrix.
+:::
+
+Use the explorer to get a feel for how each cell changes the picture:
+
+<ConfusionExplorer client:visible />
+
+## Multi-class Confusion Matrix
+
+The same idea with one row and one column per class. This example has 150 images:
+
+| Actual ↓ / Predicted → | Cat | Dog | Bird | Recall |
+| --- | --- | --- | --- | --- |
+| **Cat** | **40** | 8 | 2 | 80.0% |
+| **Dog** | 5 | **42** | 3 | 84.0% |
+| **Bird** | 1 | 4 | **45** | 90.0% |
+| **Precision** | 87.0% | 77.8% | 90.0% | Accuracy 84.7% |
+
+**Uses:** any problem with three or more classes, such as image labels, document topics or customer segments.
+
+**How to read it:**
+
+1. The diagonal holds the correct predictions, so a strong model has a bright diagonal.
+2. Each row shows where one true class went. Of 50 cats, 8 were called dogs.
+3. Each column shows what a prediction really contained. Of 54 "dog" predictions, 12 were wrong.
+4. Look for the largest number off the diagonal. Here it is cats predicted as dogs.
+5. Compare the two sides of the diagonal. There are 8 cats called dogs but only 5 dogs called cats, so the confusion leans one way.
+
+**Why it matters:** it tells you what to fix. Two classes that are often confused may need more examples, better features, or merging. It often reveals labeling problems too.
+
+## Normalized Confusion Matrix
+
+Raw counts are hard to compare when classes differ in size. Dividing each cell by a total turns counts into rates. The choice of total changes the meaning, as this screening example with 10 sick people and 990 healthy people shows:
+
+| Dividing by | Top-left cell | Bottom-left cell | Each cell then means |
+| --- | --- | --- | --- |
+| Nothing (counts) | 8 | 40 | Number of samples |
+| Row total | 80.0% | 4.0% | Of the real cases, the share given this prediction |
+| Column total | 16.7% | 83.3% | Of these predictions, the share that were this class |
+| Grand total | 0.8% | 4.0% | Share of all samples |
+
+**Uses:** imbalanced data, comparing datasets of different sizes, and heatmaps where a large class would otherwise wash out the colors.
+
+**How to read it:**
+
+- **By row:** the diagonal shows recall per class. This is the most common choice.
+- **By column:** the diagonal shows precision per class.
+- **Overall:** the diagonal adds up to accuracy.
+
+**Why it matters:** the same 40 false positives look like a minor 4.0% of healthy people, or a major 83.3% of all alarms. Both are true, and the right view depends on your question. Keep the raw counts in view too, because 100% of 2 samples proves very little.
+
+## Cost Matrix
+
+A cost matrix is not a result. It's the price list you decide on, which you combine with a confusion matrix.
+
+| | Predicted positive | Predicted negative |
+| --- | --- | --- |
+| **Actually positive** | 0 | 50 (a miss) |
+| **Actually negative** | 1 (a false alarm) | 0 |
+
+$$
+\text{Total cost} = \sum_{i,j} \text{count}_{ij} \cdot \text{cost}_{ij}
+$$
+
+Here are two models on the same 1,000 people, with those prices:
+
+| Model | TP | FN | FP | TN | Accuracy | Total cost |
+| --- | --- | --- | --- | --- | --- | --- |
+| Screening | 8 | 2 | 40 | 950 | 95.8% | **140** |
+| Cautious | 5 | 5 | 5 | 985 | **99.0%** | 255 |
+
+**Uses:** medicine, fraud, credit and any case where errors have different prices. It's also the principled way to choose a decision threshold.
+
+**How to read it:** multiply each cell of the confusion matrix by its price and add them up. Lower is better. The ratio of the prices matters more than their exact values.
+
+**Why it matters:** it brings the real-world goal into the evaluation. Above, the model with the better accuracy is the more expensive one. Setting the prices also forces an honest conversation with whoever owns the decision.
+
+## Fold Score Matrix
+
+When you use [cross-validation](/validation/cross-validation/), each model gets one score per fold. Keep the whole table instead of only the mean. These are real results from this site's KNN on the noisy dataset:
+
+| Model | Fold 1 | Fold 2 | Fold 3 | Fold 4 | Fold 5 | Mean |
+| --- | --- | --- | --- | --- | --- | --- |
+| $k = 1$ | 83.3% | 75.0% | 91.7% | 83.3% | 91.7% | 85.0% |
+| $k = 5$ | 87.5% | 87.5% | 95.8% | 95.8% | 100.0% | 93.3% |
+| $k = 25$ | 87.5% | 87.5% | 95.8% | 95.8% | 100.0% | 93.3% |
+
+**Uses:** comparing candidate models and judging how stable each one is.
+
+**How to read it:**
+
+1. Read along a row to see stability. $k = 1$ moves between 75.0% and 91.7%, so its mean alone would hide a lot.
+2. Read down a column to compare models on identical data. $k = 5$ beats $k = 1$ in every fold, which is stronger evidence than the means alone. It ties $k = 25$ in every fold, so nothing here separates those two.
+3. Look for a column that is low for every model. Folds 1 and 2 are harder here, which may point to unusual samples.
+
+**Why it matters:** a mean can come from steady results or from wild swings. With only 24 samples per fold, a single sample moves a score by about 4 points, so small gaps between means are often noise. Models must share the same folds for this comparison to be fair.
+
+## Hyperparameter Grid
+
+When tuning two settings, each cell holds a validation score. These are real results from this site's RBF [SVM](/algorithms/svm/) on moons, using 30 held-out samples:
+
+| Penalty $C$ ↓ / Width $\gamma$ → | 0.5 | 5 | 30 |
+| --- | --- | --- | --- |
+| **0.1** | 83.3% | 90.0% | 100.0% |
+| **1** | 83.3% | 100.0% | 100.0% |
+| **20** | 96.7% | 100.0% | 100.0% |
+
+**Uses:** [grid search](/validation/hyperparameter-tuning/), usually drawn as a heatmap.
+
+**How to read it:**
+
+1. Look for a broad region of good scores, not a single best cell. Here it covers the bottom-right corner.
+2. Prefer the middle of that region, because settings on a plateau are more likely to hold up on new data.
+3. If the best cell sits on the edge of the grid, widen the search in that direction.
+4. Be wary of one good cell surrounded by poor ones. It's probably luck.
+
+**Why it matters:** it shows how sensitive the model is, which a single "best parameters" result hides. Picking the best of many cells also flatters the score, so confirm the choice on a separate [test set](/testing/overview/). With only 30 samples, this table can't separate the 100% cells from each other.
+
+## Paired Comparison Table
+
+To compare two models on the same samples, count where they agree and where they differ:
+
+| | Model B correct | Model B wrong |
+| --- | --- | --- |
+| **Model A correct** | 180 | 12 |
+| **Model A wrong** | 4 | 4 |
+
+**Uses:** deciding whether a new model truly beats the current one, with McNemar's test.
+
+**How to read it:** ignore the cells where the models agree, since they say nothing about which is better. Only the 12 and the 4 matter, where $b$ and $c$ are those two counts:
+
+$$
+\chi^2 = \frac{(\lvert b - c \rvert - 1)^2}{b + c} = \frac{(12 - 4 - 1)^2}{16} = 3.06
+$$
+
+A value above 3.84 is significant at the 5% level. At 3.06, the data doesn't show a real difference, even though model A scored 96.0% against 92.0%.
+
+**Why it matters:** it stops you from replacing a model because of noise. It's also more sensitive than comparing two accuracy figures, because both models see identical samples.
+
+## Choosing a Matrix
+
+| Your question | Use |
+| --- | --- |
+| What mistakes does the model make? | Confusion matrix |
+| Which classes get mixed up? | Multi-class confusion matrix |
+| Are classes very different in size? | Normalized confusion matrix |
+| Do errors have different prices? | Cost matrix |
+| Which model is better and more stable? | Fold score matrix |
+| Which settings should I use? | Hyperparameter grid |
+| Is the improvement real? | Paired comparison table |
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="indicators.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
+from sklearn.model_selection import cross_val_score
+from statsmodels.stats.contingency_tables import mcnemar
+
+print(confusion_matrix(y_val, predictions))
+print(confusion_matrix(y_val, predictions, normalize="true"))  # by row
+ConfusionMatrixDisplay.from_predictions(y_val, predictions)
+
+fold_scores = cross_val_score(model, X, y, cv=5)  # one row of a fold score matrix
+
+print(mcnemar([[180, 12], [4, 4]], exact=False, correction=True))
+```
+</TabItem>
+</Tabs>

@@ -20,6 +20,13 @@ Validation answers one question during development: **which model and settings s
 | Leave-one-out | $k$ equals the number of samples | Very small datasets with cheap models |
 | Nested cross-validation | An inner loop tunes, an outer loop scores | You need an unbiased score from a small dataset |
 
+## Measuring Results
+
+A validation method tells you how to split the data. You also need a way to judge the results:
+
+- [Indicators](/validation/indicators/) explain why metrics matter, and define each one.
+- [Validation matrices](/validation/validation-matrices/) cover the confusion matrix and the other grids used to compare models.
+
 ## Good Practices
 
 - **Match validation to production.** If the model will predict next month, validate on a later period, not on shuffled rows.
