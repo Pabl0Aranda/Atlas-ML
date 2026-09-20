@@ -11,7 +11,7 @@ const P_PARAM = { key: 'p', label: 'Exponent p', value: 3, min: 1, max: 8, step:
 export default function DistanceExplorer({ initialMetric = 'euclidean' }: { initialMetric?: ExplorerMetric }) {
 	const [metric, setMetric] = useState<ExplorerMetric>(initialMetric);
 	const [p, setP] = useState(P_PARAM.value);
-	const [points, setPoints] = useState<{ a: Point2D; b: Point2D }>({ a: { x: -0.3, y: -0.2 }, b: { x: 0.4, y: 0.3 } });
+	const [points, setPoints] = useState<{ a: Point2D; b: Point2D }>({ a: { x: 0.1, y: 0.2 }, b: { x: 0.5, y: -0.1 } });
 	const [moving, setMoving] = useState<'a' | 'b'>('b');
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
