@@ -3,7 +3,8 @@ import { timeSeriesComparison } from '@/lib/viz/distanceDemos';
 import { MetricList, ParamControl } from './controls';
 import PlotCanvas from './PlotCanvas';
 
-const SHIFT = { key: 'shift', label: 'Time shift', value: 10, min: 0, max: 24, step: 1 };
+/** Larger shifts push the bump off the end of the series, so no alignment could match it. */
+const SHIFT = { key: 'shift', label: 'Time shift', value: 10, min: 0, max: 20, step: 1 };
 
 export default function TimeSeriesDemo() {
 	const [shift, setShift] = useState(SHIFT.value);
