@@ -28,7 +28,7 @@ export default function DistributionDemo() {
 				</div>
 				<div class="flex flex-col gap-3">
 					{CONTROLS.map((control, i) => (
-						<ParamControl param={control} value={values[i]} onChange={(v) => setValues(values.map((old, j) => (j === i ? v : old)))} />
+						<ParamControl param={control} value={values[i]} onChange={(v) => setValues((current) => current.map((old, j) => (j === i ? v : old)))} />
 					))}
 				</div>
 			</div>
