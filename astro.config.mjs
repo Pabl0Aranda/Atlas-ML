@@ -45,6 +45,7 @@ export default defineConfig({
 				'./src/styles/global.css',
 			],
 			sidebar: [
+				{ slug: 'start-here' },
 				{ label: 'Catalog', link: '/catalog/' },
 				{ label: 'Compare', link: '/compare/' },
 				{ label: 'Data Preparation', collapsed: true, items: [{ autogenerate: { directory: 'data-preparation' } }] },

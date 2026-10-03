@@ -1,0 +1,82 @@
+---
+title: Start Here
+description: Find your way around Atlas ML, pick a route for your goal, and learn what every sandbox control does.
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
+---
+
+Atlas ML explains machine learning by letting you run it. Every sandbox uses the same code you can read on its page, so what you see is what the algorithm really does.
+
+## Pick a Route
+
+| I want to | Go to |
+| --- | --- |
+| Learn what machine learning is, from the basics | Follow [the beginner route](#the-beginner-route) |
+| Understand one algorithm | Find it in the [catalog](/catalog/) |
+| Choose between two algorithms | Run them side by side in [Compare](/compare/) |
+| Work on my own project | Follow [the project route](#the-project-route) |
+| Judge how good a model is | Read [indicators](/validation/indicators/) and [validation matrices](/validation/validation-matrices/) |
+| Look up a formula | See [distance metrics](/distance-metrics/overview/) or [concepts](/concepts/bias-variance/) |
+
+## The Beginner Route
+
+Each of these builds on the one before, and each has a sandbox to try:
+
+1. [Linear regression](/algorithms/linear-regression/) shows how a model learns from errors.
+2. [K-nearest neighbors](/algorithms/knn/) shows how to classify by similarity.
+3. [Decision trees](/algorithms/decision-tree/) show how a model asks questions.
+4. [K-means](/algorithms/k-means/) shows how to find groups with no labels.
+5. [Bias and variance](/concepts/bias-variance/) explains why models that are too simple or too flexible both fail.
+6. [Neural networks](/algorithms/mlp/) show how layers learn richer patterns.
+
+## The Project Route
+
+Real projects follow the same four stages, and the sidebar is arranged the same way:
+
+1. **Prepare.** [Clean, process and split](/data-preparation/overview/) your data.
+2. **Train.** Pick an algorithm from the [catalog](/catalog/), or [compare](/compare/) a few.
+3. **Validate.** Choose a [validation method](/validation/overview/) and the right [indicators](/validation/indicators/), then tune your settings.
+4. **Test.** Measure the final model once, on [data it has never seen](/testing/overview/).
+
+## How the Site Is Organized
+
+| Section | What you'll find |
+| --- | --- |
+| **Get started** | This guide, the catalog of every algorithm, and side-by-side comparison |
+| **Workflow** | Preparing data, validating models and testing them |
+| **Algorithms** | Full pages grouped by family, each with math, a sandbox and code |
+| **Foundations** | Ideas that many algorithms share, such as distance metrics |
+
+## How to Use a Sandbox
+
+All sandboxes share the same controls, so you only need to learn them once. [K-nearest neighbors](/algorithms/knn/#interactive-sandbox) is a good one to try.
+
+| Control | What it does |
+| --- | --- |
+| **Play, Pause, Step** | Run the algorithm continuously, or one step at a time |
+| **Back and Timeline** | Rewind to any earlier moment. Stepping from there starts a new branch |
+| **Reset** | Start the run again with the same data and settings |
+| **Speed** | Change how fast Play runs |
+| **Dataset and New data** | Switch the data shape, or draw a fresh sample of it |
+| **Settings** | Sliders and menus change the algorithm. Most restart the run |
+| **Plot tool** | Pick a class and click the plot to add samples, or choose Inspect to read a location |
+| **Hold out 25% for testing** | Keep some data away from the model. Hollow points show it, and Test accuracy scores it |
+| **Try this** | Load a guided setup, with a note on what to look for |
+| **Copy link** | Share your exact setup, including any samples you added |
+
+### Keyboard and Touch
+
+- **Keyboard:** focus the plot, move with the arrow keys, and hold Shift for bigger moves. Enter uses the plot tool, and Esc hides the cursor.
+- **Touch:** tap the plot to use the tool. The readout stays visible after you tap.
+
+## Reading an Algorithm Page
+
+Algorithm pages follow the same order, so you can jump to the part you need:
+
+1. **Intuition & Overview:** the idea in plain language.
+2. **Mathematical Foundation:** the formulas.
+3. **Step-by-Step Breakdown:** the algorithm as a recipe.
+4. **Interactive Sandbox:** the algorithm running.
+5. **Code:** the real source behind the sandbox, and the scikit-learn equivalent.
+6. **Strengths, Limitations & Real-world Trade-offs:** when to use it.
