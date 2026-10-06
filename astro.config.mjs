@@ -45,19 +45,33 @@ export default defineConfig({
 				'./src/styles/global.css',
 			],
 			sidebar: [
-				{ slug: 'start-here' },
-				{ label: 'Catalog', link: '/catalog/' },
-				{ label: 'Compare', link: '/compare/' },
-				{ label: 'Data Preparation', collapsed: true, items: [{ autogenerate: { directory: 'data-preparation' } }] },
-				{ label: 'Validation', collapsed: true, items: [{ autogenerate: { directory: 'validation' } }] },
-				{ label: 'Testing', collapsed: true, items: [{ autogenerate: { directory: 'testing' } }] },
-				.../** @type {const} */ (['Supervised Learning', 'Unsupervised Learning', 'Statistical Learning', 'Deep Learning', 'Reinforcement Learning']).map((family) => ({
-					label: family,
-					collapsed: true,
-					items: familySidebar(family),
-				})),
-				{ label: 'Concepts', collapsed: true, items: [{ autogenerate: { directory: 'concepts' } }] },
-				{ label: 'Distance Metrics', collapsed: true, items: [{ autogenerate: { directory: 'distance-metrics' } }] },
+				{
+					label: 'Get started',
+					items: [{ slug: 'start-here' }, { label: 'Catalog', link: '/catalog/' }, { label: 'Compare', link: '/compare/' }],
+				},
+				{
+					label: 'Workflow',
+					items: [
+						{ label: 'Data Preparation', collapsed: true, items: [{ autogenerate: { directory: 'data-preparation' } }] },
+						{ label: 'Validation', collapsed: true, items: [{ autogenerate: { directory: 'validation' } }] },
+						{ label: 'Testing', collapsed: true, items: [{ autogenerate: { directory: 'testing' } }] },
+					],
+				},
+				{
+					label: 'Algorithms',
+					items: /** @type {const} */ (['Supervised Learning', 'Unsupervised Learning', 'Statistical Learning', 'Deep Learning', 'Reinforcement Learning']).map((family) => ({
+						label: family,
+						collapsed: true,
+						items: familySidebar(family),
+					})),
+				},
+				{
+					label: 'Foundations',
+					items: [
+						{ label: 'Concepts', collapsed: true, items: [{ autogenerate: { directory: 'concepts' } }] },
+						{ label: 'Distance Metrics', collapsed: true, items: [{ autogenerate: { directory: 'distance-metrics' } }] },
+					],
+				},
 			],
 		}),
 		preact(),
