@@ -108,6 +108,9 @@ export const FEATURED = CATALOG.filter((e) => e.page);
 /** Several pages can embed one sandbox, so this counts distinct sandboxes. */
 export const SANDBOX_COUNT = new Set(FEATURED.map((e) => e.page!.id)).size;
 
+/** Algorithms with a full page. Guides set their own path, so they are not counted. */
+export const ALGORITHM_PAGE_COUNT = FEATURED.filter((e) => !e.page!.path).length;
+
 /** Content slug of an entry with a page. */
 export const pageSlug = (entry: CatalogEntry): string => entry.page!.path ?? `algorithms/${entry.page!.id}`;
 

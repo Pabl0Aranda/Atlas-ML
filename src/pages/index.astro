@@ -2,7 +2,7 @@
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import AlgorithmCard from '@/components/ui/AlgorithmCard.astro';
 import FamilyCard from '@/components/ui/FamilyCard.astro';
-import { ALGORITHM_COUNT, CATALOG, SANDBOX_COUNT } from '@/data/catalog';
+import { ALGORITHM_COUNT, ALGORITHM_PAGE_COUNT, CATALOG, SANDBOX_COUNT } from '@/data/catalog';
 import { generateDataset } from '@/lib/ml/datasets';
 import { loadSpec } from '@/lib/viz/registry';
 import { thumbnailScene } from '@/lib/viz/scene';
@@ -21,9 +21,16 @@ const workflow = [
 ];
 
 const stats = [
-	{ value: ALGORITHM_COUNT, label: 'algorithms indexed' },
 	{ value: SANDBOX_COUNT, label: 'interactive sandboxes' },
-	{ value: workflow.length, label: 'workflow stages covered' },
+	{ value: ALGORITHM_PAGE_COUNT, label: 'algorithms explained' },
+	{ value: ALGORITHM_COUNT, label: 'in the catalog' },
+];
+
+const tools = [
+	{ title: 'Compare algorithms', text: 'Run two side by side on identical data.', href: '/compare/' },
+	{ title: 'Performance indicators', text: 'What each metric means, and how to choose one.', href: '/validation/indicators/' },
+	{ title: 'Validation matrices', text: 'Read a confusion matrix and its relatives.', href: '/validation/validation-matrices/' },
+	{ title: 'Distance metrics', text: 'See how each way of measuring changes a model.', href: '/distance-metrics/overview/' },
 ];
 
 const families = [
@@ -47,8 +54,8 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 			tagline: 'Run algorithms step by step, follow the math, then read the exact code behind every animation.',
 			image: { html: `<div class="hero-plot">${heroSvg}</div>` },
 			actions: [
-				{ text: 'Browse the catalog', link: '/catalog/', icon: 'right-arrow' },
-				{ text: 'Start with your data', link: '/data-preparation/overview/', variant: 'minimal' },
+				{ text: 'Start here', link: '/start-here/', icon: 'right-arrow' },
+				{ text: 'Browse the catalog', link: '/catalog/', variant: 'minimal' },
 			],
 		},
 	}}
@@ -85,6 +92,20 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 			<div class="mt-6 grid gap-3 md:grid-cols-2">
 				{families.map((f) => <FamilyCard {...f} />)}
 			</div>
+		</section>
+
+		<section class="mt-14">
+			<h2 class="m-0 text-2xl font-semibold sm:text-3xl">Tools and references</h2>
+			<ul class="m-0 mt-6 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-4">
+				{tools.map((tool) => (
+					<li class="m-0">
+						<a href={tool.href} class="atlas-card h-full p-4">
+							<span class="font-display block text-lg font-semibold">{tool.title}</span>
+							<span class="mt-1 block text-sm leading-snug text-(--viz-muted-ink)">{tool.text}</span>
+						</a>
+					</li>
+				))}
+			</ul>
 		</section>
 
 		<section class="mt-14">
