@@ -5,6 +5,15 @@ import { CATALOG, pageSlug } from '@/data/catalog';
 const route = Astro.locals.starlightRoute;
 const id = route.id.replace(/\/$/, '');
 const entry = CATALOG.find((e) => e.page && pageSlug(e) === id);
+// Pages outside the catalog take their label from their section.
+const sections: Record<string, string> = {
+	'data-preparation': 'Data Preparation',
+	validation: 'Validation',
+	testing: 'Testing',
+	concepts: 'Concepts',
+	'distance-metrics': 'Distance Metrics',
+};
+const eyebrow = entry?.family ?? sections[id.split('/')[0]];
 const body = route.entry.body ?? '';
 // Guides have no algorithm to compare, and gridworld agents have no dataset to share.
 const comparable = entry && !entry.page?.path && entry.family !== 'Reinforcement Learning';
@@ -15,7 +24,7 @@ const jumps = [
 ].filter((jump) => !!jump);
 ---
 
-{entry && <p class="page-eyebrow">{entry.family}</p>}
+{eyebrow && <p class="page-eyebrow">{eyebrow}</p>}
 <Default />
 {
 	jumps.length > 0 && (
