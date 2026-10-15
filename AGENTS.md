@@ -33,11 +33,13 @@ This project is an **Astro-based web application** designed to provide interacti
 │   │   ├── interactive/   # Visualizers (canvas, SVG controls, data point charts)
 │   │   └── ui/            # Common UI elements (buttons, sidebars, sliders)
 │   ├── content/
-│   │   └── docs/          # MDX documentation entries for algorithms
-│   ├── layouts/           # Main site, docs, and full-screen visualization layouts
+│   │   └── docs/          # MDX pages: algorithms, workflow stages, concepts, distance metrics
+│   ├── data/              # catalog.ts: every algorithm, also drives the sidebar and counts
 │   ├── lib/
-│   │   └── ml/            # Pure TypeScript implementations of ML algorithms & linear algebra helpers
-│   ├── pages/             # File-based routes for pages and interactive demos
+│   │   ├── ml/            # Pure TypeScript implementations of ML algorithms & linear algebra helpers
+│   │   └── viz/           # Sandbox logic: specs, presets, share links, timeline, drawing
+│   ├── pages/             # Pages built in code: home, catalog, compare
+│   ├── styles/            # Design tokens and shared styles
 │   └── types/             # Shared TypeScript interfaces (DataPoint, ModelMetrics, Hyperparameters)
 └── public/                # Static assets and pre-computed datasets
 
@@ -72,6 +74,8 @@ Every visualization interface must support standard state controls:
 * Dataset selectors (Linear, Moons, Circles, Noise/Outliers generation).
 * Hyperparameter controls (Learning rate $\alpha$, Epochs/Iterations, $k$ value, regularizers).
 * Execution triggers (Step Forward, Play/Pause, Reset).
+* Rewind, with Back and a timeline. Spec states must be immutable, or provide `snapshot`.
+* Shareable links that rebuild the exact setup.
 
 ### 3. Documentation System (`src/content/docs/`)
 
@@ -85,6 +89,15 @@ Every visualization interface must support standard state controls:
 5. **Strengths, Limitations & Real-world Trade-offs**
 
 
+
+---
+
+## Project Decisions
+
+* **No backend or database.** The site stays static. Keep state in `localStorage` and share links.
+* **Stable URLs.** Pages are public and share links depend on them, so don't move pages.
+* **Honest numbers.** Run a preset or example before writing its figures into a note or page.
+* **Commit by feature.** Make one commit per functionality or bug fix.
 
 ---
 
