@@ -2,7 +2,7 @@
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import AlgorithmCard from '@/components/ui/AlgorithmCard.astro';
 import FamilyCard from '@/components/ui/FamilyCard.astro';
-import { ALGORITHM_COUNT, ALGORITHM_PAGE_COUNT, CATALOG, SANDBOX_COUNT } from '@/data/catalog';
+import { ALGORITHM_PAGE_COUNT, CATALOG, SANDBOX_COUNT } from '@/data/catalog';
 import { generateDataset } from '@/lib/ml/datasets';
 import { loadSpec } from '@/lib/viz/registry';
 import { thumbnailScene } from '@/lib/viz/scene';
@@ -23,7 +23,7 @@ const workflow = [
 const stats = [
 	{ value: SANDBOX_COUNT, label: 'interactive sandboxes' },
 	{ value: ALGORITHM_PAGE_COUNT, label: 'algorithms explained' },
-	{ value: ALGORITHM_COUNT, label: 'in the catalog' },
+	{ value: CATALOG.length, label: 'catalog entries' },
 ];
 
 const tools = [

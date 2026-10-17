@@ -99,10 +99,6 @@ export const CATALOG: CatalogEntry[] = [
 	{ name: 'Restricted Boltzmann Machines', family: 'Deep Learning', aliases: 'RBM energy-based', summary: 'Two-layer energy-based models of a data distribution.', wiki: 'Restricted_Boltzmann_machine' },
 ];
 
-const GUIDE_FAMILIES: Family[] = ['Data Preparation', 'Validation', 'Testing'];
-
-export const ALGORITHM_COUNT = CATALOG.filter((e) => !GUIDE_FAMILIES.includes(e.family)).length;
-
 export const FEATURED = CATALOG.filter((e) => e.page);
 
 /** Several pages can embed one sandbox, so this counts distinct sandboxes. */
