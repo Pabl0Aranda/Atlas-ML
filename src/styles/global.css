@@ -175,6 +175,13 @@ a.atlas-card.grid {
 	color: var(--on-accent);
 }
 
+/* Pages without a sidebar have no menu button, and the header hides its links at this width. */
+@media (min-width: 50rem) {
+	.phone-nav {
+		display: none;
+	}
+}
+
 .source-details {
 	border: 1px solid var(--viz-border);
 	border-radius: 0.625rem;
