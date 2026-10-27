@@ -33,7 +33,7 @@ A validation method tells you how to split the data. You also need a way to judg
 - **Keep preparation inside the loop.** Refit imputers and scalers on each training fold, using a [pipeline](/data-preparation/overview/#a-safe-default-workflow).
 - **Start with a baseline.** Compare against a trivial model, such as always predicting the majority class or the mean.
 - **Report the spread.** A mean of 90% with a fold deviation of 8% tells a different story from one of 1%.
-- **Watch for overfitting.** A large gap between training and validation scores signals [high variance](/concepts/bias-variance/).
+- **Watch for [overfitting](/concepts/overfitting-underfitting/).** A large gap between training and validation scores signals [high variance](/concepts/bias-variance/).
 - **Fix your seeds and folds**, so that candidates are compared on identical splits.
 
 ## Learning Curves

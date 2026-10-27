@@ -1,0 +1,150 @@
+---
+title: Overfitting and Underfitting
+description: Why a model can look perfect in training and still fail, how to spot both problems, and how to fix them.
+sidebar:
+  order: 1
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import FitExplorer from '@/components/interactive/FitExplorer';
+import Sandbox from '@/components/interactive/Sandbox';
+
+The goal of machine learning isn't to do well on the data you already have. It's to do well on data you haven't seen yet, which is called **generalization**. Overfitting and underfitting are the two main ways a model fails at that.
+
+Think of a student preparing for an exam:
+
+- **Underfitting** is the student who barely studied. They do badly on the practice questions and on the exam.
+- **Overfitting** is the student who memorized the practice answers word for word. They ace the practice questions, then fail when the exam asks something new.
+- **A good fit** is the student who learned the ideas. They do well on both.
+
+## The Two Problems
+
+| | Underfitting | Good fit | Overfitting |
+| --- | --- | --- | --- |
+| **What happens** | The model is too simple to capture the pattern | The model captures the pattern and ignores the noise | The model also learns the noise |
+| **Training score** | Low | High | Very high |
+| **Validation score** | Low | High | Much lower than training |
+| **Gap between them** | Small | Small | Large |
+| **Also known as** | [High bias](/concepts/bias-variance/) | Balanced | [High variance](/concepts/bias-variance/) |
+
+Every dataset has two parts: the real **pattern**, and random **noise** that won't repeat in new data. A model can't tell them apart on its own. Too little flexibility misses the pattern, and too much flexibility memorizes the noise too.
+
+## See It Happen
+
+This is [K-nearest neighbors](/algorithms/knn/) on noisy data, with a quarter of the samples held out. Small $k$ makes the model very flexible, because each prediction depends on only a few samples. Large $k$ makes it rigid, because each prediction averages over almost everything. Move the slider from left to right.
+
+<FitExplorer client:visible />
+
+Averaged over 20 random samples, the three regimes look like this:
+
+| $k$ | Training accuracy | Test accuracy | Gap | Diagnosis |
+| --- | --- | --- | --- | --- |
+| 1 | 100.0% | 81.9% | 18.1 points | Overfitting |
+| 25 | 90.3% | 88.2% | 2.1 points | Good fit |
+| 85 | 71.4% | 68.6% | 2.7 points | Underfitting |
+
+Notice that the model with the best training score has the worst gap. At $k = 1$, every sample is its own nearest neighbor, so a training score of 100% is guaranteed. It says nothing about how good the model is.
+
+As the model gets more rigid, the training score falls, while the test score rises and later falls. **The best model sits near that peak, not where the training score is highest.**
+
+Here the peak is wide: test accuracy stays near 88% from $k = 15$ to $k = 75$, so many settings work about equally well. It only collapses at the far end, when $k$ gets close to the 90 training samples and every prediction turns into a vote of almost the whole dataset. Real problems often have a wide good region like this, so there's no need to hunt for one perfect value.
+
+Overfitting also depends on the data. On the clean moons dataset, $k = 1$ reaches 100% on test data too, because there's almost no noise to memorize.
+
+## How to Diagnose It
+
+Compare training and validation scores, always on data the model didn't train on:
+
+1. **Is the training score poor?** The model is underfitting, so it can't even explain the data it has seen.
+2. **Is the training score good, but validation much worse?** The model is overfitting.
+3. **Are both good and close together?** The fit is healthy, so confirm it once on a [test set](/testing/overview/).
+
+What counts as "much worse" depends on the problem. Compare the gap with the spread across [cross-validation](/validation/cross-validation/) folds, since small samples produce noisy scores. The explorer above calls a gap above 8 points overfitting, and a test score 5 points below the best underfitting. Those are rules of thumb for this example, not universal limits.
+
+[Learning curves](/validation/overview/#learning-curves) help too, because they show what more data would do:
+
+- **Underfitting:** both curves level off low and close together, so more data won't help.
+- **Overfitting:** a gap remains, and it narrows as data grows, so more data should help.
+
+## How to Fix It
+
+The two problems need opposite treatments, so diagnose first.
+
+| To fix underfitting | To fix overfitting |
+| --- | --- |
+| Use a more flexible model | Use a simpler model |
+| Add better features | Remove noisy or irrelevant features |
+| Reduce regularization | Add [regularization](/algorithms/ridge-regression/) |
+| Train for longer | Stop early, when validation stops improving |
+| | Collect more training data |
+| | Combine models, as in a [random forest](/algorithms/random-forest/) |
+| | Use data augmentation or dropout in neural networks |
+
+More data helps with overfitting, but it can't fix underfitting. A straight line stays a straight line however many samples you give it.
+
+## The Control That Sets the Balance
+
+Most algorithms have a setting that moves them between the two extremes:
+
+| Algorithm | More flexible, risks overfitting | More rigid, risks underfitting |
+| --- | --- | --- |
+| [KNN](/algorithms/knn/) | Small $k$ | Large $k$ |
+| [Polynomial regression](/algorithms/polynomial-regression/) | High degree | Low degree |
+| [Decision tree](/algorithms/decision-tree/) | Deep tree | Shallow tree |
+| [SVM](/algorithms/svm/) | Large $C$, large $\gamma$ | Small $C$, small $\gamma$ |
+| [Ridge](/algorithms/ridge-regression/) and [Lasso](/algorithms/lasso-regression/) | Small penalty $\lambda$ | Large penalty $\lambda$ |
+| [Neural network](/algorithms/mlp/) | More layers and units | Fewer layers and units |
+
+Choosing this setting is what [hyperparameter tuning](/validation/hyperparameter-tuning/) is for. Always choose it from validation scores, because the training score will always favor the most flexible option.
+
+## Interactive Sandbox
+
+Regression makes the shape of the problem easy to see. Use the **Try this** buttons below, and press **Play** after each one:
+
+- **Underfit:** a degree 1 line can't follow the curve, whatever you do.
+- **High degree:** degree 12 has enough freedom to chase individual samples. Its training loss ends at about a tenth of the line's.
+- **Heavy regularizer:** the same degree 12 model, with a penalty that keeps its weights small and flattens the curve.
+
+The lower training loss doesn't make the high-degree model better, since this sandbox only measures the data the model has seen.
+
+<Sandbox client:visible algorithm="polynomial-regression" />
+
+Classifier sandboxes can measure both sides. Tick **Hold out 25% for testing**, or try these presets:
+
+| Sandbox | Preset | Training | Held out |
+| --- | --- | --- | --- |
+| [Decision tree](/algorithms/decision-tree/#interactive-sandbox) | Overfit on noise | 100.0% | 90.0% |
+| [SVM](/algorithms/svm/#interactive-sandbox) | Overfit RBF | About 98% | About 87% |
+| [AdaBoost](/algorithms/adaboost/#interactive-sandbox) | Memorizing XOR | About 77% | About 50% |
+
+## Common Misunderstandings
+
+- **"100% training accuracy means a great model."** It often means the opposite, so never judge a model by its training score.
+- **"Overfitting only affects complex models."** A simple model can overfit too when there are very few samples.
+- **"More data always helps."** It helps with overfitting, but it does little for an underfitting model.
+- **"A little gap means something is wrong."** A small gap is normal, since a model will nearly always do slightly better on data it has seen.
+- **"Overfitting only happens during training."** You can also overfit to a validation set by trying many models against it. That's why the final [test set](/testing/overview/) is used only once.
+- **"A suspiciously good score is good news."** A validation score that seems too good often comes from [data leakage](/data-preparation/overview/#data-leakage), not from a great model.
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="fitCurve.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from sklearn.model_selection import learning_curve, validation_curve
+from sklearn.neighbors import KNeighborsClassifier
+
+ks = [1, 5, 25, 85]
+train_scores, val_scores = validation_curve(
+    KNeighborsClassifier(), X, y, param_name="n_neighbors", param_range=ks, cv=5,
+)
+print(train_scores.mean(axis=1), val_scores.mean(axis=1))
+
+sizes, train_scores, val_scores = learning_curve(KNeighborsClassifier(n_neighbors=25), X, y, cv=5)
+```
+</TabItem>
+</Tabs>
