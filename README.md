@@ -30,7 +30,7 @@ New visitors should begin at the Start Here page, which also explains every sand
 
 ## Getting started
 
-You need Node.js 22.23 or later.
+You need Node.js 22.23.4 or later.
 
 ```bash
 npm install
