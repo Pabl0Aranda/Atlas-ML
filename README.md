@@ -45,7 +45,9 @@ npm run dev
 | `npm run build` | Build the site and search index into `dist/` |
 | `npm run preview` | Serve the build. Search only works after a build |
 
-CI runs the tests, type check and build on every push.
+## Branches
+
+`main` is the only long-lived branch and always stays working. New work happens on short-lived branches named `feature/`, `fix/`, `docs/` or `chore/`, which are merged into `main` and then deleted. CI runs on `main` and on pull requests.
 
 ## Project structure
 

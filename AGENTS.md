@@ -10,7 +10,7 @@ These are the owner's decisions. Don't work around them, and ask before changing
 - **The readable engine is the product.** Algorithms run in the browser, in the same TypeScript the pages display. Don't add Python, server-side training or heavy ML libraries.
 - **Stable URLs.** Pages are public and share links depend on them, so don't move or rename pages.
 - **Honest numbers.** Never write a figure on a page or in a preset note without measuring it first. See [Measuring Claims](#measuring-claims).
-- **Commit by feature.** Make one commit per functionality or bug fix, as each one lands. Don't push unless asked.
+- **Commit by feature.** Make one commit per functionality or bug fix, as each one lands. See [Git Workflow](#git-workflow).
 
 ## Commands
 
@@ -22,6 +22,25 @@ npm run dev       # Dev server at localhost:4321
 ```
 
 Run all three of `npm test`, `npm run check` and `npm run build` before calling work finished. Changes to sandboxes or pages also need checking in a browser, because tests can't see layout.
+
+## Git Workflow
+
+`main` is the only long-lived branch, and it must always pass the tests, type check and build.
+
+1. Branch from `main`, using a short name with a prefix:
+
+   | Prefix | Use it for | Example |
+   | --- | --- | --- |
+   | `feature/` | New functionality | `feature/learning-paths` |
+   | `fix/` | Bug fixes | `fix/compare-phone-nav` |
+   | `docs/` | Pages and documentation | `docs/cnn-page` |
+   | `chore/` | Tooling and maintenance | `chore/update-astro` |
+
+2. Make one commit per functionality or bug fix, with an imperative subject.
+3. Run the checks, then merge into `main` with a fast-forward, rebasing first if `main` has moved.
+4. Delete the branch once it's merged.
+
+Don't push, and don't rewrite the history of `main`, unless asked.
 
 ## Architecture
 
