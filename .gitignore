@@ -1,23 +1,45 @@
-# build output
-dist/
-# generated types
-.astro/
-.vscode/
-
-# dependencies
+# Dependencies
 node_modules/
 
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+# Build output
+dist/
 
+# Generated files
+.astro/
+*.tsbuildinfo
 
-# environment variables
+# Test coverage
+coverage/
+
+# Logs
+*.log
+logs/
+
+# Environment variables, which can hold secrets
 .env
-.env.production
+.env.*
+!.env.example
 
-# macOS-specific files
+# Deployment tools
+.netlify/
+.vercel/
+.wrangler/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# AI tools
+.claude/
+.superpowers/
+
+# Operating systems
 .DS_Store
+Thumbs.db
+Desktop.ini
 
+# Temporary files
+*.tmp
+.cache/
