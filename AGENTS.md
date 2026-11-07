@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Guidance for AI agents working on Atlas ML, an interactive machine learning guide. The README covers setup and the project overview. This file covers how to change the project safely.
+Guidance for AI agents working on Atlas ML, an interactive machine learning guide. The README introduces the project, and CONTRIBUTING.md covers the structure and workflow for contributors. This file covers how to change the project safely.
 
 ## Project Rules
 
