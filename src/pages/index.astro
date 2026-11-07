@@ -3,16 +3,7 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import AlgorithmCard from '@/components/ui/AlgorithmCard.astro';
 import FamilyCard from '@/components/ui/FamilyCard.astro';
 import { ALGORITHM_PAGE_COUNT, CATALOG, SANDBOX_COUNT } from '@/data/catalog';
-import { generateDataset } from '@/lib/ml/datasets';
 import { withBase } from '@/lib/url';
-import { loadSpec } from '@/lib/viz/registry';
-import { thumbnailScene } from '@/lib/viz/scene';
-import { sceneToSvg } from '@/lib/viz/svg';
-
-const heroSpec = await loadSpec('svm');
-const heroData = generateDataset('moons');
-const heroParams = { ...heroSpec, params: heroSpec.params.map((p) => (p.key === 'kernel' ? { ...p, value: 1 } : p)) };
-const heroSvg = sceneToSvg(thumbnailScene(heroParams, heroData), 'Support vector machine separating two moons');
 
 const workflow = [
 	{ title: 'Prepare', text: 'Clean the data, separate it, and process it into numbers.', href: '/data-preparation/overview/' },
@@ -53,7 +44,6 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 		hero: {
 			title: 'See how machine learning actually works',
 			tagline: 'Run algorithms step by step, follow the math, then read the exact code behind every animation.',
-			image: { html: `<div class="hero-plot">${heroSvg}</div>` },
 			actions: [
 				{ text: 'Start here', link: withBase('/start-here/'), icon: 'right-arrow' },
 				{ text: 'Browse the catalog', link: withBase('/catalog/'), variant: 'minimal' },
@@ -120,3 +110,7 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 		</section>
 	</div>
 </StarlightPage>
+
+<script>
+	import '@/lib/viz/heroCanvas';
+</script>
