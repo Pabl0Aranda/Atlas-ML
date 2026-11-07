@@ -1,6 +1,6 @@
 # Contributing to Atlas ML
 
-Thanks for your interest in improving Atlas ML. You can help by [reporting a bug, suggesting a feature or proposing an algorithm](https://github.com/Pabl0Aranda/Atlas-ML/issues/new/choose), or by opening a pull request.
+Thanks for your interest in improving Atlas ML. You can help by [reporting a bug, suggesting a feature or proposing an algorithm](https://github.com/Pabl0Aranda/Atlas-ML/issues/new/choose), or by opening a pull request. Please follow the [Code of Conduct](CODE_OF_CONDUCT.md), and report security problems as described in the [Security Policy](SECURITY.md).
 
 ## Project rules
 
