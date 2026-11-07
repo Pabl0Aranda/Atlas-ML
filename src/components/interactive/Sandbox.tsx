@@ -3,6 +3,7 @@ import { DATASET_LABELS } from '@/lib/ml/datasets';
 import { moveProbe, probeStep, toolOptions, type PlotTool, type Point2D } from '@/lib/viz/interaction';
 import { loadSpec } from '@/lib/viz/registry';
 import { PRESETS, type Preset } from '@/lib/viz/presets';
+import { sandboxHeading, type SandboxHeading } from '@/lib/viz/sandboxHeader';
 import { composeData, decodeSetup, defaultSetup, encodeSetup, heldOutMetrics, withHeldOut, type SandboxSetup } from '@/lib/viz/sandboxSetup';
 import { createTimeline, currentFrame, pushFrame, seekFrame, type Timeline } from '@/lib/viz/timeline';
 import type { DatasetKind } from '@/types/ml';
@@ -12,7 +13,7 @@ import DiagramView from './DiagramView';
 import HistoryChart from './HistoryChart';
 import PlotCanvas from './PlotCanvas';
 
-function Runner({ spec, presets }: { spec: AlgorithmSpec; presets: Preset[] }) {
+function Runner({ spec, presets, heading }: { spec: AlgorithmSpec; presets: Preset[]; heading: SandboxHeading }) {
 	const [setup, setSetup] = useState<SandboxSetup>(() => decodeSetup(window.location.search, spec));
 	const { train: data, test } = useMemo(() => composeData(setup), [setup.dataset, setup.seed, setup.holdout, setup.added]);
 	const { params } = setup;
@@ -127,7 +128,29 @@ function Runner({ spec, presets }: { spec: AlgorithmSpec; presets: Preset[] }) {
 	if (!playing) spokenCaption.current = caption;
 
 	return (
-		<section class="not-content my-8 rounded-2xl border border-(--viz-border) bg-(--viz-panel) p-3 text-(--viz-ink) shadow-sm sm:p-5" aria-label="Interactive sandbox">
+		<section
+			class="sandbox not-content my-8 overflow-hidden rounded-2xl border border-(--viz-border) bg-(--viz-panel) text-(--viz-ink) shadow-sm"
+			style={heading.stage ? `--stage: var(--pipeline-${heading.stage})` : undefined}
+			aria-label={`Interactive sandbox: ${heading.name}`}
+		>
+			<header class="sandbox-header">
+				<p class="sandbox-title">
+					<span class="sandbox-dot" aria-hidden="true" />
+					<span class="sandbox-kicker">Sandbox</span>
+					<span class="sandbox-name">{heading.name}</span>
+				</p>
+				<div class="sandbox-actions">
+					<button type="button" class={done ? primaryButtonClass : buttonClass} onClick={() => restart(setup, activePreset)}>
+						<span aria-hidden="true">↺</span> Reset state
+					</button>
+					{spec.datasets.length > 0 && (
+						<button type="button" class={buttonClass} onClick={() => restart({ ...setup, seed: setup.seed + 1, added: [] })}>
+							<span aria-hidden="true">⚄</span> New random data
+						</button>
+					)}
+				</div>
+			</header>
+			<div class="p-3 sm:p-5">
 			<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_14rem]">
 				<div>
 					<div class="relative">
@@ -232,7 +255,6 @@ function Runner({ spec, presets }: { spec: AlgorithmSpec; presets: Preset[] }) {
 						<button type="button" class={buttonClass} disabled={timeline.index === 0} onClick={() => seek(timeline.index - 1)}>
 							Back
 						</button>
-						<button type="button" class={done ? primaryButtonClass : buttonClass} onClick={() => restart(setup, activePreset)}>Reset</button>
 						<button
 							type="button"
 							class={buttonClass}
@@ -240,13 +262,6 @@ function Runner({ spec, presets }: { spec: AlgorithmSpec; presets: Preset[] }) {
 						>
 							Speed {speed}×
 						</button>
-						{spec.datasets.length > 0 && <button
-							type="button"
-							class={buttonClass}
-							onClick={() => restart({ ...setup, seed: setup.seed + 1, added: [] })}
-						>
-							New data
-						</button>}
 						<CopyLinkButton
 							label="Copy link to this setup"
 							class="col-span-2"
@@ -298,6 +313,7 @@ function Runner({ spec, presets }: { spec: AlgorithmSpec; presets: Preset[] }) {
 					{series && <HistoryChart series={series} />}
 				</div>
 			)}
+			</div>
 		</section>
 	);
 }
@@ -310,5 +326,5 @@ export default function Sandbox({ algorithm }: { algorithm: AlgorithmId }) {
 	if (!spec) {
 		return <div class="not-content my-8 h-[36rem] animate-pulse rounded-2xl border border-(--viz-border) bg-(--viz-panel)" aria-label="Loading sandbox" />;
 	}
-	return <Runner spec={spec} presets={PRESETS[algorithm] ?? []} />;
+	return <Runner spec={spec} presets={PRESETS[algorithm] ?? []} heading={sandboxHeading(algorithm, location.pathname, import.meta.env.BASE_URL)} />;
 }
