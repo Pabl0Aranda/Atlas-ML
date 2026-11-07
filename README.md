@@ -12,7 +12,7 @@
 <!-- To add the sandbox GIF, save it as docs/images/sandbox.gif and replace the image below with:
 ![A sandbox running step by step](docs/images/sandbox.gif)
 -->
-![The Atlas ML home page, with a support vector machine separating two moons](docs/images/home.jpg)
+![The Atlas ML home page, with k-means clustering running live beside the title](docs/images/home.jpg)
 
 Find an algorithm, watch it run, read the math, and inspect the exact code behind every animation. Everything runs in your browser, on the same TypeScript the pages display, so there's nothing to install and no account to create.
 
