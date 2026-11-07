@@ -8,7 +8,7 @@ const LINK_NOTICE_MS = 2500;
 export const buttonClass =
 	'cursor-pointer rounded-md border border-(--viz-border) bg-(--viz-surface) px-3 py-1.5 text-sm font-medium text-(--viz-ink) transition-colors hover:border-(--viz-ink) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--sl-color-accent) disabled:cursor-not-allowed disabled:opacity-45';
 export const primaryButtonClass =
-	'cursor-pointer rounded-md border border-(--sl-color-accent) bg-(--sl-color-accent) px-3 py-1.5 text-sm font-semibold text-(--on-accent) transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--sl-color-accent) disabled:cursor-not-allowed disabled:opacity-45';
+	'cursor-pointer rounded-md border border-(--accent-fill) bg-(--accent-fill) px-3 py-1.5 text-sm font-semibold text-(--on-accent) transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--sl-color-accent) disabled:cursor-not-allowed disabled:opacity-45';
 export const selectClass = 'rounded-md border border-(--viz-border) bg-(--viz-surface) px-2 py-1.5 text-sm text-(--viz-ink)';
 export const fieldLabelClass = 'text-xs font-medium text-(--viz-muted-ink)';
 

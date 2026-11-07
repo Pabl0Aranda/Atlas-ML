@@ -197,7 +197,7 @@ function Runner({ spec, presets }: { spec: AlgorithmSpec; presets: Preset[] }) {
 							<legend class={`mb-1 p-0 ${fieldLabelClass}`}>Plot tool</legend>
 							<div class="flex flex-wrap gap-1.5">
 								{toolOptions(legend, spec.labeled).map((option) => (
-									<label class="flex min-h-9 cursor-pointer items-center rounded-md border border-(--viz-border) bg-(--viz-surface) px-2.5 text-sm font-medium text-(--viz-ink) transition-colors hover:border-(--viz-ink) has-checked:border-(--sl-color-accent) has-checked:bg-(--sl-color-accent) has-checked:text-(--on-accent) has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-(--sl-color-accent)">
+									<label class="flex min-h-9 cursor-pointer items-center rounded-md border border-(--viz-border) bg-(--viz-surface) px-2.5 text-sm font-medium text-(--viz-ink) transition-colors hover:border-(--viz-ink) has-checked:border-(--accent-fill) has-checked:bg-(--accent-fill) has-checked:text-(--on-accent) has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-(--sl-color-accent)">
 										<input
 											type="radio"
 											class="sr-only"

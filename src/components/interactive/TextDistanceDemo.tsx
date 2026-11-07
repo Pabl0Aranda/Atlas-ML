@@ -46,7 +46,7 @@ export function EditDistanceDemo() {
 							<tr>
 								<th class={cellClass} scope="row">{i === 0 ? <span class="sr-only">Empty</span> : first[i - 1]}</th>
 								{row.map((value, j) => (
-									<td class={`${cellClass} ${i === lastRow && j === lastColumn ? 'bg-(--sl-color-accent) font-semibold text-(--on-accent)' : ''}`}>{value}</td>
+									<td class={`${cellClass} ${i === lastRow && j === lastColumn ? 'bg-(--accent-fill) font-semibold text-(--on-accent)' : ''}`}>{value}</td>
 								))}
 							</tr>
 						))}
