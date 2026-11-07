@@ -263,6 +263,93 @@ a.atlas-card.grid {
 	color: var(--sl-color-text-accent);
 }
 
+/* Which of the four workflow stages a page belongs to, above its title. */
+.pipeline-trail ol {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.25rem 0;
+	margin: 0 0 1rem;
+	padding: 0;
+	list-style: none;
+	font-size: 0.8125rem;
+}
+
+.pipeline-trail li {
+	display: flex;
+	align-items: center;
+	margin: 0;
+}
+
+.pipeline-trail li + li::before {
+	content: '';
+	width: 1rem;
+	height: 2px;
+	margin-inline: 0.25rem;
+	border-radius: 1px;
+	background: var(--viz-border);
+}
+
+.pipeline-trail li.is-done + li::before,
+.pipeline-trail li:has(+ li [aria-current]) + li::before {
+	background: var(--viz-muted);
+}
+
+.pipeline-trail a {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.2rem 0.65rem;
+	border: 1px solid transparent;
+	border-radius: 999px;
+	color: var(--viz-muted-ink);
+	text-decoration: none;
+}
+
+.pipeline-trail a:hover {
+	color: var(--sl-color-white);
+}
+
+.pipeline-dot {
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background: var(--stage);
+	opacity: 0.45;
+}
+
+.pipeline-trail .is-done .pipeline-dot {
+	opacity: 0.8;
+}
+
+.pipeline-trail a[aria-current] {
+	border-color: var(--stage);
+	background: color-mix(in srgb, var(--stage) 16%, transparent);
+	color: var(--sl-color-white);
+	font-weight: 600;
+}
+
+.pipeline-trail a[aria-current] .pipeline-dot {
+	opacity: 1;
+}
+
+/* Phones fit all four stages on one line. */
+@media (max-width: 30rem) {
+	.pipeline-trail ol {
+		font-size: 0.75rem;
+	}
+
+	.pipeline-trail li + li::before {
+		width: 0.5rem;
+		margin-inline: 0.125rem;
+	}
+
+	.pipeline-trail a {
+		gap: 0.3rem;
+		padding-inline: 0.45rem;
+	}
+}
+
 .page-eyebrow {
 	margin: 0 0 0.35rem;
 	color: var(--sl-color-text-accent);
@@ -382,6 +469,11 @@ a.atlas-card.grid {
 
 	.page-eyebrow {
 		view-transition-name: page-eyebrow;
+	}
+
+	/* The trail stays put between pages, so only the highlighted stage changes. */
+	.pipeline-trail {
+		view-transition-name: pipeline-trail;
 	}
 
 	:root[data-card-morph] h1#_top,
