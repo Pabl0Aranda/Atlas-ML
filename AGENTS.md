@@ -66,7 +66,7 @@ Other parts to know:
 | `src/lib/viz/presets.ts` | Guided sandbox setups and compare pairings |
 | `src/components/interactive/controls.tsx`, `PlotCanvas.tsx` | Shared controls and plot. Reuse these in new islands |
 | `src/components/docs/AlgorithmSource.astro` | Shows a real file from `src/lib/ml/` on a page |
-| `src/styles/global.css` | Design tokens. Plot colors are the `--viz-*` variables |
+| `src/styles/global.css` | Design tokens: the slate and indigo palette, `--pipeline-*` stage colors, and `--viz-*` plot colors |
 
 ## Rules That Tests Enforce
 
@@ -74,7 +74,7 @@ Other parts to know:
 - **Every spec must finish.** It stays finite and terminates at its default settings.
 - **`live` parameters can't affect the run.** Only mark a parameter `live` if `init` and `step` ignore it.
 - **`holdout` needs a real classifier.** Only set it when `scene.region` returns class labels.
-- **Colors must pass contrast.** Graphics need 3:1 and text needs 4.5:1. Text on the accent uses `--on-accent`.
+- **Colors must pass contrast.** Graphics need 3:1 and text needs 4.5:1. White text goes on `--accent-fill`, not `--sl-color-accent`, because indigo-500 is too light for it.
 - **Internal links and anchors must exist.**
 
 ## Common Tasks

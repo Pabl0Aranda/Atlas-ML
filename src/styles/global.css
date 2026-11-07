@@ -8,23 +8,47 @@
 	--font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
 	--font-display: 'Space Grotesk Variable', 'Inter Variable', sans-serif;
-	--color-accent-200: #b9d3f5;
-	--color-accent-600: #2571cc;
-	--color-accent-900: #123a6b;
-	--color-accent-950: #0c2747;
+	/* Tailwind's indigo. Starlight builds its accent shades from these. */
+	--color-accent-200: #c7d2fe;
+	--color-accent-600: #4f46e5;
+	--color-accent-900: #312e81;
+	--color-accent-950: #1e1b4b;
 }
 
-/* Starlight's default theme is dark; light mode is the [data-theme] override.
-   Series values are the validated data-viz palette for each surface. */
+/* The brand palette: Tailwind's slate for surfaces and text, and indigo for the
+   accent. Starlight's default theme is dark; light mode is the [data-theme]
+   override. Series values are the validated data-viz palette for each surface. */
 :root {
+	--sl-color-white: #f8fafc;
+	--sl-color-gray-1: #e2e8f0;
+	--sl-color-gray-2: #cbd5e1;
+	--sl-color-gray-3: #94a3b8;
+	--sl-color-gray-4: #64748b;
+	--sl-color-gray-5: #334155;
+	--sl-color-gray-6: #1e293b;
+	--sl-color-black: #0f172a;
+	--sl-color-text: #f8fafc;
+	--sl-color-hairline: #334155;
+	--sl-color-accent: #6366f1;
+	--sl-color-accent-high: #818cf8;
+
+	/* White text needs a deeper fill than indigo-500 to stay readable. */
+	--accent-fill: #4f46e5;
 	--on-accent: #ffffff;
-	--viz-surface: #1a1a19;
-	--viz-panel: #20201f;
-	--viz-border: #3a3a37;
-	--viz-grid: #2e2e2b;
-	--viz-ink: #f0efec;
-	--viz-muted: #6f6e68;
-	--viz-muted-ink: #c3c2b7;
+
+	/* The four workflow stages, for badges and stage markers. */
+	--pipeline-prepare: #f59e0b;
+	--pipeline-train: #3b82f6;
+	--pipeline-validate: #a855f7;
+	--pipeline-test: #10b981;
+
+	--viz-surface: #0f172a;
+	--viz-panel: #1e293b;
+	--viz-border: #334155;
+	--viz-grid: #1e293b;
+	--viz-ink: #f8fafc;
+	--viz-muted: #64748b;
+	--viz-muted-ink: #94a3b8;
 	--viz-series-1: #3987e5;
 	--viz-series-2: #d95926;
 	--viz-series-3: #199e70;
@@ -32,17 +56,60 @@
 }
 
 :root[data-theme='light'] {
-	--viz-surface: #fcfcfb;
-	--viz-panel: #f4f3f0;
-	--viz-border: #d9d8d2;
-	--viz-grid: #e9e8e3;
-	--viz-ink: #0b0b0b;
-	--viz-muted: #8a8982;
-	--viz-muted-ink: #52514e;
+	--sl-color-white: #0f172a;
+	--sl-color-gray-1: #1e293b;
+	--sl-color-gray-2: #334155;
+	--sl-color-gray-3: #475569;
+	--sl-color-gray-4: #94a3b8;
+	--sl-color-gray-5: #cbd5e1;
+	--sl-color-gray-6: #f1f5f9;
+	--sl-color-gray-7: #f8fafc;
+	--sl-color-black: #ffffff;
+	--sl-color-text: #1e293b;
+	--sl-color-hairline: #cbd5e1;
+	--sl-color-accent: #4f46e5;
+	--sl-color-accent-high: #3730a3;
+
+	/* Darker shades, so the stage colors still stand out on a light page. */
+	--pipeline-prepare: #b45309;
+	--pipeline-train: #2563eb;
+	--pipeline-validate: #9333ea;
+	--pipeline-test: #047857;
+
+	--viz-surface: #f8fafc;
+	--viz-panel: #f1f5f9;
+	--viz-border: #cbd5e1;
+	--viz-grid: #e2e8f0;
+	--viz-ink: #0f172a;
+	--viz-muted: #64748b;
+	--viz-muted-ink: #475569;
 	--viz-series-1: #2a78d6;
 	--viz-series-2: #d95926;
 	--viz-series-3: #1a8a62;
 	--viz-series-4: #b27500;
+}
+
+/* Links brighten on hover, to the lighter indigo in the dark theme. */
+.sl-markdown-content a:hover {
+	color: var(--sl-color-accent-high);
+}
+
+:root:not([data-theme='light']) .sl-markdown-content a:hover {
+	color: #a5b4fc;
+}
+
+.pipeline-badge {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.75rem;
+	height: 1.75rem;
+	border: 2px solid var(--stage);
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--stage) 18%, transparent);
+	color: var(--viz-ink);
+	font-size: 0.875rem;
+	font-weight: 600;
 }
 
 h1,
@@ -220,8 +287,8 @@ a.atlas-card.grid {
 }
 
 .page-jump-primary {
-	border-color: var(--sl-color-accent);
-	background: var(--sl-color-accent);
+	border-color: var(--accent-fill);
+	background: var(--accent-fill);
 	color: var(--on-accent);
 }
 
