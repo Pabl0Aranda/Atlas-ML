@@ -32,6 +32,18 @@ function play(card: HTMLAnchorElement, preview: HTMLElement): boolean {
 	return true;
 }
 
+/** Names the card's parts so the next page's transition can carry them across. */
+function nameForTransition(card: HTMLAnchorElement, preview: HTMLElement) {
+	preview.style.viewTransitionName = 'card-preview';
+	const title = card.querySelector<HTMLElement>('[data-card-title]');
+	const family = card.querySelector<HTMLElement>('[data-card-family]');
+	if (!title || !family) return;
+	title.style.viewTransitionName = 'page-title';
+	family.style.viewTransitionName = 'page-eyebrow';
+	// A name can only be used once per page, so this page's own heading gives it up.
+	document.documentElement.dataset.cardMorph = '';
+}
+
 function prefetch(href: string) {
 	const link = document.createElement('link');
 	link.rel = 'prefetch';
@@ -50,6 +62,7 @@ document.addEventListener('click', (event) => {
 	if (!play(card, preview)) return;
 
 	event.preventDefault();
+	nameForTransition(card, preview);
 	prefetch(card.href);
 	// A timer, not the last frame: animation frames stop in a background tab.
 	setTimeout(() => window.location.assign(card.href), CARD_MOTION_MS);
@@ -58,5 +71,11 @@ document.addEventListener('click', (event) => {
 // Coming back with the Back button restores the page as it was left, mid-animation.
 window.addEventListener('pageshow', () => {
 	for (const canvas of document.querySelectorAll('.card-motion')) canvas.remove();
-	for (const card of document.querySelectorAll<HTMLElement>('a[data-playing]')) delete card.dataset.playing;
+	for (const card of document.querySelectorAll<HTMLElement>('a[data-playing]')) {
+		delete card.dataset.playing;
+		for (const part of card.querySelectorAll<HTMLElement>('[data-card-preview], [data-card-title], [data-card-family]')) {
+			part.style.viewTransitionName = '';
+		}
+	}
+	delete document.documentElement.dataset.cardMorph;
 });

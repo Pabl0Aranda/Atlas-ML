@@ -244,3 +244,83 @@ a.atlas-card.grid {
 		scroll-behavior: smooth;
 	}
 }
+
+/* Pages fade into each other, while the header and sidebar stay put. A clicked
+   card names its parts in cardClick.ts, so its title and family label travel to
+   the new page's heading. Browsers without support just load the page. */
+@media (prefers-reduced-motion: no-preference) {
+	@view-transition {
+		navigation: auto;
+	}
+
+	header.header {
+		view-transition-name: site-header;
+	}
+
+	.sidebar-pane {
+		view-transition-name: site-sidebar;
+	}
+
+	h1#_top {
+		view-transition-name: page-title;
+	}
+
+	.page-eyebrow {
+		view-transition-name: page-eyebrow;
+	}
+
+	:root[data-card-morph] h1#_top,
+	:root[data-card-morph] .page-eyebrow {
+		view-transition-name: none;
+	}
+
+	::view-transition-group(page-title),
+	::view-transition-group(page-eyebrow) {
+		animation-duration: 0.4s;
+		animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+	}
+
+	/* Keeps text in proportion while it scales, instead of stretching to the box. */
+	::view-transition-old(page-title),
+	::view-transition-new(page-title),
+	::view-transition-old(page-eyebrow),
+	::view-transition-new(page-eyebrow) {
+		width: auto;
+		height: 100%;
+		object-fit: none;
+		object-position: left center;
+		animation-duration: 0.4s;
+	}
+
+	::view-transition-old(root) {
+		animation: page-out 0.16s ease-in both;
+	}
+
+	::view-transition-new(root) {
+		animation: page-in 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) 0.06s both;
+	}
+
+	::view-transition-old(card-preview) {
+		animation: card-preview-out 0.34s ease-out both;
+	}
+}
+
+@keyframes page-out {
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes page-in {
+	from {
+		opacity: 0;
+		transform: translateY(0.75rem);
+	}
+}
+
+@keyframes card-preview-out {
+	to {
+		opacity: 0;
+		transform: scale(1.3);
+	}
+}
