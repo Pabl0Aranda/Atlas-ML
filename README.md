@@ -78,9 +78,23 @@ The build is static, so any static host works. Two variables control it:
 SITE_URL=https://pabl0aranda.github.io BASE_PATH=/Atlas-ML npm run build
 ```
 
+## Roadmap
+
+These are the ideas under consideration, not promises:
+
+- [ ] Learning paths, with progress saved in your browser
+- [ ] Quick knowledge checks on each page
+- [ ] A "Which algorithm should I use?" guide
+- [ ] A glossary with hover definitions
+- [ ] Deep learning pages, such as CNNs, RNNs and autoencoders
+- [ ] A distinctive visual identity
+- [ ] Automated browser tests
+
+Have another idea? [Suggest a feature](https://github.com/Pabl0Aranda/Atlas-ML/issues/new/choose).
+
 ## Contributing
 
-Ideas and fixes are welcome. [Open an issue](https://github.com/Pabl0Aranda/Atlas-ML/issues/new/choose) to report a bug, suggest a feature or propose an algorithm, and see [CONTRIBUTING.md](CONTRIBUTING.md) for how the project is organized.
+Ideas and fixes are welcome. [Open an issue](https://github.com/Pabl0Aranda/Atlas-ML/issues/new/choose) to report a bug, suggest a feature or propose an algorithm, and see [CONTRIBUTING.md](CONTRIBUTING.md) for how the project is organized. Everyone taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md), and security problems should be reported as described in the [Security Policy](SECURITY.md).
 
 ## License
 
