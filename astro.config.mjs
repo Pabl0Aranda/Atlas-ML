@@ -7,19 +7,23 @@ import tailwindcss from '@tailwindcss/vite';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { familySidebar } from './src/data/catalog.ts';
+import { rehypeBaseLinks } from './src/lib/url.ts';
 
 // The sitemap, canonical URLs and social images need an absolute origin, so they
 // switch on once the deployment sets SITE_URL.
 const site = process.env.SITE_URL;
-const socialImage = site ? new URL('/og-image.png', site).href : undefined;
+// The folder the site is served from, such as /Atlas-ML on GitHub Pages.
+const base = process.env.BASE_PATH || undefined;
+const socialImage = site ? new URL(`${base ?? ''}/og-image.png`, site).href : undefined;
 
 // https://astro.build/config
 export default defineConfig({
 	site,
+	base,
 	markdown: {
 		processor: unified({
 			remarkPlugins: [remarkMath],
-			rehypePlugins: [rehypeKatex],
+			rehypePlugins: [rehypeKatex, [rehypeBaseLinks, { base }]],
 		}),
 	},
 	integrations: [

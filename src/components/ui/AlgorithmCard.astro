@@ -1,5 +1,6 @@
 ---
 import { generateDataset } from '@/lib/ml/datasets';
+import { withBase } from '@/lib/url';
 import { loadSpec } from '@/lib/viz/registry';
 import { thumbnailScene } from '@/lib/viz/scene';
 import { sceneToSvg } from '@/lib/viz/svg';
@@ -15,7 +16,7 @@ const svg = sceneToSvg(thumbnailScene(spec, generateDataset(entry.page.thumbnail
 ---
 
 <a
-	href={`/${pageSlug(entry)}/`}
+	href={withBase(`/${pageSlug(entry)}/`)}
 	data-entry
 	data-family={entry.family}
 	data-search={`${entry.name} ${entry.aliases ?? ''} ${entry.summary}`.toLowerCase()}

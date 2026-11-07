@@ -117,6 +117,7 @@ Pages make specific claims, so they have to be true for this site's data.
 - **Plot colors.** `hexToRgb` in `canvas.ts` only reads six-digit hex, so keep series colors in that form.
 - **Color alone.** Plots pair each class color with a shape. Keep that for accessibility.
 - **Input parity.** Anything a mouse can do on a plot must also work by touch and keyboard.
+- **Internal links.** The site is served from a subfolder. Plain `/catalog/` links are fine in MDX, because a build step prefixes them, but links in code must use `withBase` from `src/lib/url.ts`.
 - **Pages without a sidebar.** They have no menu on phones, so give them their own links, as `compare.astro` does.
 - **Metric changes.** The mean only minimizes squared Euclidean distance, so k-means with Manhattan distance must update with medians.
 - **Preact state.** Use functional updates in input handlers, because two quick changes can otherwise overwrite each other.

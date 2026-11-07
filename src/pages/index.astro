@@ -4,6 +4,7 @@ import AlgorithmCard from '@/components/ui/AlgorithmCard.astro';
 import FamilyCard from '@/components/ui/FamilyCard.astro';
 import { ALGORITHM_PAGE_COUNT, CATALOG, SANDBOX_COUNT } from '@/data/catalog';
 import { generateDataset } from '@/lib/ml/datasets';
+import { withBase } from '@/lib/url';
 import { loadSpec } from '@/lib/viz/registry';
 import { thumbnailScene } from '@/lib/viz/scene';
 import { sceneToSvg } from '@/lib/viz/svg';
@@ -54,8 +55,8 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 			tagline: 'Run algorithms step by step, follow the math, then read the exact code behind every animation.',
 			image: { html: `<div class="hero-plot">${heroSvg}</div>` },
 			actions: [
-				{ text: 'Start here', link: '/start-here/', icon: 'right-arrow' },
-				{ text: 'Browse the catalog', link: '/catalog/', variant: 'minimal' },
+				{ text: 'Start here', link: withBase('/start-here/'), icon: 'right-arrow' },
+				{ text: 'Browse the catalog', link: withBase('/catalog/'), variant: 'minimal' },
 			],
 		},
 	}}
@@ -77,7 +78,7 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 			<ol class="m-0 mt-6 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-4">
 				{workflow.map((step, i) => (
 					<li class="m-0">
-						<a href={step.href} class="atlas-card h-full p-4">
+						<a href={withBase(step.href)} class="atlas-card h-full p-4">
 							<span class="flex size-7 items-center justify-center rounded-full bg-(--sl-color-accent) text-sm font-semibold text-(--on-accent)">{i + 1}</span>
 							<span class="font-display mt-3 block text-lg font-semibold">{step.title}</span>
 							<span class="mt-1 block text-sm leading-snug text-(--viz-muted-ink)">{step.text}</span>
@@ -99,7 +100,7 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 			<ul class="m-0 mt-6 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-4">
 				{tools.map((tool) => (
 					<li class="m-0">
-						<a href={tool.href} class="atlas-card h-full p-4">
+						<a href={withBase(tool.href)} class="atlas-card h-full p-4">
 							<span class="font-display block text-lg font-semibold">{tool.title}</span>
 							<span class="mt-1 block text-sm leading-snug text-(--viz-muted-ink)">{tool.text}</span>
 						</a>
@@ -111,7 +112,7 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 		<section class="mt-14">
 			<div class="flex flex-wrap items-baseline justify-between gap-2">
 				<h2 class="m-0 text-2xl font-semibold sm:text-3xl">Good places to start</h2>
-				<a href="/catalog/" class="text-sm font-medium text-(--sl-color-text-accent)">All {CATALOG.length} entries →</a>
+				<a href={withBase('/catalog/')} class="text-sm font-medium text-(--sl-color-text-accent)">All {CATALOG.length} entries →</a>
 			</div>
 			<div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{startHere.map((entry) => <AlgorithmCard entry={entry as any} />)}

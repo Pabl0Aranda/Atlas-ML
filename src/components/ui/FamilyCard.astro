@@ -1,6 +1,7 @@
 ---
 import { CATALOG, type Family } from '@/data/catalog';
 import { generateDataset } from '@/lib/ml/datasets';
+import { withBase } from '@/lib/url';
 import { loadSpec } from '@/lib/viz/registry';
 import { thumbnailScene } from '@/lib/viz/scene';
 import { sceneToSvg } from '@/lib/viz/svg';
@@ -20,7 +21,7 @@ const interactive = entries.filter((e) => e.page).length;
 const svg = sceneToSvg(thumbnailScene(await loadSpec(preview), generateDataset(dataset)), `${family} example`);
 ---
 
-<a href={`/catalog/?family=${encodeURIComponent(family)}`} class="atlas-card grid grid-cols-[6.5rem_1fr] items-center gap-4 p-3 sm:grid-cols-[8rem_1fr]">
+<a href={withBase(`/catalog/?family=${encodeURIComponent(family)}`)} class="atlas-card grid grid-cols-[6.5rem_1fr] items-center gap-4 p-3 sm:grid-cols-[8rem_1fr]">
 	<div class="overflow-hidden rounded-lg border border-(--viz-border) [&>svg]:block [&>svg]:aspect-square [&>svg]:w-full" set:html={svg} />
 	<div class="min-w-0">
 		<span class="font-display block text-lg leading-tight font-semibold">{family}</span>

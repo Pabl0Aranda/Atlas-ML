@@ -2,6 +2,7 @@
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import Compare from '@/components/interactive/Compare';
 import { FEATURED } from '@/data/catalog';
+import { withBase } from '@/lib/url';
 import { loadSpec } from '@/lib/viz/registry';
 
 // Guides and gridworld agents have nothing to run side by side on shared data.
@@ -24,9 +25,9 @@ const options = (
 	hasSidebar={false}
 >
 	<nav class="page-jumps phone-nav" aria-label="Site">
-		<a href="/" class="page-jump">Home</a>
-		<a href="/start-here/" class="page-jump">Start here</a>
-		<a href="/catalog/" class="page-jump">Catalog</a>
+		<a href={withBase('/')} class="page-jump">Home</a>
+		<a href={withBase('/start-here/')} class="page-jump">Start here</a>
+		<a href={withBase('/catalog/')} class="page-jump">Catalog</a>
 	</nav>
 	<p>Pick two algorithms, or the same one with different settings. Both train on identical data and advance together, so any difference you see comes from the algorithms.</p>
 	<Compare client:load options={options} />

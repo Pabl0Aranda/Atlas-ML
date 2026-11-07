@@ -1,6 +1,7 @@
 ---
 import Default from '@astrojs/starlight/components/PageTitle.astro';
 import { CATALOG, pageSlug } from '@/data/catalog';
+import { withBase } from '@/lib/url';
 
 const route = Astro.locals.starlightRoute;
 const id = route.id.replace(/\/$/, '');
@@ -20,7 +21,7 @@ const comparable = entry && !entry.page?.path && entry.family !== 'Reinforcement
 const jumps = [
 	body.includes('<Sandbox') && { label: 'Try the sandbox', href: '#interactive-sandbox', primary: true },
 	body.includes('## Code') && { label: 'See the code', href: '#code', primary: false },
-	comparable && { label: 'Compare with another', href: `/compare/?a=${entry.page!.id}`, primary: false },
+	comparable && { label: 'Compare with another', href: withBase(`/compare/?a=${entry.page!.id}`), primary: false },
 ].filter((jump) => !!jump);
 ---
 

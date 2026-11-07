@@ -15,7 +15,7 @@ const sources = [...walk(DOCS), ...walk(PAGES), ...walk('src/components')].filte
 
 /** Every internal link in a file, such as /validation/overview/#good-practices. */
 const linksIn = (text: string) =>
-	[...text.matchAll(/(?:\]\(|href="|link: ')(\/[^)"'\s?]*)/g)].map((m) => m[1]).filter((link) => link !== '/');
+	[...text.matchAll(/(?:\]\(|href="|href: '|link: '|withBase\(')(\/[^)"'\s?]*)/g)].map((m) => m[1]).filter((link) => link !== '/');
 
 const docFile = (path: string) => join(DOCS, `${path.replace(/^\/|\/$/g, '')}.mdx`);
 const pageFile = (path: string) => join(PAGES, `${path.replace(/^\/|\/$/g, '')}.astro`);

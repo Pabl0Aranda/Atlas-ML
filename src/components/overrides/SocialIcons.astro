@@ -1,4 +1,6 @@
 ---
+import { withBase } from '@/lib/url';
+
 const links = [
 	{ label: 'Start here', href: '/start-here/' },
 	{ label: 'Catalog', href: '/catalog/' },
@@ -7,5 +9,5 @@ const links = [
 ---
 
 <nav class="header-nav" aria-label="Main">
-	{links.map((link) => <a href={link.href}>{link.label}</a>)}
+	{links.map((link) => <a href={withBase(link.href)}>{link.label}</a>)}
 </nav>
