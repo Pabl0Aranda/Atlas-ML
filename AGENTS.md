@@ -53,7 +53,7 @@ src/lib/viz/registry.ts   Loads specs by id, so pages only download what they us
       ↓
 src/components/interactive/Sandbox.tsx   One shared UI for every spec
       ↓
-src/content/docs/  MDX pages embed <Sandbox client:visible algorithm="id" />
+src/content/docs/  MDX pages embed <Sandbox client:idle algorithm="id" />
 ```
 
 Other parts to know:
@@ -95,7 +95,7 @@ Add an `.mdx` file to a folder in `src/content/docs/`, and set `sidebar.order` t
 
 ### Add an Interactive Island
 
-Put the logic in a pure, tested module, and keep the component thin. Hydrate with `client:visible`, so pages stay light.
+Put the logic in a pure, tested module, and keep the component thin. Hydrate with `client:visible`, so pages stay light. The exception is `Sandbox`, which uses `client:idle`: it grows when it loads, and doing that early keeps smooth anchor scrolling on target.
 
 Islands are rendered on the server first, so don't touch `window` or `document` while rendering, unless the code only runs after a spec loads, as the sandbox's does.
 
