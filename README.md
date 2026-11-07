@@ -1,8 +1,20 @@
 # Atlas ML
 
-An interactive guide to machine learning. Find an algorithm, watch it run step by step, read the math, and inspect the exact code behind every animation.
+**Watch machine learning algorithms run, step by step, in your browser.**
 
-Everything runs in the browser, on the same TypeScript the pages display, so there is no backend or database.
+[Try it live](https://pabl0aranda.github.io/Atlas-ML/) · [Start here](https://pabl0aranda.github.io/Atlas-ML/start-here/) · [Report a bug](https://github.com/Pabl0Aranda/Atlas-ML/issues/new/choose)
+
+[![CI](https://github.com/Pabl0Aranda/Atlas-ML/actions/workflows/ci.yml/badge.svg)](https://github.com/Pabl0Aranda/Atlas-ML/actions/workflows/ci.yml)
+[![Deploy](https://github.com/Pabl0Aranda/Atlas-ML/actions/workflows/deploy.yml/badge.svg)](https://github.com/Pabl0Aranda/Atlas-ML/actions/workflows/deploy.yml)
+[![Release](https://img.shields.io/github/v/release/Pabl0Aranda/Atlas-ML)](https://github.com/Pabl0Aranda/Atlas-ML/releases/latest)
+[![License: MIT](https://img.shields.io/github/license/Pabl0Aranda/Atlas-ML)](LICENSE)
+
+<!-- To add the sandbox GIF, save it as docs/images/sandbox.gif and replace the image below with:
+![A sandbox running step by step](docs/images/sandbox.gif)
+-->
+![The Atlas ML home page, with a support vector machine separating two moons](docs/images/home.jpg)
+
+Find an algorithm, watch it run, read the math, and inspect the exact code behind every animation. Everything runs in your browser, on the same TypeScript the pages display, so there's nothing to install and no account to create.
 
 ## Features
 
@@ -15,7 +27,30 @@ Everything runs in the browser, on the same TypeScript the pages display, so the
 - **Foundations.** Overfitting and underfitting, bias and variance, gradient descent, and a section on distance metrics.
 - **Works for everyone.** Sandboxes support touch and keyboard, and plots back up color with shape.
 
-New visitors should begin at the Start Here page, which also explains every sandbox control.
+## See it in action
+
+| Compare two models on the same data | See overfitting as it happens |
+| :---: | :---: |
+| ![Compare mode showing a linear and an RBF support vector machine side by side on the moons dataset](docs/images/compare.jpg) | ![The overfitting explorer at k equals 1, with 100% training accuracy and 81.9% test accuracy](docs/images/overfitting.jpg) |
+
+## Run it locally
+
+You need Node.js 22.23.4 or later.
+
+```bash
+npm install
+npm run dev
+```
+
+The site then runs at `localhost:4321`.
+
+| Command | Action |
+| :------ | :----- |
+| `npm run dev` | Start the dev server |
+| `npm test` | Run the unit, sandbox contract and link tests |
+| `npm run check` | Type-check the project |
+| `npm run build` | Build the site and search index into `dist/` |
+| `npm run preview` | Serve the build. Search only works after a build |
 
 ## Tech stack
 
@@ -28,68 +63,9 @@ New visitors should begin at the Start Here page, which also explains every sand
 | Search | Pagefind |
 | Tests | Vitest, `astro check` |
 
-## Getting started
-
-You need Node.js 22.23.4 or later.
-
-```bash
-npm install
-npm run dev
-```
-
-| Command | Action |
-| :------ | :----- |
-| `npm run dev` | Start the dev server at `localhost:4321` |
-| `npm test` | Run the unit, sandbox contract and link tests |
-| `npm run check` | Type-check the project |
-| `npm run build` | Build the site and search index into `dist/` |
-| `npm run preview` | Serve the build. Search only works after a build |
-
-## Branches
-
-`main` is the only long-lived branch and always stays working. New work happens on short-lived branches named `feature/`, `fix/`, `docs/` or `chore/`, which are merged into `main` and then deleted. CI runs on `main` and on pull requests.
-
-## Project structure
-
-| Folder | What lives there |
-| :----- | :--------------- |
-| `src/content/docs/` | The pages, in MDX. Folder names become URLs |
-| `src/pages/` | Pages built in code: home, catalog and compare |
-| `src/data/catalog.ts` | Every algorithm, which also drives the sidebar and counts |
-| `src/lib/ml/` | Pure algorithm and math code with its tests, and the source shown on pages |
-| `src/lib/viz/` | Sandbox logic: specs, presets, links, timeline and drawing |
-| `src/components/interactive/` | Client-side islands, such as the sandbox and demos |
-| `src/components/ui/`, `docs/`, `overrides/` | Static cards, doc helpers and Starlight overrides |
-| `src/styles/global.css` | Design tokens and shared styles |
-| `src/types/` | Shared TypeScript types |
-
-Page URLs are public, and share links depend on them, so avoid moving pages.
-
-## Testing
-
-`npm test` covers more than the algorithms:
-
-- **Contract tests** run every sandbox from start to finish, and check that it stays finite, terminates, and keeps its recorded frames intact.
-- **Link tests** fail on any broken internal link or heading anchor.
-- **Contrast tests** check the color tokens against accessibility targets.
-
-## Adding a page
-
-Add an `.mdx` file to a folder in `src/content/docs/`, and the sidebar picks it up. Set `sidebar.order` in the frontmatter to place it.
-
-## Adding an algorithm
-
-1. Write the pure math in `src/lib/ml/`, with a test file beside it.
-2. Add a spec in `src/lib/viz/specs/` and register it in `src/lib/viz/registry.ts`. Add its id to `AlgorithmId`.
-3. Add a page in `src/content/docs/algorithms/`.
-4. Add `page` to its entry in `src/data/catalog.ts`, which also adds it to the sidebar. Algorithms without a page only need a catalog entry.
-5. Optionally, add guided presets in `src/lib/viz/presets.ts`. Run each one before writing its note, so the figures are real.
-
-Spec states must be immutable, because the sandbox timeline keeps earlier frames. A spec that trains in place for speed must provide `snapshot`, and the contract tests check this.
-
 ## Deployment
 
-The site is published to GitHub Pages at <https://pabl0aranda.github.io/Atlas-ML/>. Every push to `main` runs the tests, builds the site and publishes it, using `.github/workflows/deploy.yml`.
+Every push to `main` runs the tests, builds the site and publishes it to [GitHub Pages](https://pabl0aranda.github.io/Atlas-ML/), using `.github/workflows/deploy.yml`.
 
 The build is static, so any static host works. Two variables control it:
 
@@ -102,4 +78,10 @@ The build is static, so any static host works. Two variables control it:
 SITE_URL=https://pabl0aranda.github.io BASE_PATH=/Atlas-ML npm run build
 ```
 
-Links in code must use `withBase` from `src/lib/url.ts`, so they keep working under a subfolder.
+## Contributing
+
+Ideas and fixes are welcome. [Open an issue](https://github.com/Pabl0Aranda/Atlas-ML/issues/new/choose) to report a bug, suggest a feature or propose an algorithm, and see [CONTRIBUTING.md](CONTRIBUTING.md) for how the project is organized.
+
+## License
+
+Released under the [MIT License](LICENSE).
