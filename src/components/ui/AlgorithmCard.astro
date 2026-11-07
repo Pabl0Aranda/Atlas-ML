@@ -19,13 +19,18 @@ const svg = sceneToSvg(thumbnailScene(spec, generateDataset(entry.page.thumbnail
 	href={withBase(`/${pageSlug(entry)}/`)}
 	data-entry
 	data-family={entry.family}
+	data-motion={entry.family}
 	data-search={`${entry.name} ${entry.aliases ?? ''} ${entry.summary}`.toLowerCase()}
 	class="atlas-card flex flex-col overflow-hidden"
 >
-	<div class="bg-(--viz-surface) [&>svg]:block [&>svg]:aspect-[5/3] [&>svg]:w-full" set:html={svg.includes('data-grid') ? svg : svg.replace('<svg ', '<svg preserveAspectRatio="xMidYMid slice" ')} />
+	<div data-card-preview class="relative bg-(--viz-surface) [&>svg]:block [&>svg]:aspect-[5/3] [&>svg]:w-full" set:html={svg.includes('data-grid') ? svg : svg.replace('<svg ', '<svg preserveAspectRatio="xMidYMid slice" ')} />
 	<div class="flex flex-1 flex-col gap-1 p-4">
 		<span class="text-xs text-(--viz-muted-ink)">{entry.family}</span>
 		<span class="font-display text-lg font-semibold leading-tight">{entry.name}</span>
 		<span class="text-sm leading-snug text-(--viz-muted-ink)">{entry.summary}</span>
 	</div>
 </a>
+
+<script>
+	import '@/lib/viz/cardClick';
+</script>
