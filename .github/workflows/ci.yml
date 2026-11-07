@@ -43,5 +43,15 @@ jobs:
       - name: Check types
         run: npm run check
 
+      # Built as GitHub Pages serves it, in the /Atlas-ML subfolder, so the link check
+      # sees the real addresses.
       - name: Build the site
         run: npm run build
+        env:
+          SITE_URL: https://pabl0aranda.github.io
+          BASE_PATH: /Atlas-ML
+
+      - name: Check links in the built site
+        run: npm run check:links
+        env:
+          BASE_PATH: /Atlas-ML
