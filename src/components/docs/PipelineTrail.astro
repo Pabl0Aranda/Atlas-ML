@@ -1,0 +1,26 @@
+---
+import { STAGES, type StageId } from '@/lib/pipeline';
+import { withBase } from '@/lib/url';
+
+interface Props {
+	stage: StageId;
+}
+
+const { stage } = Astro.props;
+const current = STAGES.findIndex((s) => s.id === stage);
+---
+
+<nav class="pipeline-trail" aria-label="Workflow stage">
+	<ol>
+		{
+			STAGES.map((s, i) => (
+				<li class:list={[{ 'is-done': i < current }]} style={`--stage: var(--pipeline-${s.id})`}>
+					<a href={withBase(s.href)} aria-current={i === current ? 'step' : undefined}>
+						<span class="pipeline-dot" aria-hidden="true" />
+						{s.label}
+					</a>
+				</li>
+			))
+		}
+	</ol>
+</nav>
