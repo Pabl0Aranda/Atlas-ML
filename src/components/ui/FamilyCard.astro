@@ -21,11 +21,15 @@ const interactive = entries.filter((e) => e.page).length;
 const svg = sceneToSvg(thumbnailScene(await loadSpec(preview), generateDataset(dataset)), `${family} example`);
 ---
 
-<a href={withBase(`/catalog/?family=${encodeURIComponent(family)}`)} class="atlas-card grid grid-cols-[6.5rem_1fr] items-center gap-4 p-3 sm:grid-cols-[8rem_1fr]">
-	<div class="overflow-hidden rounded-lg border border-(--viz-border) [&>svg]:block [&>svg]:aspect-square [&>svg]:w-full" set:html={svg} />
+<a href={withBase(`/catalog/?family=${encodeURIComponent(family)}`)} data-motion={family} class="atlas-card grid grid-cols-[6.5rem_1fr] items-center gap-4 p-3 sm:grid-cols-[8rem_1fr]">
+	<div data-card-preview class="relative overflow-hidden rounded-lg border border-(--viz-border) [&>svg]:block [&>svg]:aspect-square [&>svg]:w-full" set:html={svg} />
 	<div class="min-w-0">
 		<span class="font-display block text-lg leading-tight font-semibold">{family}</span>
 		<span class="mt-1 block text-sm leading-snug text-(--viz-muted-ink)">{description}</span>
 		<span class="mt-2 block text-xs text-(--viz-muted-ink)">{entries.length} algorithms · {interactive} interactive</span>
 	</div>
 </a>
+
+<script>
+	import '@/lib/viz/cardClick';
+</script>
