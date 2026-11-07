@@ -217,6 +217,16 @@ a.atlas-card.grid {
 	margin-bottom: 0.75rem;
 }
 
+/* A copy of a filtered-out card, fading in place. It sits under the sticky filter bar. */
+.layout-ghost {
+	position: fixed;
+	z-index: 4;
+	box-sizing: border-box;
+	margin: 0;
+	list-style: none;
+	pointer-events: none;
+}
+
 .catalog-bar {
 	position: sticky;
 	top: var(--sl-nav-height);

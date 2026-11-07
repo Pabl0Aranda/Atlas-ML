@@ -59,10 +59,13 @@ const chipClass =
 </StarlightPage>
 
 <script>
+	import { animateLayoutChange } from '@/lib/viz/layoutMotion';
+
 	const input = document.querySelector<HTMLInputElement>('#catalog-filter')!;
 	const chips = [...document.querySelectorAll<HTMLButtonElement>('[data-family-filter]')];
 	const entries = [...document.querySelectorAll<HTMLElement>('[data-entry]')];
 	const groups = [...document.querySelectorAll<HTMLElement>('[data-group]')];
+	const moving = [...document.querySelectorAll<HTMLElement>('[data-entry], [data-group] > h2, [data-group] > p')];
 	const count = document.querySelector('#catalog-count')!;
 	const empty = document.querySelector<HTMLElement>('#catalog-empty')!;
 	let family = new URLSearchParams(location.search).get('family') ?? '';
@@ -83,11 +86,11 @@ const chipClass =
 		empty.hidden = visible > 0;
 	}
 
-	input.addEventListener('input', apply);
+	input.addEventListener('input', () => animateLayoutChange(moving, apply));
 	for (const chip of chips) {
 		chip.addEventListener('click', () => {
 			family = chip.dataset.familyFilter ?? '';
-			apply();
+			animateLayoutChange(moving, apply);
 		});
 	}
 	apply();
