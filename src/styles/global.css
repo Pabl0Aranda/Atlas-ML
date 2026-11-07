@@ -217,3 +217,11 @@ a.atlas-card.grid {
 		transform: none;
 	}
 }
+
+/* Only on the root: anchor links glide, while inner panes such as the sidebar
+   keep restoring their position instantly. */
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+}
