@@ -30,12 +30,18 @@ export default defineConfig({
 		starlight({
 			title: 'Atlas ML',
 			logo: { src: './src/assets/logo.svg' },
-			head: socialImage
-				? [
-						{ tag: 'meta', attrs: { property: 'og:image', content: socialImage } },
-						{ tag: 'meta', attrs: { name: 'twitter:image', content: socialImage } },
-					]
-				: [],
+			// Browsers cache tab icons for days, so a new logo needs a new file name.
+			favicon: '/icon.svg',
+			head: [
+				{ tag: 'link', attrs: { rel: 'icon', type: 'image/png', sizes: '32x32', href: `${base ?? ''}/favicon-32.png` } },
+				{ tag: 'link', attrs: { rel: 'apple-touch-icon', href: `${base ?? ''}/apple-touch-icon.png` } },
+				...(socialImage
+					? /** @type {const} */ ([
+							{ tag: 'meta', attrs: { property: 'og:image', content: socialImage } },
+							{ tag: 'meta', attrs: { name: 'twitter:image', content: socialImage } },
+						])
+					: []),
+			],
 			components: {
 				PageTitle: './src/components/overrides/PageTitle.astro',
 				SocialIcons: './src/components/overrides/SocialIcons.astro',
