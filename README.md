@@ -89,8 +89,17 @@ Spec states must be immutable, because the sandbox timeline keeps earlier frames
 
 ## Deployment
 
-The site builds to static files, so any static host works. Set `SITE_URL` to the public origin when building, which turns on the sitemap, canonical URLs and social image tags:
+The site is published to GitHub Pages at <https://pabl0aranda.github.io/Atlas-ML/>. Every push to `main` runs the tests, builds the site and publishes it, using `.github/workflows/deploy.yml`.
+
+The build is static, so any static host works. Two variables control it:
+
+| Variable | Purpose | Example |
+| :------- | :------ | :------ |
+| `SITE_URL` | Public origin. Turns on the sitemap, canonical URLs and social image tags | `https://pabl0aranda.github.io` |
+| `BASE_PATH` | Subfolder the site is served from. Leave it out at the root of a domain | `/Atlas-ML` |
 
 ```bash
-SITE_URL=https://example.com npm run build
+SITE_URL=https://pabl0aranda.github.io BASE_PATH=/Atlas-ML npm run build
 ```
+
+Links in code must use `withBase` from `src/lib/url.ts`, so they keep working under a subfolder.
