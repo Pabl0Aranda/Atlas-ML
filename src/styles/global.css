@@ -73,45 +73,46 @@ h3,
 }
 
 .hero {
-	grid-template-columns: 100%;
-	padding-block: 4rem 4.5rem;
+	padding-block: 2.5rem 3rem;
 }
 
-.hero .stack,
-.hero .copy {
-	align-items: center;
-	text-align: center;
-}
-
-.hero .actions {
-	justify-content: center;
-}
-
-/* Live k-means behind the home title. It fades out towards the middle and the
-   bottom, so it never competes with the text. */
-.has-live-hero {
-	position: relative;
-}
-
-.has-live-hero > .sl-container {
-	position: relative;
-}
-
-.hero-canvas {
-	position: absolute;
-	top: 0;
-	left: 0;
+/* The text comes first, then a live k-means run: below it on phones, and beside
+   it from tablet width up. */
+.hero > .hero-html {
+	order: 2;
 	width: 100%;
-	pointer-events: none;
-	opacity: 0.7;
-	mask-image: radial-gradient(ellipse 60% 50% at 50% 38%, transparent 55%, #000 100%), linear-gradient(to bottom, #000 72%, transparent);
-	mask-composite: intersect;
 }
 
-@media (max-width: 40rem) {
-	.hero-canvas {
-		opacity: 0.4;
+@media (min-width: 50rem) {
+	.hero {
+		grid-template-columns: 6fr 5fr;
+		gap: 2.5rem;
 	}
+}
+
+.hero-live {
+	width: 100%;
+	margin: 0;
+	overflow: hidden;
+	border: 1px solid var(--viz-border);
+	border-radius: 0.875rem;
+	background: var(--viz-surface);
+}
+
+.hero-live canvas {
+	display: block;
+	width: 100%;
+	aspect-ratio: 4 / 3;
+}
+
+.hero-live figcaption {
+	display: flex;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.5rem 0.875rem;
+	border-top: 1px solid var(--viz-border);
+	font-size: 0.8125rem;
+	color: var(--viz-muted-ink);
 }
 
 .hero h1 {

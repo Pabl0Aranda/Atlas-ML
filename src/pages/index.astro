@@ -44,6 +44,9 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 		hero: {
 			title: 'See how machine learning actually works',
 			tagline: 'Run algorithms step by step, follow the math, then read the exact code behind every animation.',
+			image: {
+				html: `<figure class="hero-live" data-hero-live><canvas aria-hidden="true"></canvas><figcaption><span>k-means, running live</span><span data-hero-step></span></figcaption></figure>`,
+			},
 			actions: [
 				{ text: 'Start here', link: withBase('/start-here/'), icon: 'right-arrow' },
 				{ text: 'Browse the catalog', link: withBase('/catalog/'), variant: 'minimal' },

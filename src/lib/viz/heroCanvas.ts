@@ -1,18 +1,13 @@
 import { readPlotColors } from './canvas';
-import { createHeroRun, drawHero, heroDuration, heroFinalPose, heroPose } from './heroMotion';
+import { createHeroRun, drawHero, heroDuration, heroFinalPose, heroPose, type HeroPose } from './heroMotion';
 
 const FRAME_MS = 1000 / 30;
-const MAX_RATIO = 1.5;
+const MAX_RATIO = 2;
 const PHONE_WIDTH = 640;
 
-function start(hero: HTMLElement, panel: HTMLElement) {
-	const canvas = document.createElement('canvas');
+function start(panel: HTMLElement, canvas: HTMLCanvasElement, label: HTMLElement | null) {
 	const ctx = canvas.getContext('2d');
 	if (!ctx) return;
-	canvas.className = 'hero-canvas';
-	canvas.setAttribute('aria-hidden', 'true');
-	panel.classList.add('has-live-hero');
-	panel.prepend(canvas);
 
 	const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
 	const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches || !!connection?.saveData;
@@ -20,21 +15,31 @@ function start(hero: HTMLElement, panel: HTMLElement) {
 
 	let seed = 3;
 	let run = createHeroRun(seed, points);
-	let colors = readPlotColors(hero);
+	let colors = readPlotColors(panel);
 	let width = 0;
 	let height = 0;
 	let seconds = 0;
 	let onScreen = true;
 	let lastFrame = 0;
 	let looping = false;
+	let shownStep = '';
 
-	const paint = () => drawHero(ctx, width, height, run, still ? heroFinalPose(run) : heroPose(run, seconds), colors);
+	const describe = (pose: HeroPose) => {
+		const last = run.steps.length - 1;
+		const step = Math.min(pose.step + (pose.recolor > 0.5 ? 1 : 0), last);
+		const text = step === last ? `Converged after ${last} ${last === 1 ? 'step' : 'steps'}` : `Step ${step} of ${last}`;
+		if (label && text !== shownStep) label.textContent = shownStep = text;
+	};
+
+	const paint = () => {
+		const pose = still ? heroFinalPose(run) : heroPose(run, seconds);
+		drawHero(ctx, width, height, run, pose, colors);
+		describe(pose);
+	};
 
 	const resize = () => {
 		const ratio = Math.min(window.devicePixelRatio || 1, MAX_RATIO);
-		width = panel.clientWidth;
-		height = hero.getBoundingClientRect().bottom - panel.getBoundingClientRect().top;
-		canvas.style.height = `${height}px`;
+		({ width, height } = canvas.getBoundingClientRect());
 		canvas.width = Math.round(width * ratio);
 		canvas.height = Math.round(height * ratio);
 		ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -66,9 +71,9 @@ function start(hero: HTMLElement, panel: HTMLElement) {
 		requestAnimationFrame(frame);
 	};
 
-	new ResizeObserver(resize).observe(hero);
+	new ResizeObserver(resize).observe(canvas);
 	new MutationObserver(() => {
-		colors = readPlotColors(hero);
+		colors = readPlotColors(panel);
 		paint();
 	}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 	new IntersectionObserver(([entry]) => {
@@ -78,10 +83,10 @@ function start(hero: HTMLElement, panel: HTMLElement) {
 	document.addEventListener('visibilitychange', resume);
 }
 
-const hero = document.querySelector<HTMLElement>('.hero');
-const panel = hero?.closest<HTMLElement>('.content-panel');
-if (hero && panel) {
+const panel = document.querySelector<HTMLElement>('[data-hero-live]');
+const canvas = panel?.querySelector('canvas');
+if (panel && canvas) {
 	// The page's content comes first, so this waits until the browser has a moment.
 	const idle = window.requestIdleCallback ?? ((run: () => void) => setTimeout(run, 200));
-	idle(() => start(hero, panel));
+	idle(() => start(panel, canvas, panel.querySelector<HTMLElement>('[data-hero-step]')));
 }
