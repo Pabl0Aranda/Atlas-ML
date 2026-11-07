@@ -52,6 +52,12 @@ jobs:
           SITE_URL: ${{ steps.pages.outputs.origin }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
 
+      # A broken link stops the site from being published.
+      - name: Check links in the built site
+        run: npm run check:links
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
       - name: Upload the site
         uses: actions/upload-pages-artifact@v3
         with:

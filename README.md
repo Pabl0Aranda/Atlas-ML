@@ -50,6 +50,7 @@ The site then runs at `localhost:4321`.
 | `npm test` | Run the unit, sandbox contract and link tests |
 | `npm run check` | Type-check the project |
 | `npm run build` | Build the site and search index into `dist/` |
+| `npm run check:links` | Check every internal link and file in the build. Set `BASE_PATH` to match the build |
 | `npm run preview` | Serve the build. Search only works after a build |
 
 ## Tech stack
