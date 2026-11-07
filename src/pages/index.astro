@@ -6,10 +6,10 @@ import { ALGORITHM_PAGE_COUNT, CATALOG, SANDBOX_COUNT } from '@/data/catalog';
 import { withBase } from '@/lib/url';
 
 const workflow = [
-	{ title: 'Prepare', text: 'Clean the data, separate it, and process it into numbers.', href: '/data-preparation/overview/' },
-	{ title: 'Train', text: 'Choose an algorithm and fit it to the training set.', href: '/catalog/' },
-	{ title: 'Validate', text: 'Compare models and tune settings on held-out data.', href: '/validation/overview/' },
-	{ title: 'Test', text: 'Measure the final model once, honestly.', href: '/testing/overview/' },
+	{ stage: 'prepare', title: 'Prepare', text: 'Clean the data, separate it, and process it into numbers.', href: '/data-preparation/overview/' },
+	{ stage: 'train', title: 'Train', text: 'Choose an algorithm and fit it to the training set.', href: '/catalog/' },
+	{ stage: 'validate', title: 'Validate', text: 'Compare models and tune settings on held-out data.', href: '/validation/overview/' },
+	{ stage: 'test', title: 'Test', text: 'Measure the final model once, honestly.', href: '/testing/overview/' },
 ];
 
 const stats = [
@@ -72,7 +72,7 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 				{workflow.map((step, i) => (
 					<li class="m-0">
 						<a href={withBase(step.href)} class="atlas-card h-full p-4">
-							<span class="flex size-7 items-center justify-center rounded-full bg-(--sl-color-accent) text-sm font-semibold text-(--on-accent)">{i + 1}</span>
+							<span class="pipeline-badge" style={`--stage: var(--pipeline-${step.stage})`}>{i + 1}</span>
 							<span class="font-display mt-3 block text-lg font-semibold">{step.title}</span>
 							<span class="mt-1 block text-sm leading-snug text-(--viz-muted-ink)">{step.text}</span>
 						</a>

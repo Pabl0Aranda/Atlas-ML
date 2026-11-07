@@ -35,11 +35,29 @@ describe.each(Object.entries(themes))('%s theme', (_, scope) => {
 		expect(ratio(token(scope, '--viz-muted-ink'), token(scope, '--viz-panel'))).toBeGreaterThanOrEqual(4.5);
 	});
 
-	it('keeps text on the accent at 4.5:1', () => {
-		expect(ratio(token(css, '--on-accent'), token(css, '--color-accent-600'))).toBeGreaterThanOrEqual(4.5);
+	it('keeps text on the accent fill at 4.5:1', () => {
+		expect(ratio(token(css, '--on-accent'), token(css, '--accent-fill'))).toBeGreaterThanOrEqual(4.5);
 	});
 
-	it('keeps the accent visible on the page, for focus rings', () => {
-		expect(ratio(token(css, '--color-accent-600'), token(scope, '--viz-surface'))).toBeGreaterThanOrEqual(3);
+	it('keeps the accent visible on the page, for focus rings and borders', () => {
+		expect(ratio(token(scope, '--sl-color-accent'), token(scope, '--sl-color-black'))).toBeGreaterThanOrEqual(3);
 	});
+
+	it('keeps body and muted text at 4.5:1 on the page', () => {
+		expect(ratio(token(scope, '--sl-color-text'), token(scope, '--sl-color-black'))).toBeGreaterThanOrEqual(4.5);
+		expect(ratio(token(scope, '--sl-color-gray-3'), token(scope, '--sl-color-black'))).toBeGreaterThanOrEqual(4.5);
+	});
+
+	it.each(['--pipeline-prepare', '--pipeline-train', '--pipeline-validate', '--pipeline-test'])(
+		'%s reaches 3:1 on cards',
+		(name) => {
+			expect(ratio(token(scope, name), token(scope, '--viz-panel'))).toBeGreaterThanOrEqual(3);
+		},
+	);
+});
+
+// Starlight colors links with the high accent in the dark theme and the accent in the light one.
+it('keeps links at 4.5:1 on the page in both themes', () => {
+	expect(ratio(token(themes.dark, '--sl-color-accent-high'), token(themes.dark, '--sl-color-black'))).toBeGreaterThanOrEqual(4.5);
+	expect(ratio(token(themes.light, '--sl-color-accent'), token(themes.light, '--sl-color-black'))).toBeGreaterThanOrEqual(4.5);
 });
