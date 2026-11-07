@@ -1,0 +1,44 @@
+---
+import type { Family } from '@/data/catalog';
+
+interface Props {
+	family: Family;
+	class?: string;
+}
+
+const { family, class: className } = Astro.props;
+
+// Each family gets a picture of its core idea, drawn on a 24-pixel grid.
+const ICONS: Record<Family, string> = {
+	// A funnel: raw data in, clean data out.
+	'Data Preparation': '<path d="M4 5h16l-6 7.5V18l-4 2v-7.5L4 5z"/>',
+	// Arrows going round: the validation fold rotates.
+	Validation: '<path d="M20 12a8 8 0 0 1-14.3 4.9"/><path d="M4 12a8 8 0 0 1 14.3-4.9"/><path d="M18.5 3v4.2h-4.2"/><path d="M5.5 21v-4.2h4.2"/>',
+	// A target with a hit: measuring how close predictions land.
+	Testing: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/>',
+	// A decision tree: one question splitting into two answers.
+	'Supervised Learning': '<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/>',
+	// Three groups of dots: clusters found without labels.
+	'Unsupervised Learning': '<g fill="currentColor" stroke="none"><circle cx="6" cy="7" r="1.6"/><circle cx="9" cy="5" r="1.6"/><circle cx="8.5" cy="9" r="1.6"/><circle cx="17" cy="6.5" r="1.6"/><circle cx="19" cy="9.5" r="1.6"/><circle cx="12" cy="17" r="1.6"/><circle cx="15" cy="18.5" r="1.6"/><circle cx="10.5" cy="19.5" r="1.6"/></g>',
+	// A bell curve over a baseline: a probability distribution.
+	'Statistical Learning': '<path d="M3 20h18"/><path d="M3 19c3 0 4-12 9-12s6 12 9 12"/>',
+	// A flag on a path: an agent heading for its reward.
+	'Reinforcement Learning': '<path d="M6 21V4"/><path d="M6 4h11l-2.5 4 2.5 4H6"/>',
+	// Connected layers: a small neural network.
+	'Deep Learning': '<circle cx="5" cy="7" r="2"/><circle cx="5" cy="17" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 7.5l3-2M7 8l3 3.3M7 16l3-3.3M7 16.5l3 2M14 5.8l3.4 5M14 12h3M14 18.2l3.4-5"/>',
+};
+---
+
+<svg
+	class={className}
+	viewBox="0 0 24 24"
+	width="24"
+	height="24"
+	fill="none"
+	stroke="currentColor"
+	stroke-width="1.75"
+	stroke-linecap="round"
+	stroke-linejoin="round"
+	aria-hidden="true"
+	set:html={ICONS[family]}
+/>

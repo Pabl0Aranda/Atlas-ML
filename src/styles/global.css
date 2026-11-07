@@ -194,7 +194,7 @@ h3,
 	background: var(--viz-panel);
 	color: var(--viz-ink);
 	text-decoration: none;
-	transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+	transition: all 0.3s;
 }
 
 a.atlas-card.flex {
@@ -205,10 +205,17 @@ a.atlas-card.grid {
 	display: grid;
 }
 
+/* Tailwind's hover:-translate-y-1 hover:shadow-lg, with a deeper shadow so it
+   still shows on the dark background. */
 .atlas-card:hover {
 	border-color: var(--sl-color-accent);
-	box-shadow: 0 6px 20px -12px rgb(0 0 0 / 0.45);
-	transform: translateY(-2px);
+	box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.35), 0 4px 6px -4px rgb(0 0 0 / 0.35);
+	transform: translateY(-0.25rem);
+}
+
+.family-icon {
+	flex: none;
+	color: var(--sl-color-text-accent);
 }
 
 .atlas-card[data-playing] {
