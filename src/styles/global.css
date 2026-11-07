@@ -59,14 +59,6 @@ h3,
 	padding-block: 0.25rem;
 }
 
-.hero-plot svg {
-	display: block;
-	width: min(100%, 24rem);
-	margin-inline: auto;
-	border-radius: 0.75rem;
-	border: 1px solid var(--viz-border);
-}
-
 :root {
 	--sl-content-width: 50rem;
 }
@@ -81,7 +73,45 @@ h3,
 }
 
 .hero {
-	padding-block: 2.5rem 3rem;
+	grid-template-columns: 100%;
+	padding-block: 4rem 4.5rem;
+}
+
+.hero .stack,
+.hero .copy {
+	align-items: center;
+	text-align: center;
+}
+
+.hero .actions {
+	justify-content: center;
+}
+
+/* Live k-means behind the home title. It fades out towards the middle and the
+   bottom, so it never competes with the text. */
+.has-live-hero {
+	position: relative;
+}
+
+.has-live-hero > .sl-container {
+	position: relative;
+}
+
+.hero-canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	pointer-events: none;
+	opacity: 0.7;
+	mask-image: radial-gradient(ellipse 60% 50% at 50% 38%, transparent 55%, #000 100%), linear-gradient(to bottom, #000 72%, transparent);
+	mask-composite: intersect;
+}
+
+@media (max-width: 40rem) {
+	.hero-canvas {
+		opacity: 0.4;
+	}
 }
 
 .hero h1 {
