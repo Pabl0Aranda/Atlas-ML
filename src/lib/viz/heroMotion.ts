@@ -29,7 +29,7 @@ export interface HeroPose {
 const easeInOut = (p: number) => (p < 0.5 ? 2 * p * p : 1 - (-2 * p + 2) ** 2 / 2);
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 
-/** Clusters sit towards the corners, which leaves the middle clear for the title. */
+/** Clusters sit towards the corners, so the centroids have room to travel. */
 function heroDataset(n: number, rng: () => number): Dataset {
 	const gaussian = () => (rng() + rng() + rng() - 1.5) * 0.8;
 	const corners = [
@@ -101,7 +101,7 @@ export function drawHero(ctx: CanvasRenderingContext2D, w: number, h: number, ru
 	const py = (y: number) => ((y + 1) / 2) * h;
 	const from = run.steps[pose.step].assignments;
 	const to = run.steps[Math.min(pose.step + 1, run.steps.length - 1)].assignments;
-	const r = Math.max(2, Math.min(w, h) * 0.008);
+	const r = Math.max(2.5, Math.min(w, h) * 0.013);
 
 	run.data.forEach((p, i) => {
 		const owner = pose.recolor > 0.5 ? to[i] : from[i];
@@ -109,7 +109,7 @@ export function drawHero(ctx: CanvasRenderingContext2D, w: number, h: number, ru
 		const y = py(p.y);
 		const centroid = pose.centroids[owner];
 
-		ctx.globalAlpha = pose.opacity * 0.14;
+		ctx.globalAlpha = pose.opacity * 0.22;
 		ctx.strokeStyle = colors.series[owner];
 		ctx.lineWidth = 1;
 		ctx.beginPath();
