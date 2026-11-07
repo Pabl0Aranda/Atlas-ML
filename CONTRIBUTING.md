@@ -26,6 +26,13 @@ npm run check
 npm run build
 ```
 
+CI also checks every link in the built site. To run that check yourself, build the site with the GitHub Pages subfolder, then check it:
+
+```bash
+BASE_PATH=/Atlas-ML npm run build
+BASE_PATH=/Atlas-ML npm run check:links
+```
+
 ## Branches
 
 `main` is the only long-lived branch and always stays working. Work on a short-lived branch from `main`, named with one of these prefixes:

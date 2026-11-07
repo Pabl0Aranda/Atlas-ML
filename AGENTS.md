@@ -18,10 +18,11 @@ These are the owner's decisions. Don't work around them, and ask before changing
 npm test          # Unit, sandbox contract, contrast and link tests
 npm run check     # Type-check, including .astro and .mdx files
 npm run build     # Full static build
+npm run check:links  # Every internal link in dist/. Set BASE_PATH to match the build
 npm run dev       # Dev server at localhost:4321
 ```
 
-Run all three of `npm test`, `npm run check` and `npm run build` before calling work finished. Changes to sandboxes or pages also need checking in a browser, because tests can't see layout.
+Run all three of `npm test`, `npm run check` and `npm run build` before calling work finished. CI also builds the site under `/Atlas-ML` and runs `npm run check:links` on it, so a link that only breaks in the real build still fails the pull request. Changes to sandboxes or pages also need checking in a browser, because tests can't see layout.
 
 ## Git Workflow
 
