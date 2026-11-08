@@ -46,7 +46,7 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 			title: 'See how machine learning actually works',
 			tagline: 'Run algorithms step by step, follow the math, then read the exact code behind every animation.',
 			image: {
-				html: `<figure class="hero-live" data-hero-live><canvas aria-hidden="true"></canvas><figcaption><span>k-means, running live</span><span data-hero-step></span><span class="sr-only">An animation of k-means grouping scattered points into four clusters, step by step.</span></figcaption></figure>`,
+				html: `<figure class="hero-live" data-hero-live><canvas tabindex="0" role="application" aria-roledescription="plot" aria-label="Live k-means plot: points grouped into four clusters, step by step. Click or tap to add a point. From the keyboard, move with the arrow keys and press Enter."></canvas><figcaption><span>k-means, running live. <span class="hero-hint">Click or tap to add points.</span></span><span class="hero-live-status"><span data-hero-step></span><button type="button" class="hero-reset" data-hero-reset hidden>Reset</button></span><span class="sr-only" aria-live="polite" data-hero-announce></span></figcaption></figure>`,
 			},
 			actions: [
 				{ text: 'Start here', link: withBase('/start-here/'), icon: 'right-arrow' },

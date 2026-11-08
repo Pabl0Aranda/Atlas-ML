@@ -172,6 +172,39 @@ h3,
 	display: block;
 	width: 100%;
 	aspect-ratio: 4 / 3;
+	cursor: crosshair;
+	touch-action: manipulation;
+}
+
+.hero-live canvas:focus-visible {
+	outline: 2px solid var(--sl-color-accent);
+	outline-offset: -2px;
+}
+
+.hero-live-status {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	white-space: nowrap;
+}
+
+.hero-reset {
+	padding: 0.125rem 0.5rem;
+	border: 1px solid var(--viz-border);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--viz-ink);
+	font: inherit;
+	cursor: pointer;
+}
+
+.hero-reset:hover {
+	border-color: var(--sl-color-accent);
+}
+
+.hero-reset:focus-visible {
+	outline: 2px solid var(--sl-color-accent);
+	outline-offset: 2px;
 }
 
 .hero-live figcaption {
