@@ -25,11 +25,13 @@ describe('stageFor', () => {
 		expect(stageFor('distance-metrics/geometric/')).toBe('train');
 		expect(stageFor('validation/cross-validation')).toBe('validate');
 		expect(stageFor('testing/regression-metrics')).toBe('test');
+		expect(stageFor('testing/explainability')).toBe('test');
+		expect(stageFor('deployment/overview')).toBe('deploy');
 		expect(stageFor('concepts/gradient-descent')).toBe('train');
 		expect(stageFor('concepts/overfitting-underfitting')).toBe('validate');
 	});
 
-	it('lists the four stages in workflow order', () => {
-		expect(STAGES.map((s) => s.label)).toEqual(['Prepare', 'Train', 'Validate', 'Test']);
+	it('lists the five stages in workflow order', () => {
+		expect(STAGES.map((s) => s.label)).toEqual(['Prepare', 'Train', 'Validate', 'Test', 'Deploy']);
 	});
 });

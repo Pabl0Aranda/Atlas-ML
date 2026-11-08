@@ -48,7 +48,7 @@ describe.each(Object.entries(themes))('%s theme', (_, scope) => {
 		expect(ratio(token(scope, '--sl-color-gray-3'), token(scope, '--sl-color-black'))).toBeGreaterThanOrEqual(4.5);
 	});
 
-	it.each(['--pipeline-prepare', '--pipeline-train', '--pipeline-validate', '--pipeline-test'])(
+	it.each(['--pipeline-prepare', '--pipeline-train', '--pipeline-validate', '--pipeline-test', '--pipeline-deploy'])(
 		'%s reaches 3:1 on cards',
 		(name) => {
 			expect(ratio(token(scope, name), token(scope, '--viz-panel'))).toBeGreaterThanOrEqual(3);

@@ -10,6 +10,7 @@ const workflow = [
 	{ stage: 'train', title: 'Train', text: 'Choose an algorithm and fit it to the training set.', href: '/catalog/' },
 	{ stage: 'validate', title: 'Validate', text: 'Compare models and tune settings on held-out data.', href: '/validation/overview/' },
 	{ stage: 'test', title: 'Test', text: 'Measure the final model once, honestly.', href: '/testing/overview/' },
+	{ stage: 'deploy', title: 'Deploy', text: 'Save the model and serve its predictions in production.', href: '/deployment/overview/' },
 ];
 
 const stats = [
@@ -67,8 +68,8 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 
 		<section id="workflow" class="mt-14 scroll-mt-24">
 			<h2 class="m-0 text-2xl font-semibold sm:text-3xl">The workflow, end to end</h2>
-			<p class="m-0 mt-2 text-(--viz-muted-ink)">Every project follows the same four stages. Pick one to begin.</p>
-			<ol class="m-0 mt-6 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-4">
+			<p class="m-0 mt-2 text-(--viz-muted-ink)">Every project follows the same five stages. Pick one to begin.</p>
+			<ol class="m-0 mt-6 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-5">
 				{workflow.map((step, i) => (
 					<li class="m-0">
 						<a href={withBase(step.href)} class="atlas-card h-full p-4">

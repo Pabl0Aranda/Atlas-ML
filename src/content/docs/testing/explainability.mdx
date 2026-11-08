@@ -1,0 +1,97 @@
+---
+title: Explainability
+description: Find out which features drive a model's predictions, overall and for one case, with permutation importance, SHAP and LIME.
+sidebar:
+  order: 4
+---
+
+import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
+
+## Intuition & Overview
+
+A test score tells you how often a model is right, not why. Before trusting a model with real decisions, it helps to know what it pays attention to. That can expose a model that learned a shortcut, such as a hospital's scanner model reading the hospital's name off the image instead of the scan itself.
+
+Explanations come at two levels:
+
+- **Global:** which <Term id="feature">features</Term> matter most across all predictions. Useful for checking the model as a whole.
+- **Local:** why the model made one particular prediction. Useful when someone asks why their loan was refused.
+
+## Models That Explain Themselves
+
+Some models can be read directly. A [decision tree](/algorithms/decision-tree/) shows its questions, and a [linear model](/algorithms/linear-regression/) has one weight per feature, as long as the features are on the same scale. [Lasso](/algorithms/lasso-regression/) goes further and sets unhelpful weights to exactly zero.
+
+Most accurate models, such as [random forests](/algorithms/random-forest/), [gradient boosting](/algorithms/gradient-boosting/) and [neural networks](/algorithms/mlp/), are too large to read. The methods below treat them as black boxes: they only feed in inputs and watch the outputs, so they work with any model.
+
+## Permutation Importance
+
+Shuffle one feature's column in the test set, so its values no longer match their rows, and measure how much the score drops. A feature the model relies on causes a large drop. A feature it ignores causes none.
+
+$$
+\text{importance}_j = s - \frac{1}{K} \sum_{k=1}^{K} s_{j,k}
+$$
+
+Here $s$ is the score on the real test set, and $s_{j,k}$ is the score after the $k$-th random shuffle of feature $j$. Averaging over $K$ shuffles smooths out luck. It is global, simple and cheap, and it measures importance on held-out data rather than on the data the model memorized.
+
+## SHAP
+
+SHAP, short for SHapley Additive exPlanations, splits one prediction into a contribution per feature. The contributions add up exactly to the gap between this prediction and the model's average prediction:
+
+$$
+f(x) = \mathbb{E}[f(X)] + \sum_{j=1}^{p} \phi_j
+$$
+
+Each $\phi_j$ comes from game theory. It is feature $j$'s average effect on the prediction when it joins every possible group of the other features. A positive $\phi_j$ pushed this prediction up, and a negative one pushed it down.
+
+SHAP is local, but averaging the size of each $\phi_j$ over many predictions gives a global ranking too. Computing it exactly takes time that grows exponentially with the number of features, so libraries use fast exact methods for trees and approximations for other models.
+
+## LIME
+
+LIME, short for Local Interpretable Model-agnostic Explanations, explains one prediction by fitting a simple model around it. It makes many small changes to the input, asks the black box for a prediction on each, and fits a weighted linear model $g$ to those answers:
+
+$$
+\min_{g} \sum_{z} \pi_x(z) \big(f(z) - g(z)\big)^2 + \Omega(g)
+$$
+
+The weight $\pi_x(z)$ is larger for samples $z$ close to the original input $x$, and $\Omega(g)$ keeps $g$ simple, for instance by limiting it to a few features. The weights of $g$ are the explanation: a straight-line summary of how the model behaves near that one point.
+
+## Comparison
+
+| Method | Level | Strength | Watch out for |
+| --- | --- | --- | --- |
+| Permutation importance | Global | Simple, works on held-out data | Misleading with strongly correlated features |
+| SHAP | Local and global | Contributions add up exactly, with solid theory | Slow for large non-tree models |
+| LIME | Local | Fast, works on text and images too | Results can change between runs and with settings |
+
+## Code
+
+```python
+import shap
+from lime.lime_tabular import LimeTabularExplainer
+from sklearn.inspection import permutation_importance
+
+# Global: how much the test score drops when each feature is shuffled.
+result = permutation_importance(model, X_test, y_test, n_repeats=10, random_state=0)
+for i in result.importances_mean.argsort()[::-1][:5]:
+    print(f"{feature_names[i]:<25} {result.importances_mean[i]:.3f}")
+
+# SHAP: each feature's push on each prediction, for the positive class.
+explainer = shap.TreeExplainer(model)
+shap_values = explainer(X_test)[:, :, 1]
+shap.plots.bar(shap_values)        # global: average impact per feature
+shap.plots.waterfall(shap_values[0])  # local: one prediction, feature by feature
+
+# LIME: a simple model fitted around one prediction.
+lime = LimeTabularExplainer(X_train, feature_names=feature_names, class_names=class_names, random_state=0)
+print(lime.explain_instance(X_test[0], model.predict_proba, num_features=5).as_list())
+```
+
+<NotebookLinks page="testing/explainability" />
+
+## Pitfalls
+
+- **Importance is not causation.** A feature can matter to the model only because it travels with the real cause. Changing it in the real world may change nothing.
+- **Correlated features share credit.** If two features carry the same information, shuffling one barely hurts, because the model reads the other. Both can look unimportant.
+- **A bad model gets a confident explanation.** Explanations describe the model, not the world, so check the [test score](/testing/overview/) first.
+- **Local is not global.** One prediction's explanation says little about the next one, especially in a flexible model.
+- **Explanations need context.** "Income lowered the score by 0.12" means little without the average score and the scale it's on.

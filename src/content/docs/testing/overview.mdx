@@ -32,6 +32,7 @@ Testing answers a different question from [validation](/validation/overview/): *
 | Slice analysis | Performance per subgroup |
 | Calibration curves | Whether a predicted 80% really happens 80% of the time |
 | Robustness tests | Behavior with noise, missing fields and unusual inputs |
+| [Explainability](/testing/explainability/) | Which features drive predictions, with permutation importance, SHAP and LIME |
 
 ## Confidence Intervals
 
@@ -47,7 +48,7 @@ At 90% accuracy on 100 samples, that is about $\pm 6$ points, so a model at 92% 
 
 ## Testing in Production
 
-A test set is a snapshot, and the world keeps changing.
+A test set is a snapshot, and the world keeps changing. Saving, serving and monitoring a model are covered in [Deployment](/deployment/overview/).
 
 - **Shadow deployment:** run the model on live traffic without acting on its predictions.
 - **A/B testing:** send part of the traffic to the new model and compare business outcomes.
