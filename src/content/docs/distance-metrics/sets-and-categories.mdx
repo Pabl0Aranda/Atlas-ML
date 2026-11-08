@@ -8,6 +8,7 @@ sidebar:
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import { SetDistanceDemo } from '@/components/interactive/TextDistanceDemo';
+import Term from '@/components/docs/Term.astro';
 
 Not all data lives on a number line. "Red" is not halfway between "blue" and "green", and a list of tags has no coordinates. These distances compare such data directly.
 
@@ -60,7 +61,6 @@ Hamming distance below compares characters by position, while Jaccard distance c
 <TabItem label="This site's engine">
 ```ts
 import { hamming, jaccardDistance } from '@/lib/ml/distance';
-import Term from '@/components/docs/Term.astro';
 
 hamming('karolin', 'kathrin'); // 3
 jaccardDistance(new Set([1, 2, 3]), new Set([2, 3, 4])); // 0.5

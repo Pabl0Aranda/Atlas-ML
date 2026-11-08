@@ -6,6 +6,7 @@ description: Q-Learning with a neural network in place of the table, stabilized 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -51,7 +52,6 @@ The sandbox trains on one minibatch per move. Because each sample's gradient is 
 <TabItem label="PyTorch">
 ```python
 import torch
-import Term from '@/components/docs/Term.astro';
 from torch import nn
 
 def train_step(online, target, optimizer, batch, gamma=0.98):

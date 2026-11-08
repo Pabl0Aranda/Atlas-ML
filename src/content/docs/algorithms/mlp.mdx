@@ -6,6 +6,7 @@ description: A feedforward neural network trained with backpropagation.
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -55,7 +56,6 @@ Hover over the plot to trace how a location activates each neuron. Edge width sh
 <TabItem label="PyTorch">
 ```python
 import torch
-import Term from '@/components/docs/Term.astro';
 from torch import nn
 
 model = nn.Sequential(nn.Linear(2, 6), nn.Tanh(), nn.Linear(6, 6), nn.Tanh(), nn.Linear(6, 1))

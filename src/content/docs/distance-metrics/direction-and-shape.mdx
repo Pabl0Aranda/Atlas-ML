@@ -8,6 +8,7 @@ sidebar:
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import DistanceExplorer from '@/components/interactive/DistanceExplorer';
+import Term from '@/components/docs/Term.astro';
 
 [Geometric distances](/distance-metrics/geometric/) take coordinates at face value. These two do not: cosine distance ignores how long a vector is, and Mahalanobis distance adjusts for how the data is spread.
 
@@ -79,7 +80,6 @@ mahalanobis([0, 0], [0.3, 0.3], inverse);
 <TabItem label="SciPy">
 ```python
 import numpy as np
-import Term from '@/components/docs/Term.astro';
 from scipy.spatial import distance
 
 distance.cosine([1, 2], [2, 4])  # 0.0
