@@ -89,3 +89,52 @@ export function classifyTree(node: TreeNode, x: number, y: number): number {
 export function treeDepth(node: TreeNode): number {
 	return node.kind === 'leaf' ? 0 : 1 + Math.max(treeDepth(node.left), treeDepth(node.right));
 }
+
+export interface SplitStats {
+	left: { samples: number; gini: number };
+	right: { samples: number; gini: number };
+	/** Each side's Gini weighted by its share of the samples. The tree picks the split that minimizes it. */
+	weighted: number;
+	/** How much the split lowers impurity: the parent's Gini minus the weighted Gini. */
+	gain: number;
+}
+
+/** The arithmetic behind one split, as the calculations panel shows it. */
+export function splitStats(data: DataPoint[], feature: Feature, threshold: number): SplitStats {
+	const left = data.filter((p) => p[feature] <= threshold);
+	const right = data.filter((p) => p[feature] > threshold);
+	const weighted = data.length ? (left.length * gini(left) + right.length * gini(right)) / data.length : 0;
+	return {
+		left: { samples: left.length, gini: gini(left) },
+		right: { samples: right.length, gini: gini(right) },
+		weighted,
+		gain: gini(data) - weighted,
+	};
+}
+
+export interface LevelSplit extends SplitStats {
+	/** The rules leading to this node from the root, such as "x ≤ 0.12". */
+	path: string[];
+	samples: number;
+	gini: number;
+	feature: Feature;
+	threshold: number;
+}
+
+/** Every split made at one level of the tree, counting the root's split as level 1. */
+export function splitsAtLevel(root: TreeNode, data: DataPoint[], level: number): LevelSplit[] {
+	const found: LevelSplit[] = [];
+	const visit = (node: TreeNode, rows: DataPoint[], depth: number, path: string[]) => {
+		if (node.kind === 'leaf') return;
+		const { feature, threshold } = node;
+		if (depth === level) {
+			found.push({ path, samples: rows.length, gini: gini(rows), feature, threshold, ...splitStats(rows, feature, threshold) });
+			return;
+		}
+		const rule = threshold.toFixed(2);
+		visit(node.left, rows.filter((p) => p[feature] <= threshold), depth + 1, [...path, `${feature} ≤ ${rule}`]);
+		visit(node.right, rows.filter((p) => p[feature] > threshold), depth + 1, [...path, `${feature} > ${rule}`]);
+	};
+	if (level >= 1) visit(root, data, 1, []);
+	return found;
+}

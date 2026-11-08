@@ -1,8 +1,8 @@
 import type { Dataset } from '../../../types/ml';
 import type { AlgorithmSpec, Diagram, DiagramNode } from '../../../types/viz';
-import { buildTree, classifyTree, treeDepth, type TreeNode } from '../../ml/decisionTree';
+import { buildTree, classifyTree, gini, splitsAtLevel, treeDepth, type TreeNode } from '../../ml/decisionTree';
 import { accuracy } from '../../ml/knn';
-import { classPoints, percent } from '../scene';
+import { classPoints, fixed, percent } from '../scene';
 
 interface State {
 	depth: number;
@@ -60,4 +60,33 @@ export const decisionTree: AlgorithmSpec<State> = {
 		return `Depth ${treeDepth(s.tree)} fits ${percent(classify(s, data))} of the training points. Every split is axis-aligned.`;
 	},
 	diagram: (s) => treeDiagram(s.tree),
+	calculations(s, data) {
+		const columns = ['Node', 'n', 'Gini', 'Split', 'Left n · Gini', 'Right n · Gini', 'Weighted', 'Gain'];
+		if (s.depth === 0) {
+			return {
+				title: 'The root node, before any split',
+				columns: ['Samples', 'Gini'],
+				rows: [[String(data.length), fixed(gini(data))]],
+				note: 'Step to search every threshold on x and y for the split that lowers the Gini impurity the most.',
+			};
+		}
+		const splits = splitsAtLevel(s.tree, data, s.depth);
+		return {
+			title: `Splits made at depth ${s.depth}`,
+			columns,
+			rows: splits.map((row) => [
+				row.path.join(' → ') || 'Root',
+				String(row.samples),
+				fixed(row.gini),
+				`${row.feature} ≤ ${row.threshold.toFixed(2)}`,
+				`${row.left.samples} · ${fixed(row.left.gini)}`,
+				`${row.right.samples} · ${fixed(row.right.gini)}`,
+				fixed(row.weighted),
+				fixed(row.gain),
+			]),
+			note: splits.length
+				? 'n is the number of samples. Weighted = (n_left · Gini_left + n_right · Gini_right) / n, and Gain = Gini − Weighted. Each node keeps the threshold on x or y with the largest gain.'
+				: 'No node could split further: every leaf is already pure, or too small to split.',
+		};
+	},
 };

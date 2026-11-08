@@ -9,6 +9,7 @@ import { createTimeline, currentFrame, pushFrame, seekFrame, type Timeline } fro
 import type { DatasetKind } from '@/types/ml';
 import type { AlgorithmId, AlgorithmSpec } from '@/types/viz';
 import { buttonClass, CopyLinkButton, fieldLabelClass, MetricList, ParamControl, PlotLegend, primaryButtonClass, selectClass, SPEEDS, TICK_MS, TimelineControl } from './controls';
+import CalculationsPanel from './CalculationsPanel';
 import DiagramView from './DiagramView';
 import HistoryChart from './HistoryChart';
 import LiveEquation from './LiveEquation';
@@ -36,6 +37,7 @@ function Runner({ spec, presets, heading }: { spec: AlgorithmSpec; presets: Pres
 	const editable = spec.editable !== false;
 	const modelScene = useMemo(() => spec.scene(state, data, params), [state, data, params]);
 	const scene = useMemo(() => withHeldOut(modelScene, test), [modelScene, test]);
+	const calculations = useMemo(() => spec.calculations?.(state, data, params, probe), [state, data, params, probe]);
 
 	const restart = (next: SandboxSetup, preset: Preset | null = null) => {
 		setPlaying(false);
@@ -308,6 +310,8 @@ function Runner({ spec, presets, heading }: { spec: AlgorithmSpec; presets: Pres
 				class="mt-3 border-t border-(--viz-border) pt-3 sm:grid-cols-4"
 				metrics={[...spec.metrics(state, data, params), ...heldOutMetrics(modelScene.region, test)]}
 			/>
+
+			{calculations && <CalculationsPanel calculations={calculations} />}
 
 			{(series || diagram) && (
 				<div class="mt-3 grid gap-4 border-t border-(--viz-border) pt-3">

@@ -47,3 +47,28 @@ export function classifyNaiveBayes(model: ClassStats[], x: number, y: number, fe
 	for (const c of model) if (logPosterior(c, x, y, features) > logPosterior(best, x, y, features)) best = c;
 	return best.label;
 }
+
+export interface PosteriorRow {
+	label: number;
+	prior: number;
+	/** The Gaussian density of each feature in use, given the class. */
+	likelihood: Partial<Record<Feature, number>>;
+	/** P(class | features), normalized so the rows sum to 1. */
+	posterior: number;
+}
+
+/** Prior times likelihoods for each class at one location, as the calculations panel shows them. */
+export function explainNaiveBayes(model: ClassStats[], x: number, y: number, features: Feature[]): PosteriorRow[] {
+	const point = { x, y };
+	const logs = model.map((c) => logPosterior(c, x, y, features));
+	// Normalizing in log space keeps tiny products from rounding to zero.
+	const top = Math.max(...logs);
+	const weights = logs.map((l) => Math.exp(l - top));
+	const total = weights.reduce((s, w) => s + w, 0);
+	return model.map((c, i) => ({
+		label: c.label,
+		prior: c.prior,
+		likelihood: Object.fromEntries(features.map((f) => [f, Math.exp(logGaussian(point[f], c.mean[f], c.variance[f]))])),
+		posterior: weights[i] / total,
+	}));
+}
