@@ -22,6 +22,10 @@ describe('sandboxHeading', () => {
 		expect(heading).toEqual({ name: 'Polynomial Regression', stage: 'validate' });
 	});
 
+	it('names a concept sandbox that has no catalog entry', () => {
+		expect(sandboxHeading('gradient-descent', '/concepts/gradient-descent/').name).toBe('Gradient Descent');
+	});
+
 	it('gives every catalog sandbox a stage on its own page', () => {
 		const missing = FEATURED.filter((e) => !sandboxHeading(e.page!.id, `/${e.page!.path ?? `algorithms/${e.page!.id}`}/`).stage);
 		expect(missing.map((e) => e.name)).toEqual([]);

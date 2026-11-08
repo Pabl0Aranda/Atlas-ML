@@ -34,6 +34,7 @@ const loaders: Record<AlgorithmId, () => Promise<AlgorithmSpec>> = {
 	'cross-validation': () => import('./specs/evaluation').then((m) => m.crossValidation),
 	'hyperparameter-search': () => import('./specs/evaluation').then((m) => m.hyperparameterSearch),
 	'threshold-metrics': () => import('./specs/evaluation').then((m) => m.thresholdMetrics),
+	'gradient-descent': () => import('./specs/gradientDescent').then((m) => m.gradientDescent),
 };
 
 export const ALGORITHM_IDS = Object.keys(loaders) as AlgorithmId[];
