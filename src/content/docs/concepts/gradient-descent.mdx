@@ -5,6 +5,8 @@ sidebar:
   order: 3
 ---
 
+import Sandbox from '@/components/interactive/Sandbox';
+
 Gradient descent minimizes a loss by repeatedly stepping downhill:
 
 $$
@@ -19,7 +21,35 @@ The gradient $\nabla L(w)$ points in the direction of steepest increase, so we m
 - **Well chosen:** the loss falls steadily.
 - **Too large:** updates overshoot, and the loss can oscillate or diverge.
 
-You can see all three in the [linear regression sandbox](/algorithms/linear-regression/#interactive-sandbox).
+## Momentum
+
+Plain descent forgets every step as soon as it takes it. Momentum keeps a share $\beta$ of the last step $v$ and adds the new one to it:
+
+$$
+v \leftarrow \beta v - \alpha \nabla L(w)
+$$
+
+$$
+w \leftarrow w + v
+$$
+
+Steps that keep pointing the same way build up speed, and steps that flip back and forth cancel out. That helps most in long, narrow valleys, where plain descent bounces across the valley and makes little progress along it. With $\beta = 0$ this is plain gradient descent again.
+
+## Interactive Sandbox
+
+The plot shows a loss over two weights, $w_1$ across and $w_2$ up. Each gray line joins weights with the same loss, like the contour lines on a map, and the lines crowd together where the slope is steeper. The large dot marks the current weights, and the dark line traces every step from the start. Point at the plot to read the loss there.
+
+Use the **Try this** buttons below, and press **Play** after each one:
+
+- **Zigzag:** the steps overshoot the floor of a narrow valley and bounce from side to side, yet the run still settles after 39 steps.
+- **Too large:** a slightly larger learning rate makes each bounce bigger than the last, and the weights fly off the plot.
+- **Momentum:** a small learning rate with momentum settles in 54 steps. Without momentum, the same learning rate is still crawling after 200.
+- **Local minimum:** with two valleys, the one you end in depends on where you start, not on which is deeper.
+- **Curved valley:** the gradient points across a bent valley floor rather than along it, which slows plain descent down.
+
+<Sandbox client:idle algorithm="gradient-descent" />
+
+Real models have thousands or millions of weights rather than two, so their loss can't be drawn. The same things still happen along every direction at once. You can also watch a learning rate that is too large in the [linear regression sandbox](/algorithms/linear-regression/#interactive-sandbox).
 
 ## Variants
 

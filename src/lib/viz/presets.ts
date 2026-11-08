@@ -81,6 +81,13 @@ export const PRESETS: Partial<Record<AlgorithmId, Preset[]>> = {
 	'lasso-regression': [
 		{ label: 'Heavy penalty', note: 'Press Play. The L1 penalty drives weights to exactly zero, leaving only 1 of 9 terms. That is the difference from ridge.', params: { lambda: 0.2 } },
 	],
+	'gradient-descent': [
+		{ label: 'Zigzag', note: 'Press Play. Each step overshoots the valley floor and bounces to the other side, yet the loss still falls, and the run settles after 39 steps.', params: { surface: 1, alpha: 0.2, beta: 0, startX: -0.8, startY: 0.6 } },
+		{ label: 'Too large', note: 'Press Play. A learning rate only a little higher makes each bounce bigger than the last, and the weights leave the plot after 29 steps.', params: { surface: 1, alpha: 0.23, beta: 0, startX: -0.8, startY: 0.6 } },
+		{ label: 'Momentum', note: 'A small learning rate with momentum 0.8 settles in 54 steps. Set Momentum to 0 and the same learning rate is still crawling after 200.', params: { surface: 1, alpha: 0.02, beta: 0.8, startX: -0.8, startY: 0.6 } },
+		{ label: 'Local minimum', note: 'Press Play. Starting on the right, the weights settle in the shallow right valley at a loss of about 0.25. Set Start w₁ to -0.8 to reach the deeper left one, at about 0.04.', params: { surface: 2, alpha: 0.05, beta: 0, startX: 0.8, startY: 0.6 } },
+		{ label: 'Curved valley', note: 'Press Play. The gradient points across the bent floor, not along it, so plain descent is still short of the minimum after 200 steps. Momentum 0.8 gets there in 78.', params: { surface: 3, alpha: 0.02, beta: 0, startX: -0.8, startY: 0.6 } },
+	],
 };
 
 export const COMPARE_PRESETS: ComparePreset[] = [

@@ -32,7 +32,8 @@ export type AlgorithmId =
 	| 'data-splitting'
 	| 'cross-validation'
 	| 'hyperparameter-search'
-	| 'threshold-metrics';
+	| 'threshold-metrics'
+	| 'gradient-descent';
 
 export interface ParamSpec {
 	key: string;

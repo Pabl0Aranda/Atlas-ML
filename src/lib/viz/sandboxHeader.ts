@@ -2,6 +2,11 @@ import { CATALOG, pageSlug } from '../../data/catalog';
 import { stageFor, type StageId } from '../pipeline';
 import type { AlgorithmId } from '../../types/viz';
 
+/** Names for sandboxes that teach a concept rather than an algorithm, so the catalog has no entry for them. */
+const CONCEPT_NAMES: Partial<Record<AlgorithmId, string>> = {
+	'gradient-descent': 'Gradient Descent',
+};
+
 export interface SandboxHeading {
 	name: string;
 	stage: StageId | undefined;
@@ -17,5 +22,5 @@ export function sandboxHeading(algorithm: AlgorithmId, pathname: string, base = 
 	const id = pathname.slice(pathname.startsWith(prefix) ? prefix.length : 0).replace(/^\/|\/$/g, '');
 	const entries = CATALOG.filter((e) => e.page?.id === algorithm);
 	const entry = entries.find((e) => pageSlug(e) === id) ?? entries[0];
-	return { name: entry?.name ?? 'Sandbox', stage: stageFor(id) };
+	return { name: entry?.name ?? CONCEPT_NAMES[algorithm] ?? 'Sandbox', stage: stageFor(id) };
 }
