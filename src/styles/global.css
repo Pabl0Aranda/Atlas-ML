@@ -585,6 +585,41 @@ a.atlas-card.grid {
 	outline-offset: 2px;
 }
 
+/* A sandbox's formula with its current numbers, under the plot. */
+.live-equation {
+	margin: 0.75rem 0 0;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--viz-border);
+	border-radius: 0.5rem;
+	background: var(--viz-surface);
+}
+
+.live-equation-label {
+	color: var(--viz-muted-ink);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+/* Long polynomials scroll sideways instead of widening the page. The height is reserved,
+   so nothing below jumps while KaTeX loads. */
+.live-equation-math {
+	min-height: 2.75rem;
+	overflow-x: auto;
+	overflow-y: hidden;
+	font-size: 0.85rem;
+}
+
+.live-equation-math .katex-display {
+	margin: 0.25rem 0;
+	text-align: left;
+}
+
+.live-equation-math .katex-display > .katex {
+	text-align: left;
+}
+
 .notebook-note {
 	color: var(--viz-muted-ink);
 	font-size: 0.8125rem;

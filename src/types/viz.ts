@@ -152,4 +152,6 @@ export interface AlgorithmSpec<S = any> {
 	diagram?(state: S, probe: { x: number; y: number }): Diagram | undefined;
 	/** Text shown for the location under the cursor. */
 	describe?(state: S, probe: { x: number; y: number }, params: Hyperparameters): string;
+	/** The model's formula as LaTeX, with the current numbers in place. Shown under the plot. */
+	equation?(state: S, data: Dataset, params: Hyperparameters): string;
 }

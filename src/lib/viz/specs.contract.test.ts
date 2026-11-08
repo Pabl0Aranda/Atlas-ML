@@ -1,3 +1,4 @@
+import katex from 'katex';
 import { describe, expect, it } from 'vitest';
 import { generateDataset } from '../ml/datasets';
 import { PRESETS } from './presets';
@@ -27,6 +28,11 @@ function expectValidFrame(spec: AlgorithmSpec, state: unknown, data: Dataset, pa
 	if (scene.region) expect(spec.legend(params)[scene.region(0.1, -0.2)]).toBeDefined();
 	for (const metric of spec.metrics(state, data, params)) expect(metric.value).not.toMatch(/NaN|undefined/);
 	expect(spec.caption(state, data, params)).not.toMatch(/NaN|undefined/);
+	if (spec.equation) {
+		const latex = spec.equation(state, data, params);
+		expect(latex).not.toMatch(/NaN|undefined|infty/);
+		expect(() => katex.renderToString(latex, { displayMode: true, throwOnError: true })).not.toThrow();
+	}
 }
 
 describe.each(ALGORITHM_IDS)('%s spec', (id) => {

@@ -11,6 +11,7 @@ import type { AlgorithmId, AlgorithmSpec } from '@/types/viz';
 import { buttonClass, CopyLinkButton, fieldLabelClass, MetricList, ParamControl, PlotLegend, primaryButtonClass, selectClass, SPEEDS, TICK_MS, TimelineControl } from './controls';
 import DiagramView from './DiagramView';
 import HistoryChart from './HistoryChart';
+import LiveEquation from './LiveEquation';
 import PlotCanvas from './PlotCanvas';
 
 function Runner({ spec, presets, heading }: { spec: AlgorithmSpec; presets: Preset[]; heading: SandboxHeading }) {
@@ -152,7 +153,7 @@ function Runner({ spec, presets, heading }: { spec: AlgorithmSpec; presets: Pres
 			</header>
 			<div class="p-3 sm:p-5">
 			<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_14rem]">
-				<div>
+				<div class="min-w-0">
 					<div class="relative">
 						<PlotCanvas
 							scene={scene}
@@ -191,6 +192,7 @@ function Runner({ spec, presets, heading }: { spec: AlgorithmSpec; presets: Pres
 						</span>
 					</div>
 					<div class="mt-3"><TimelineControl index={timeline.index} length={timeline.frames.length} onSeek={seek} /></div>
+					{spec.equation && <LiveEquation latex={spec.equation(state, data, params)} />}
 				</div>
 
 				<div class="flex flex-col gap-3">

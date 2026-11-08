@@ -8,6 +8,7 @@ import { initLogistic, logisticProbability, logisticStep, type LogisticState } f
 import { classifyNaiveBayes, fitNaiveBayes, type Feature } from '../../ml/naiveBayes';
 import { predict } from '../../ml/regression';
 import { initRegularized, regularizedStep, type RegularizedState } from '../../ml/regularizedRegression';
+import { lines, num, polynomial, sum } from '../equation';
 import { classPoints, contour, fixed, percent } from '../scene';
 
 const CLASSES = ['Class A', 'Class B'];
@@ -87,6 +88,11 @@ export const logisticRegression: AlgorithmSpec<LogisticState> = {
 			? 'All weights start at zero, so every point gets probability 0.5. Press Play.'
 			: 'The solid line is probability 0.5, and the dashes mark 0.1 and 0.9. Narrower dashes mean a more confident model.',
 	series: (s) => ({ label: 'Log loss per epoch', values: s.lossHistory }),
+	equation: (s) =>
+		lines(
+			`P(\\text{B}) = \\sigma(${sum(s.weights, ['', 'x_1', 'x_2', 'x_1^{2}', 'x_2^{2}', 'x_1 x_2'])})`,
+			`\\text{log loss} = ${num(s.loss, 4)}`,
+		),
 };
 
 export const lda: AlgorithmSpec<Stage> = {
@@ -204,6 +210,7 @@ function createPenaltySpec(l1Ratio: number | null): AlgorithmSpec<RegularizedSta
 					? `Converged after ${s.pass} passes.`
 					: 'Coordinate descent updates one coefficient at a time, holding the rest fixed.',
 		series: (s) => ({ label: 'Objective per pass', values: s.lossHistory }),
+		equation: (s, _, p) => lines(polynomial(s.weights), `J(w) = ${num(s.loss, 4)} \\quad (\\lambda = ${num(p.lambda, 3)})`),
 	};
 }
 
