@@ -1,0 +1,123 @@
+---
+title: Saving & Serving Models
+description: The last stage of the workflow, deploy and inference. Save a trained model to a file, serve its predictions in production, and keep watching it.
+sidebar:
+  label: Saving & Serving Models
+  order: 1
+---
+
+import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
+
+## Intuition & Overview
+
+Training happens once, on your machine or a cluster. Using the model happens over and over, wherever the predictions are needed: in an app, on a website, on a phone. That second part is called **inference**: running a trained model on new inputs to get predictions.
+
+Deploying a model means three things:
+
+1. **Save** the trained model to a file, so the training work isn't lost.
+2. **Serve** it, so other programs can send it inputs and get predictions back.
+3. **Monitor** it, because the world it predicts keeps changing.
+
+## Saving a Model
+
+A trained model is just numbers, such as weights, split points or support vectors, plus the code that knows how to use them. Saving it, also called serialization, writes those numbers to a file.
+
+| Format | Extension | Made by | Runs in |
+| --- | --- | --- | --- |
+| Pickle or joblib | `.pkl`, `.joblib` | Python, scikit-learn | Python, with the same library versions |
+| ONNX | `.onnx` | Converters for most frameworks | Almost anywhere: Python, C++, C#, Java, JavaScript, phones |
+| PyTorch | `.pt` | PyTorch | Python, or C++ through TorchScript |
+| TensorFlow SavedModel | A folder | TensorFlow, Keras | TensorFlow Serving, TensorFlow Lite on phones, TensorFlow.js |
+
+**Pickle** is the quickest choice for scikit-learn. It stores the Python object as it is, so loading it needs the same library versions, and it is unsafe with files you didn't create: loading a pickle can run any code hidden inside it.
+
+**ONNX**, the Open Neural Network Exchange, describes the model as a graph of standard math operations. Any ONNX runtime can then run it, without Python or the library that trained it. That makes it the usual way to move a model from a Python notebook into a phone app, a browser or a fast C++ service.
+
+### Save the whole pipeline
+
+A model trained on [scaled features](/data-preparation/processing/) expects scaled features at prediction time too, scaled with the exact same statistics from the <Term id="training-set">training set</Term>. If you save the model alone and rebuild the preprocessing by hand in production, small differences creep in, and predictions go quietly wrong. This is called training-serving skew.
+
+The fix is to save preprocessing and model together as one pipeline, so one file turns raw inputs into predictions.
+
+## Serving a Model
+
+| Pattern | How it works | Good for |
+| --- | --- | --- |
+| Batch | A scheduled job scores many rows at once and stores the results | Nightly recommendations, risk scores |
+| Online API | A web service answers each request in milliseconds | Fraud checks at payment time, search ranking |
+| Streaming | The model scores events as they flow through a queue | Sensor alerts, live dashboards |
+| On device or in browser | The model runs where the user is, with no server | Offline apps, privacy, instant feedback |
+
+An online API is the most common pattern. A small web service loads the model once at startup, then answers requests such as `POST /predict` with the inputs as JSON, returning the prediction as JSON.
+
+This site uses the last pattern. Every sandbox trains and runs its model in your browser, in TypeScript, with no server involved. Larger models can do the same through ONNX Runtime Web or TensorFlow.js.
+
+### What matters in production
+
+- **Latency:** how long one prediction takes. A payment check might have 50 milliseconds.
+- **Throughput:** how many predictions per second the service handles. Batching requests together raises it.
+- **Size:** large models cost more memory and start more slowly. Smaller models, or compressed ones, may be worth a small loss in accuracy.
+- **Versioning:** store every model with its version, training data and metrics, so you can tell which model made a prediction and roll back a bad release.
+
+## Monitoring
+
+A model starts going stale the day it ships. Customers change, prices change, sensors age. When the inputs drift away from the training data, accuracy falls, often without any error message.
+
+- **Watch the inputs.** Compare live feature distributions with the training data, for example with the [distribution distances](/distance-metrics/distributions/) covered in Foundations.
+- **Watch the outputs.** A sudden change in how often the model predicts each class is an early warning.
+- **Measure real accuracy** once true labels arrive, even if they arrive weeks later.
+- **Retrain on a plan.** Decide in advance what triggers a new model: a schedule, or drift past a threshold.
+
+The [Testing Overview](/testing/overview/#testing-in-production) covers how to roll out a new model safely, with shadow deployment and A/B tests.
+
+## Code
+
+The code below saves a scikit-learn pipeline with joblib, exports it to ONNX and runs it with ONNX Runtime, then serves it with FastAPI, a popular Python web framework. To run the service, save the code as `serve.py` and start it with `uvicorn serve:app`.
+
+```python
+import joblib
+import numpy as np
+import onnxruntime as ort
+from fastapi import FastAPI
+from pydantic import BaseModel
+from skl2onnx import to_onnx
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+# Save the whole pipeline, so preprocessing travels with the model.
+pipeline = make_pipeline(StandardScaler(), LogisticRegression()).fit(X_train, y_train)
+joblib.dump(pipeline, "model.joblib")
+model = joblib.load("model.joblib")  # only ever load files you trust
+
+# ONNX: a portable file that runs without Python or scikit-learn.
+onnx_model = to_onnx(pipeline, X_train[:1].astype(np.float32))
+with open("model.onnx", "wb") as f:
+    f.write(onnx_model.SerializeToString())
+session = ort.InferenceSession("model.onnx")
+input_name = session.get_inputs()[0].name
+print(session.run(None, {input_name: X_test[:3].astype(np.float32)})[0])
+
+# An online API: load the model once, then answer each request.
+app = FastAPI()
+
+class Features(BaseModel):
+    values: list[float]
+
+@app.post("/predict")
+def predict(features: Features):
+    probability = model.predict_proba([features.values])[0, 1]
+    return {"label": int(probability > 0.5), "probability": float(probability)}
+```
+
+<NotebookLinks page="deployment/overview" />
+
+## Before You Ship
+
+- The model beat a simple baseline on a [test set](/testing/overview/) it had never seen.
+- Preprocessing is saved with the model, in one pipeline.
+- Library versions are pinned, so the model loads the same way next year.
+- Inputs are checked before prediction: missing fields, wrong types and impossible values get a clear error.
+- You know [which features drive its predictions](/testing/explainability/), and they make sense.
+- Monitoring and a rollback plan are in place.

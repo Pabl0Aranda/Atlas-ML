@@ -36,11 +36,12 @@
 	--accent-fill: #4f46e5;
 	--on-accent: #ffffff;
 
-	/* The four workflow stages, for badges and stage markers. */
+	/* The five workflow stages, for badges and stage markers. */
 	--pipeline-prepare: #f59e0b;
 	--pipeline-train: #3b82f6;
 	--pipeline-validate: #a855f7;
 	--pipeline-test: #10b981;
+	--pipeline-deploy: #f43f5e;
 
 	--viz-surface: #0f172a;
 	--viz-panel: #1e293b;
@@ -75,6 +76,7 @@
 	--pipeline-train: #2563eb;
 	--pipeline-validate: #9333ea;
 	--pipeline-test: #047857;
+	--pipeline-deploy: #be123c;
 
 	--viz-surface: #f8fafc;
 	--viz-panel: #f1f5f9;
@@ -263,7 +265,7 @@ a.atlas-card.grid {
 	color: var(--sl-color-text-accent);
 }
 
-/* Which of the four workflow stages a page belongs to, above its title. */
+/* Which of the five workflow stages a page belongs to, above its title. */
 .pipeline-trail ol {
 	display: flex;
 	flex-wrap: wrap;
@@ -333,20 +335,20 @@ a.atlas-card.grid {
 	opacity: 1;
 }
 
-/* Phones fit all four stages on one line. */
+/* Phones fit all five stages on one line. */
 @media (max-width: 30rem) {
 	.pipeline-trail ol {
 		font-size: 0.75rem;
 	}
 
 	.pipeline-trail li + li::before {
-		width: 0.5rem;
+		width: 0.25rem;
 		margin-inline: 0.125rem;
 	}
 
 	.pipeline-trail a {
-		gap: 0.3rem;
-		padding-inline: 0.45rem;
+		gap: 0.2rem;
+		padding-inline: 0.25rem;
 	}
 }
 

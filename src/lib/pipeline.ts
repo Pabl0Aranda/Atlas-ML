@@ -1,9 +1,10 @@
-/** The four workflow stages, in order, each with the page that introduces it. */
+/** The five workflow stages, in order, each with the page that introduces it. */
 export const STAGES = [
 	{ id: 'prepare', label: 'Prepare', href: '/data-preparation/overview/' },
 	{ id: 'train', label: 'Train', href: '/catalog/' },
 	{ id: 'validate', label: 'Validate', href: '/validation/overview/' },
 	{ id: 'test', label: 'Test', href: '/testing/overview/' },
+	{ id: 'deploy', label: 'Deploy', href: '/deployment/overview/' },
 ] as const;
 
 export type StageId = (typeof STAGES)[number]['id'];
@@ -22,6 +23,7 @@ const SECTIONS: Record<string, StageId> = {
 	'distance-metrics': 'train',
 	validation: 'validate',
 	testing: 'test',
+	deployment: 'deploy',
 };
 
 /** The stage a docs page belongs to, from its content id, or undefined for pages outside the workflow. */

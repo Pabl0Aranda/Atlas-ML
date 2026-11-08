@@ -65,6 +65,7 @@ export default defineConfig({
 						{ label: 'Data Preparation', collapsed: true, items: [{ autogenerate: { directory: 'data-preparation' } }] },
 						{ label: 'Validation', collapsed: true, items: [{ autogenerate: { directory: 'validation' } }] },
 						{ label: 'Testing', collapsed: true, items: [{ autogenerate: { directory: 'testing' } }] },
+						{ label: 'Deployment', collapsed: true, items: [{ autogenerate: { directory: 'deployment' } }] },
 					],
 				},
 				{

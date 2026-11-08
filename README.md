@@ -23,7 +23,7 @@ Find an algorithm, watch it run, read the math, and inspect the exact code behin
 - **Compare mode.** Run two algorithms side by side on identical data.
 - **Train and test view.** Hold out data on classifiers to see overfitting directly.
 - **Guided presets.** One-click setups that make a single idea visible, with notes based on real runs.
-- **The full workflow.** Guides to data preparation, validation and testing, including indicators and validation matrices.
+- **The full workflow.** Guides to data preparation, validation, testing and deployment, including indicators, validation matrices, explainability and serving models.
 - **Foundations.** Overfitting and underfitting, bias and variance, gradient descent, and a section on distance metrics.
 - **Works for everyone.** Sandboxes support touch and keyboard, and plots back up color with shape.
 

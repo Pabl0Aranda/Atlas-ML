@@ -199,6 +199,15 @@ from sklearn.neighbors import KNeighborsClassifier
 
 model = KNeighborsClassifier(n_neighbors=5)`,
 	},
+	'deployment/overview': {
+		install: `%pip install --quiet skl2onnx onnxruntime fastapi httpx`,
+		setup: `${moons}\n\n${split}`,
+		demo: `from fastapi.testclient import TestClient
+
+# Send the service one request, as another program would over HTTP.
+client = TestClient(app)
+print(client.post("/predict", json={"values": X_test[0].tolist()}).json())`,
+	},
 	'distance-metrics/direction-and-shape': {
 		setup: `import numpy as np
 
