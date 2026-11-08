@@ -15,6 +15,7 @@ export default function TimeSeriesDemo() {
 		<section class="not-content my-6 rounded-2xl border border-(--viz-border) bg-(--viz-panel) p-3 text-(--viz-ink) sm:p-5" aria-label="Time series demo">
 			<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_14rem]">
 				<PlotCanvas scene={scene} class="block w-full rounded-lg border border-(--viz-border)" role="img" aria-label={summary} />
+				<p class="sr-only" aria-live="polite">{summary}</p>
 				<div class="flex flex-col gap-3">
 					<ParamControl param={SHIFT} value={shift} onChange={setShift} />
 					<MetricList
