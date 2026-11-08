@@ -17,6 +17,8 @@ Models learn whatever the data contains, including its errors. Most of the work 
 2. **[Separate](/data-preparation/splitting/):** set aside data the model will never train on, so you can measure honestly.
 3. **[Process](/data-preparation/processing/):** turn the <Term id="training-set">training data</Term> into the numeric form algorithms need, through scaling and encoding.
 
+When one class is much rarer than the others, the training data may also need [rebalancing](/data-preparation/imbalanced-data/) after the split.
+
 :::caution[Separate before you learn anything from the data]
 Only fixes that need no statistics belong before the split. Any step that **learns a value from the data**, such as a mean, a scale or a category list, must be fitted on the training set only and then applied to the <Term id="test-set">test set</Term>.
 :::

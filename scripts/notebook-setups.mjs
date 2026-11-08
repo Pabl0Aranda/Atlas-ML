@@ -178,6 +178,20 @@ colors_train = [["red"], ["green"], ["blue"], ["green"]]`,
 		demo: `print(X_train_scaled.mean(axis=0).round(2), X_train_scaled.std(axis=0).round(2))
 print(encoder.transform([["blue"], ["purple"]]).toarray())  # an unseen color becomes all zeros`,
 	},
+	'data-preparation/imbalanced-data': {
+		install: `%pip install --quiet imbalanced-learn`,
+		setup: `import numpy as np
+
+# Two overlapping clouds of 1,000 samples, one in ten from the rare class, like the sandbox.
+rng = np.random.default_rng(7)
+y = (np.arange(1000) % 10 == 0).astype(int)
+centers = np.where(y[:, None] == 1, 0.45, -0.15)
+X = centers + rng.normal(0, 0.24, size=(1000, 2))
+print("Rare samples:", y.sum(), "of", len(y))`,
+		demo: `# The same model without rebalancing, for comparison. Look at recall for class 1.
+plain_model = LogisticRegression().fit(X_train, y_train)
+print(classification_report(y_test, plain_model.predict(X_test), digits=3))`,
+	},
 	'data-preparation/splitting': {
 		setup: `${moons}
 
