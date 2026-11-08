@@ -2,6 +2,7 @@
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import AlgorithmCard from '@/components/ui/AlgorithmCard.astro';
 import FamilyCard from '@/components/ui/FamilyCard.astro';
+import SandboxTour from '@/components/interactive/SandboxTour';
 import { ALGORITHM_PAGE_COUNT, CATALOG, SANDBOX_COUNT } from '@/data/catalog';
 import { withBase } from '@/lib/url';
 
@@ -65,6 +66,12 @@ const startHere = ['K-Means Clustering', 'Decision Trees', 'Q-Learning'].map((na
 				</div>
 			))}
 		</dl>
+
+		<section id="tour" class="mt-14 scroll-mt-24">
+			<h2 class="m-0 text-2xl font-semibold sm:text-3xl">Try a sandbox in three steps</h2>
+			<p class="m-0 mt-2 text-(--viz-muted-ink)">Every sandbox on the site works the same way. Learn it once here, with k-nearest neighbors.</p>
+			<SandboxTour client:visible />
+		</section>
 
 		<section id="workflow" class="mt-14 scroll-mt-24">
 			<h2 class="m-0 text-2xl font-semibold sm:text-3xl">The workflow, end to end</h2>
