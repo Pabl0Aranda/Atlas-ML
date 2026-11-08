@@ -8,6 +8,7 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -38,7 +39,7 @@ This uses all the data for validation at the cost of training $k$ models, which 
 ## Choosing a Split
 
 - **Random:** fine for large, balanced, independent samples.
-- **Stratified:** the default for classification, and essential for rare classes.
+- **Stratified:** the default for <Term id="classification">classification</Term>, and essential for rare classes.
 - **Grouped:** keeps all rows of a customer or patient on one side.
 - **Time-based:** train on the past and test on the future. Never shuffle time series.
 

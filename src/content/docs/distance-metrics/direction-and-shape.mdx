@@ -49,9 +49,9 @@ $$
 
 Think of it as stretching space until the data forms a round cloud, then measuring with an ordinary ruler. A step along the direction the data naturally varies counts for little, and the same step across it counts for a lot.
 
-If features are uncorrelated and have unit variance, $\Sigma$ is the identity matrix, and this becomes plain Euclidean distance.
+If <Term id="feature">features</Term> are uncorrelated and have unit variance, $\Sigma$ is the identity matrix, and this becomes plain Euclidean distance.
 
-That makes it useful for outlier detection. A point can look close to the center by Euclidean distance, yet be highly unusual because it breaks the pattern between features. Someone 190 cm tall weighing 50 kg is not extreme on either measure alone, but the combination is rare.
+That makes it useful for <Term id="outlier">outlier</Term> detection. A point can look close to the center by Euclidean distance, yet be highly unusual because it breaks the pattern between features. Someone 190 cm tall weighing 50 kg is not extreme on either measure alone, but the combination is rare.
 
 <DistanceExplorer client:visible initialMetric="mahalanobis" />
 
@@ -79,6 +79,7 @@ mahalanobis([0, 0], [0.3, 0.3], inverse);
 <TabItem label="SciPy">
 ```python
 import numpy as np
+import Term from '@/components/docs/Term.astro';
 from scipy.spatial import distance
 
 distance.cosine([1, 2], [2, 4])  # 0.0

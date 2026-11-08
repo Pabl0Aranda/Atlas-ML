@@ -36,9 +36,9 @@ $$
 
 1. Initialize weights randomly, scaled by layer width.
 2. **Forward pass:** compute every layer's activations.
-3. **Backward pass:** propagate $\delta$ from output to input and accumulate gradients.
+3. **Backward pass:** propagate $\delta$ from output to input and accumulate <Term id="gradient">gradients</Term>.
 4. Update all weights with [gradient descent](/concepts/gradient-descent/).
-5. Repeat for many epochs.
+5. Repeat for many <Term id="epoch">epochs</Term>.
 
 ## Interactive Sandbox
 
@@ -55,6 +55,7 @@ Hover over the plot to trace how a location activates each neuron. Edge width sh
 <TabItem label="PyTorch">
 ```python
 import torch
+import Term from '@/components/docs/Term.astro';
 from torch import nn
 
 model = nn.Sequential(nn.Linear(2, 6), nn.Tanh(), nn.Linear(6, 6), nn.Tanh(), nn.Linear(6, 1))
@@ -75,7 +76,7 @@ for epoch in range(1000):
 **Strengths**
 
 - Universal approximators: with enough units they can fit nearly any continuous function.
-- They learn their own features and scale with data and compute.
+- They learn their own <Term id="feature">features</Term> and scale with data and compute.
 
 **Limitations**
 

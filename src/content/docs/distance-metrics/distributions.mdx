@@ -21,7 +21,7 @@ $$
 
 It is 0 only when the two distributions are identical, and it grows as they differ. With a natural logarithm, the unit is nats.
 
-KL divergence is everywhere in machine learning. Minimizing cross-entropy, the loss used to train most classifiers, is equivalent to minimizing the KL divergence from the true labels to the model's predictions. Variational autoencoders use it directly.
+KL divergence is everywhere in machine learning. Minimizing cross-entropy, the loss used to train most <Term id="classification">classifiers</Term>, is equivalent to minimizing the KL divergence from the true labels to the model's predictions. Variational autoencoders use it directly.
 
 ### Not a distance at all
 
@@ -72,6 +72,7 @@ Both distributions here are Gaussians drawn on the same bins. Exact Gaussians ne
 <TabItem label="This site's engine">
 ```ts
 import { klDivergence, wasserstein } from '@/lib/ml/distance';
+import Term from '@/components/docs/Term.astro';
 
 klDivergence([0.5, 0.5, 0, 0], [0.25, 0.25, 0.25, 0.25]); // 0.693...
 wasserstein([1, 0, 0], [0, 0, 1], 1); // 2

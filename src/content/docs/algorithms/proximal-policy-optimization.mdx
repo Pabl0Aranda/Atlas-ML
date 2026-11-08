@@ -13,7 +13,7 @@ import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 
 [Q-Learning](/algorithms/q-learning/) and [Deep Q-Networks](/algorithms/deep-q-networks/) learn action values, then act on them. PPO skips that step and learns the **policy** itself: a network that outputs the probability of each action. Actions that turned out better than expected become more likely.
 
-The danger is that one bad, oversized update can wreck a good policy, and the agent then collects worse data, which makes recovery harder. PPO, introduced by Schulman and colleagues in 2017, keeps each update close to the previous policy. It is simple and dependable enough to have become a default choice in reinforcement learning, and it is widely used to fine-tune language models from human feedback.
+The danger is that one bad, oversized update can wreck a good <Term id="policy">policy</Term>, and the agent then collects worse data, which makes recovery harder. PPO, introduced by Schulman and colleagues in 2017, keeps each update close to the previous policy. It is simple and dependable enough to have become a default choice in reinforcement learning, and it is widely used to fine-tune language models from human feedback.
 
 ## Mathematical Foundation
 
@@ -42,7 +42,7 @@ An **entropy bonus** added to the objective rewards keeping some randomness, so 
 1. Run the current policy for a fixed number of moves, storing each move and its probability.
 2. Compute advantages with the critic.
 3. Update the actor on the clipped objective, and the critic toward the observed returns.
-4. Repeat step 3 for a few epochs on the same data. The clip is what makes this reuse safe.
+4. Repeat step 3 for a few <Term id="epoch">epochs</Term> on the same data. The clip is what makes this reuse safe.
 5. Discard the data and collect a new rollout.
 
 ## Interactive Sandbox
@@ -51,7 +51,7 @@ Arrows show each cell's likeliest action, and shading shows the critic's value. 
 
 **Rooms** is the reliable case: in our tests this configuration solved it on all six random seeds.
 
-**Cliff** is a deliberately hard case. With default settings PPO usually fails here, and it solved only one of six seeds. Random exploration reaches the goal rarely, while falling is frequent and costly, so the policy gets little evidence that the goal is worth the risk. Episodes end up stuck around the 100-move time limit instead. Try learning rate 0.5, entropy 0.08 and rollout 1024: more exploration solves Cliff for this sandbox's fixed seed, though across six seeds that setting still failed twice.
+**Cliff** is a deliberately hard case. With default settings PPO usually fails here, and it solved only one of six seeds. Random exploration reaches the goal rarely, while falling is frequent and costly, so the policy gets little evidence that the goal is worth the risk. Episodes end up stuck around the 100-move time limit instead. Try <Term id="learning-rate">learning rate</Term> 0.5, entropy 0.08 and rollout 1024: more exploration solves Cliff for this sandbox's fixed seed, though across six seeds that setting still failed twice.
 
 <Sandbox client:idle algorithm="proximal-policy-optimization" />
 
@@ -64,6 +64,7 @@ Arrows show each cell's likeliest action, and shading shows the critic's value. 
 <TabItem label="PyTorch">
 ```python
 import torch
+import Term from '@/components/docs/Term.astro';
 
 def ppo_loss(new_log_probs, old_log_probs, advantages, entropy, clip=0.2, entropy_bonus=0.01):
     ratio = torch.exp(new_log_probs - old_log_probs)

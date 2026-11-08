@@ -9,6 +9,7 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import ConfusionExplorer from '@/components/interactive/ConfusionExplorer';
+import Term from '@/components/docs/Term.astro';
 
 A single [indicator](/validation/indicators/) compresses a model into one number. A matrix keeps the detail: it shows where a model succeeds, which mistakes it makes, and how stable its results are.
 
@@ -31,17 +32,17 @@ The foundation of all the others. It counts every prediction by what was predict
 | **Actually positive** | True positive (TP) | False negative (FN) |
 | **Actually negative** | False positive (FP) | True negative (TN) |
 
-**Uses:** any two-class problem, such as fraud, disease or spam. It is the source of precision, recall, F1 and most other [indicators](/validation/indicators/).
+**Uses:** any two-class problem, such as fraud, disease or spam. It is the source of <Term id="precision">precision</Term>, recall, F1 and most other [indicators](/validation/indicators/).
 
 **How to read it:**
 
 1. Start with the diagonal, TP and TN. Those are the correct predictions.
 2. Then read the other two cells separately, because they are different mistakes. FN are the misses, and FP are the false alarms.
-3. Read along the top row for recall: how many real positives were caught?
+3. Read along the top row for <Term id="recall">recall</Term>: how many real positives were caught?
 4. Read down the left column for precision: how many alarms were real?
 5. Compare row totals to see how imbalanced the classes are.
 
-**Why it matters:** two models with the same accuracy can make completely different mistakes, and only the matrix shows that. It also makes a useless model easy to spot, since a model that always predicts one class leaves one column empty.
+**Why it matters:** two models with the same <Term id="accuracy">accuracy</Term> can make completely different mistakes, and only the matrix shows that. It also makes a useless model easy to spot, since a model that always predicts one class leaves one column empty.
 
 :::caution[Check the layout first]
 Layouts differ between tools. scikit-learn puts actual classes on rows and sorts labels, so for labels 0 and 1 it prints `[[TN, FP], [FN, TP]]`, with TP at the bottom right. That is the opposite corner from the table above. Other tools swap rows and columns. Always check before reading a matrix.
@@ -72,7 +73,7 @@ The same idea with one row and one column per class. This example has 150 images
 4. Look for the largest number off the diagonal. Here it is cats predicted as dogs.
 5. Compare the two sides of the diagonal. There are 8 cats called dogs but only 5 dogs called cats, so the confusion leans one way.
 
-**Why it matters:** it tells you what to fix. Two classes that are often confused may need more examples, better features, or merging. It often reveals labeling problems too.
+**Why it matters:** it tells you what to fix. Two classes that are often confused may need more examples, better <Term id="feature">features</Term>, or merging. It often reveals labeling problems too.
 
 ## Normalized Confusion Matrix
 
@@ -143,7 +144,7 @@ When you use [cross-validation](/validation/cross-validation/), each model gets 
 
 ## Hyperparameter Grid
 
-When tuning two settings, each cell holds a validation score. These are real results from this site's RBF [SVM](/algorithms/svm/) on moons, using 30 held-out samples:
+When tuning two settings, each cell holds a validation score. These are real results from this site's RBF [SVM](/algorithms/svm/) on moons, using 30 <Term id="held-out-data">held-out</Term> samples:
 
 | Penalty $C$ ↓ / Width $\gamma$ → | 0.5 | 5 | 30 |
 | --- | --- | --- | --- |

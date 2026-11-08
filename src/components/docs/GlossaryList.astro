@@ -1,0 +1,23 @@
+---
+import { GLOSSARY_ENTRIES } from '@/data/glossary';
+import { withBase } from '@/lib/url';
+---
+
+<dl class="glossary-list">
+	{
+		GLOSSARY_ENTRIES.map(([id, entry]) => (
+			<div id={id}>
+				<dt>{entry.term}</dt>
+				<dd>
+					{entry.definition}
+					{entry.see && (
+						<>
+							{' '}
+							<a href={withBase(entry.see)}>Learn more</a>
+						</>
+					)}
+				</dd>
+			</div>
+		))
+	}
+</dl>

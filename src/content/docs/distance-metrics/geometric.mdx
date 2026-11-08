@@ -9,7 +9,7 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import DistanceExplorer from '@/components/interactive/DistanceExplorer';
 
-These are the distances most people meet first. They all compare two numeric vectors feature by feature, and differ only in how they combine those differences.
+These are the distances most people meet first. They all compare two numeric vectors <Term id="feature">feature</Term> by feature, and differ only in how they combine those differences.
 
 As a running example, take the points $(0, 0)$ and $(3, 4)$.
 
@@ -35,7 +35,7 @@ $$
 
 For the example, $3 + 4 = 7$.
 
-Differences are not squared, so a single large one has less influence than under Euclidean distance. That makes Manhattan distance a common choice when data has outliers or many dimensions.
+Differences are not squared, so a single large one has less influence than under Euclidean distance. That makes Manhattan distance a common choice when data has <Term id="outlier">outliers</Term> or many dimensions.
 
 ## Chebyshev distance
 
@@ -67,11 +67,11 @@ Choose **Minkowski** below and drag $p$. The rings swell from a diamond, through
 
 The rings show which points count as equally far away. At the same radius, a diamond covers less area than a circle, and a square covers more. That changes results: an algorithm with a fixed radius finds fewer neighbors with Manhattan distance and more with Chebyshev distance.
 
-You can see this in the [DBSCAN](/algorithms/dbscan/) presets. With $\varepsilon = 0.15$ on the moons data, Manhattan distance breaks the moons into 5 clusters, and raising $\varepsilon$ to 0.18 brings back both moons. A radius tuned for one metric does not carry over to another.
+You can see this in the [DBSCAN](/algorithms/dbscan/) presets. With $\varepsilon = 0.15$ on the moons data, Manhattan distance breaks the moons into 5 <Term id="cluster">clusters</Term>, and raising $\varepsilon$ to 0.18 brings back both moons. A radius tuned for one metric does not carry over to another.
 
 ## Why k-means needs a different update
 
-Switching metric is not always a simple swap. Each [k-means](/algorithms/k-means/) iteration moves a centroid to the point that minimizes total cost in its cluster:
+Switching metric is not always a simple swap. Each [k-means](/algorithms/k-means/) iteration moves a <Term id="centroid">centroid</Term> to the point that minimizes total cost in its cluster:
 
 $$
 \arg\min_{c} \sum_{i} (x_i - c)^2 = \text{mean}, \qquad \arg\min_{c} \sum_{i} \lvert x_i - c \rvert = \text{median}
@@ -85,6 +85,7 @@ The mean is only the right answer for squared Euclidean distance. Using Manhatta
 <TabItem label="This site's engine">
 ```ts
 import { chebyshev, euclidean, manhattan, minkowski } from '@/lib/ml/distance';
+import Term from '@/components/docs/Term.astro';
 
 euclidean([0, 0], [3, 4]); // 5
 manhattan([0, 0], [3, 4]); // 7

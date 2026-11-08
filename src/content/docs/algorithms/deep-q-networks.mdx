@@ -21,13 +21,13 @@ $$
 
 Simply putting a network into Q-Learning tends to be unstable, for two reasons. DQN adds one fix for each:
 
-- **Experience replay.** Consecutive moves are highly correlated, which misleads gradient descent. Transitions go into a buffer $\mathcal{D}$, and training samples random minibatches from it. Each experience also gets reused many times.
+- **Experience replay.** Consecutive moves are highly correlated, which misleads <Term id="gradient">gradient</Term> descent. Transitions go into a buffer $\mathcal{D}$, and training samples random minibatches from it. Each experience also gets reused many times.
 - **Target network.** The target would otherwise shift with every update, like chasing your own shadow. A frozen copy with parameters $\theta^-$ computes the targets, and is refreshed from $\theta$ only every so often.
 
 ## Step-by-Step Breakdown
 
 1. Initialize the online network randomly, and copy it to the target network.
-2. Choose an action with an $\varepsilon$-greedy policy, with $\varepsilon$ decaying from 1 toward a small value.
+2. Choose an action with an $\varepsilon$-greedy <Term id="policy">policy</Term>, with $\varepsilon$ decaying from 1 toward a small value.
 3. Store the transition $(s, a, r, s')$ in the replay buffer.
 4. Sample a random minibatch from the buffer.
 5. Compute targets with the target network, using only $r$ for terminal states.
@@ -38,7 +38,7 @@ Simply putting a network into Q-Learning tends to be unstable, for two reasons. 
 
 The worlds match the [Q-Learning sandbox](/algorithms/q-learning/#interactive-sandbox), so you can compare them directly. Here the input is not a cell ID: it is a one-hot column plus a one-hot row, feeding 48 hidden units. Press **Play** and allow about a minute. Early on the arrows change wildly, which is the network generalizing before it has enough evidence.
 
-The sandbox trains on one minibatch per move. Because each sample's gradient is divided by the batch size, a learning rate of 1 here is gentler than it looks. Lower it to around 0.1 and the network will likely fail to find a route within the move budget.
+The sandbox trains on one minibatch per move. Because each sample's gradient is divided by the batch size, a <Term id="learning-rate">learning rate</Term> of 1 here is gentler than it looks. Lower it to around 0.1 and the network will likely fail to find a route within the move budget.
 
 <Sandbox client:idle algorithm="deep-q-networks" />
 
@@ -51,6 +51,7 @@ The sandbox trains on one minibatch per move. Because each sample's gradient is 
 <TabItem label="PyTorch">
 ```python
 import torch
+import Term from '@/components/docs/Term.astro';
 from torch import nn
 
 def train_step(online, target, optimizer, batch, gamma=0.98):
@@ -79,6 +80,6 @@ def train_step(online, target, optimizer, batch, gamma=0.98):
 **Limitations**
 
 - Actions must be discrete, because it takes a maximum over them. Continuous control needs methods such as DDPG or Soft Actor-Critic.
-- It is sensitive to hyperparameters, and results vary between random seeds.
+- It is sensitive to <Term id="hyperparameter">hyperparameters</Term>, and results vary between random seeds.
 - On a world this small a table is faster and more reliable. The network pays off when states are too many to list.
 - The $\max$ overestimates values. Double DQN is a common fix, and dueling networks and prioritized replay are other standard improvements.

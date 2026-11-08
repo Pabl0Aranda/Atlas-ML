@@ -8,6 +8,7 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -38,7 +39,7 @@ Standardization is the usual default. A single extreme value squeezes every othe
 | [Neural networks](/algorithms/mlp/) and [gradient descent](/concepts/gradient-descent/) | Similar scales make training faster and more stable |
 | Regularized regression | The penalty should treat coefficients equally |
 
-[Decision trees](/algorithms/decision-tree/) and tree ensembles do not need it, because splits depend only on the order of values.
+[Decision trees](/algorithms/decision-tree/) and tree <Term id="ensemble">ensembles</Term> do not need it, because splits depend only on the order of values.
 
 ## Encoding Categories
 
@@ -79,6 +80,6 @@ encoder = OneHotEncoder(handle_unknown="ignore").fit(colors_train)
 
 ## Trade-offs
 
-- Scalers and encoders learn from data, so fit them on the training set and only apply them elsewhere.
+- Scalers and encoders learn from data, so fit them on the <Term id="training-set">training set</Term> and only apply them elsewhere.
 - Save fitted transformers with the model. Production data must pass through the same steps.
 - Scaled features are harder to read, so keep the originals for reporting.

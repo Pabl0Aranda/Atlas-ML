@@ -10,8 +10,8 @@ const pages = (dir: string): string[] =>
 	);
 
 describe('stageFor', () => {
-	it('places every docs page except Start Here in a stage', () => {
-		const unplaced = pages(DOCS).filter((id) => id !== 'start-here' && !stageFor(id));
+	it('places every docs page except Start Here and the glossary in a stage', () => {
+		const unplaced = pages(DOCS).filter((id) => !['start-here', 'glossary'].includes(id) && !stageFor(id));
 		expect(unplaced).toEqual([]);
 	});
 

@@ -9,6 +9,7 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import ConfusionExplorer from '@/components/interactive/ConfusionExplorer';
+import Term from '@/components/docs/Term.astro';
 
 An indicator, also called a metric, turns a model's behavior into a number you can compare. It may look like a reporting detail, but it is one of the most important decisions in a project, because the indicator defines what "better" means.
 
@@ -32,7 +33,7 @@ Take 1,000 people, of whom 10 have a disease. Compare a lazy model that always s
 | Balanced accuracy | 50.0% | **88.0%** |
 | MCC | 0.000 | **0.354** |
 
-Accuracy prefers the model that finds nobody. No indicator is wrong here, but each answers a different question, so you need to ask the right one.
+<Term id="accuracy">Accuracy</Term> prefers the model that finds nobody. No indicator is wrong here, but each answers a different question, so you need to ask the right one.
 
 ## Try It
 
@@ -42,7 +43,7 @@ Edit any cell, or load an example, and watch which indicators move. The cost fie
 
 ## Classification Indicators
 
-All of these come from the four cells of the [confusion matrix](/validation/validation-matrices/): true positives (TP), false positives (FP), true negatives (TN) and false negatives (FN). Below, $N$ is the total number of samples, $P$ is precision and $R$ is recall.
+All of these come from the four cells of the [confusion matrix](/validation/validation-matrices/): true positives (TP), false positives (FP), true negatives (TN) and false negatives (FN). Below, $N$ is the total number of samples, $P$ is <Term id="precision">precision</Term> and $R$ is <Term id="recall">recall</Term>.
 
 | Indicator | Formula | The question it answers |
 | --- | --- | --- |
@@ -122,7 +123,7 @@ If RMSE is much larger than MAE, a few large errors are driving your score.
 
 ## Clustering Indicators
 
-Clustering has no single right answer, so indicators fall into two groups.
+<Term id="cluster">Clustering</Term> has no single right answer, so indicators fall into two groups.
 
 | Indicator | Needs true labels? | How to read it |
 | --- | --- | --- |
@@ -155,7 +156,7 @@ Indicators without labels tend to favor round, compact clusters. They can rate [
 
 - **Trusting one number.** Always read the [confusion matrix](/validation/validation-matrices/) beside it.
 - **Chasing the metric.** Once an indicator becomes the target, a model can improve it without improving the real outcome.
-- **Quoting training scores.** Only held-out data gives an honest answer.
+- **Quoting training scores.** Only <Term id="held-out-data">held-out data</Term> gives an honest answer.
 - **Choosing after looking.** Picking the indicator that flatters your model is a form of [leakage](/data-preparation/overview/#data-leakage). Decide first.
 - **Ignoring uncertainty.** A two-point gain on 100 samples can be pure chance. See [confidence intervals](/testing/overview/#confidence-intervals).
 - **Averaging away subgroups.** A good overall score can hide failure on one group.

@@ -6,10 +6,11 @@ description: Blend the L1 and L2 penalties to get sparsity with stability.
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
-[Lasso](/algorithms/lasso-regression/) selects features but behaves erratically when they are correlated. [Ridge](/algorithms/ridge-regression/) is stable but keeps everything. Elastic net mixes both penalties, so it can drop features while treating correlated groups more evenly.
+[Lasso](/algorithms/lasso-regression/) selects <Term id="feature">features</Term> but behaves erratically when they are correlated. [Ridge](/algorithms/ridge-regression/) is stable but keeps everything. Elastic net mixes both penalties, so it can drop features while treating correlated groups more evenly.
 
 ## Mathematical Foundation
 
@@ -65,6 +66,6 @@ model.fit(X_train, y_train)
 
 **Limitations**
 
-- There are two hyperparameters to tune instead of one.
+- There are two <Term id="hyperparameter">hyperparameters</Term> to tune instead of one.
 - Like lasso, it adds bias to the coefficients it keeps.
 - Features must be scaled.
