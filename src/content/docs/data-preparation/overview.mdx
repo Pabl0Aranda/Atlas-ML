@@ -7,6 +7,7 @@ sidebar:
 ---
 
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 Models learn whatever the data contains, including its errors. Most of the work in a real project happens before training, and a simple model on well-prepared data usually beats a sophisticated model on careless data.
 
@@ -52,5 +53,7 @@ model = make_pipeline(prepare, LogisticRegression())
 model.fit(X_train, y_train)          # every step is fitted on training data only
 print(model.score(X_test, y_test))
 ```
+
+<NotebookLinks page="data-preparation/overview" />
 
 A pipeline makes leakage hard to commit, because each preparation step is refitted inside `fit`, and inside every <Term id="cross-validation">cross-validation</Term> fold.

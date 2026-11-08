@@ -498,6 +498,49 @@ a.atlas-card.grid {
 	color: var(--viz-muted-ink);
 }
 
+/* Open a page's Python code as a notebook, under the code itself. */
+.notebook-links {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem 0.75rem;
+	margin-top: 0.75rem;
+}
+
+.notebook-link {
+	padding: 0.35rem 0.8rem;
+	border: 1px solid var(--viz-border);
+	border-radius: 0.5rem;
+	color: var(--viz-ink);
+	font-size: 0.875rem;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.notebook-link:hover {
+	border-color: var(--sl-color-accent);
+}
+
+.notebook-link-primary {
+	border-color: var(--accent-fill);
+	background: var(--accent-fill);
+	color: var(--on-accent);
+}
+
+.notebook-link-primary:hover {
+	opacity: 0.9;
+}
+
+.notebook-link:focus-visible {
+	outline: 2px solid var(--sl-color-accent);
+	outline-offset: 2px;
+}
+
+.notebook-note {
+	color: var(--viz-muted-ink);
+	font-size: 0.8125rem;
+}
+
 /* Every sandbox opens with the same header: its stage color, its name, and the two
    buttons that make experimenting safe. */
 .sandbox-header {
