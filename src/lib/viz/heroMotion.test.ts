@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { kMeansStep } from '../ml/kmeans';
-import { createHeroRun, heroDuration, heroFinalPose, heroPose } from './heroMotion';
+import { addHeroPoint, createHeroRun, HERO_RESUME_AT, heroDuration, heroFinalPose, heroPose, MAX_ADDED, toPlot } from './heroMotion';
 
 describe('hero k-means run', () => {
 	for (const seed of [3, 4, 5, 6, 7, 8]) {
@@ -56,5 +56,60 @@ describe('heroPose', () => {
 		const pose = heroFinalPose(run);
 		expect(pose.opacity).toBe(1);
 		expect(pose.centroids).toEqual(final.centroids);
+	});
+});
+
+describe('adding points to the hero run', () => {
+	const run = createHeroRun(3, 48);
+	const final = heroFinalPose(run);
+
+	it('adds the point and runs k-means again from the centroids on screen', () => {
+		const next = addHeroPoint(run, final.centroids, { x: 0.9, y: -0.9 });
+		expect(next.data).toHaveLength(49);
+		expect(next.data.at(-1)).toMatchObject({ x: 0.9, y: -0.9 });
+		expect(next.steps[0].centroids).toEqual(final.centroids);
+		const last = next.steps.at(-1)!;
+		expect(last.converged).toBe(true);
+		expect(kMeansStep(last, next.data).assignments).toEqual(last.assignments);
+	});
+
+	it('marks which points the visitor added', () => {
+		expect(run.added).toBe(0);
+		const once = addHeroPoint(run, final.centroids, { x: 0, y: 0 });
+		const twice = addHeroPoint(once, heroFinalPose(once).centroids, { x: 0.1, y: 0.1 });
+		expect(once.added).toBe(1);
+		expect(twice.added).toBe(2);
+	});
+
+	it('pulls the nearest centroid toward a far-away point', () => {
+		const corner = { x: 0.98, y: 0.98 };
+		const dist = (c: { x: number; y: number }) => Math.hypot(c.x - corner.x, c.y - corner.y);
+		let next = run;
+		for (let i = 0; i < 8; i++) next = addHeroPoint(next, heroFinalPose(next).centroids, corner);
+		const before = Math.min(...final.centroids.map(dist));
+		const after = Math.min(...heroFinalPose(next).centroids.map(dist));
+		expect(after).toBeLessThan(before);
+	});
+
+	it('keeps points inside the plot and caps how many a visitor can add', () => {
+		const outside = addHeroPoint(run, final.centroids, { x: 3, y: -3 });
+		expect(outside.data.at(-1)).toMatchObject({ x: 1, y: -1 });
+		let next = run;
+		for (let i = 0; i < MAX_ADDED + 5; i++) next = addHeroPoint(next, heroFinalPose(next).centroids, { x: (i % 10) / 10, y: 0.5 });
+		expect(next.added).toBe(MAX_ADDED);
+		expect(next.data).toHaveLength(48 + MAX_ADDED);
+		expect(next.data.slice(0, 48)).toEqual(run.data);
+	});
+
+	it('starts a run after a click fully visible, without fading in again', () => {
+		const next = addHeroPoint(run, final.centroids, { x: 0.5, y: 0.5 });
+		expect(heroPose(next, HERO_RESUME_AT).opacity).toBe(1);
+		expect(heroPose(next, HERO_RESUME_AT).centroids).toEqual(final.centroids);
+	});
+
+	it('converts canvas pixels to plot coordinates', () => {
+		expect(toPlot(0, 0, 400, 300)).toEqual({ x: -1, y: -1 });
+		expect(toPlot(400, 300, 400, 300)).toEqual({ x: 1, y: 1 });
+		expect(toPlot(200, 150, 400, 300)).toEqual({ x: 0, y: 0 });
 	});
 });

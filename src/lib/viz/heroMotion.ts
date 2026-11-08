@@ -10,11 +10,17 @@ const STEP_S = 1.8;
 const HOLD_S = 4.5;
 /** The last part of a step, when points take the color of their new cluster. */
 const RECOLOR_FROM = 0.7;
+/** Visitors can add this many points. After that, each new one replaces their oldest. */
+export const MAX_ADDED = 40;
+/** Where a run restarts after a click: past the fade-in, on the centroids already on screen. */
+export const HERO_RESUME_AT = FADE_S;
 
 /** A finished k-means run, kept step by step so it can be replayed slowly. */
 export interface HeroRun {
 	data: Dataset;
 	steps: KMeansState[];
+	/** How many of the last points in data a visitor added. */
+	added: number;
 }
 
 export interface HeroPose {
@@ -44,11 +50,8 @@ function heroDataset(n: number, rng: () => number): Dataset {
 	});
 }
 
-/** Runs real k-means from centroids bunched in the middle, so they spread out to find the clusters. */
-export function createHeroRun(seed: number, n: number): HeroRun {
-	const rng = createRng(seed);
-	const data = heroDataset(n, rng);
-	const centroids = Array.from({ length: K }, () => ({ x: (rng() - 0.5) * 0.5, y: (rng() - 0.5) * 0.5 }));
+/** Real k-means from the given centroids until it converges, keeping every step. */
+function runFrom(data: Dataset, centroids: Centroid[]): KMeansState[] {
 	const first: KMeansState = {
 		centroids,
 		assignments: data.map((p) => nearestCentroid(centroids, p.x, p.y)),
@@ -61,8 +64,32 @@ export function createHeroRun(seed: number, n: number): HeroRun {
 	while (!steps[steps.length - 1].converged && steps.length <= MAX_STEPS) {
 		steps.push(kMeansStep(steps[steps.length - 1], data));
 	}
-	return { data, steps };
+	return steps;
 }
+
+/** Runs real k-means from centroids bunched in the middle, so they spread out to find the clusters. */
+export function createHeroRun(seed: number, n: number): HeroRun {
+	const rng = createRng(seed);
+	const data = heroDataset(n, rng);
+	const centroids = Array.from({ length: K }, () => ({ x: (rng() - 0.5) * 0.5, y: (rng() - 0.5) * 0.5 }));
+	return { data, steps: runFrom(data, centroids), added: 0 };
+}
+
+const clampPlot = (v: number) => Math.min(1, Math.max(-1, v));
+
+/**
+ * Adds a visitor's point and runs k-means again, starting from the centroids on screen, so
+ * the animation shows them shifting to make room for it rather than starting over.
+ */
+export function addHeroPoint(run: HeroRun, centroids: Centroid[], point: { x: number; y: number }): HeroRun {
+	const original = run.data.slice(0, run.data.length - run.added);
+	const added = [...run.data.slice(run.data.length - run.added), { x: clampPlot(point.x), y: clampPlot(point.y), label: 0 }].slice(-MAX_ADDED);
+	const data = [...original, ...added];
+	return { data, steps: runFrom(data, centroids.map((c) => ({ ...c }))), added: added.length };
+}
+
+/** Plot coordinates under a pixel of the canvas, which spans -1 to 1 on both axes. */
+export const toPlot = (px: number, py: number, w: number, h: number) => ({ x: (px / w) * 2 - 1, y: (py / h) * 2 - 1 });
 
 export const heroDuration = (run: HeroRun) => FADE_S * 2 + (run.steps.length - 1) * STEP_S + HOLD_S;
 
@@ -95,7 +122,15 @@ export const heroFinalPose = (run: HeroRun): HeroPose => ({
 	opacity: 1,
 });
 
-export function drawHero(ctx: CanvasRenderingContext2D, w: number, h: number, run: HeroRun, pose: HeroPose, colors: PlotColors) {
+export function drawHero(
+	ctx: CanvasRenderingContext2D,
+	w: number,
+	h: number,
+	run: HeroRun,
+	pose: HeroPose,
+	colors: PlotColors,
+	cursor?: { x: number; y: number },
+) {
 	ctx.clearRect(0, 0, w, h);
 	const px = (x: number) => ((x + 1) / 2) * w;
 	const py = (y: number) => ((y + 1) / 2) * h;
@@ -126,6 +161,16 @@ export function drawHero(ctx: CanvasRenderingContext2D, w: number, h: number, ru
 			ctx.arc(x, y, r, 0, Math.PI * 2);
 			ctx.fill();
 		}
+
+		// A visitor's own points get an outline, so they can find them again.
+		if (i >= run.data.length - run.added) {
+			ctx.globalAlpha = pose.opacity;
+			ctx.strokeStyle = colors.ink;
+			ctx.lineWidth = 1.5;
+			ctx.beginPath();
+			ctx.arc(x, y, r * 1.8, 0, Math.PI * 2);
+			ctx.stroke();
+		}
 	});
 
 	pose.centroids.forEach((c, i) => {
@@ -140,5 +185,21 @@ export function drawHero(ctx: CanvasRenderingContext2D, w: number, h: number, ru
 		ctx.arc(px(c.x), py(c.y), r * 1.1, 0, Math.PI * 2);
 		ctx.fill();
 	});
+
+	// The keyboard cursor: a crosshair showing where Enter will add a point.
+	if (cursor) {
+		const x = px(cursor.x);
+		const y = py(cursor.y);
+		const arm = r * 4;
+		ctx.globalAlpha = 1;
+		ctx.strokeStyle = colors.ink;
+		ctx.lineWidth = 1.5;
+		ctx.beginPath();
+		ctx.moveTo(x - arm, y);
+		ctx.lineTo(x + arm, y);
+		ctx.moveTo(x, y - arm);
+		ctx.lineTo(x, y + arm);
+		ctx.stroke();
+	}
 	ctx.globalAlpha = 1;
 }
