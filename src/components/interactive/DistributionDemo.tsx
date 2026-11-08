@@ -24,6 +24,7 @@ export default function DistributionDemo() {
 			<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_14rem]">
 				<div>
 					<PlotCanvas scene={scene} class="block w-full rounded-lg border border-(--viz-border)" role="img" aria-label={`Two distributions. Wasserstein distance ${moved.toFixed(3)}.`} />
+					<p class="sr-only" aria-live="polite">{`Wasserstein distance ${moved.toFixed(3)}.`}</p>
 					<p class="m-0 mt-2 text-xs text-(--viz-muted-ink)">Solid curve: P. Dashed curve: Q.</p>
 				</div>
 				<div class="flex flex-col gap-3">
