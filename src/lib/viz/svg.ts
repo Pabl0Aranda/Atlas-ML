@@ -43,6 +43,24 @@ function gridToSvg(grid: SceneGrid, label: string): string {
 	return `<svg data-grid viewBox="0 0 ${grid.cols * cell} ${grid.rows * cell}" role="img" aria-label="${label}" style="background:var(--viz-surface)">${rects}<path d="${route}" fill="none" stroke="var(--viz-ink)" stroke-width="2"/></svg>`;
 }
 
+/**
+ * One point, shaped by its class like drawMark in canvas.ts: circle, square, triangle,
+ * then diamond. Shape doubles the color, so a thumbnail never relies on color alone.
+ */
+function mark(cls: number, x: number, y: number, r: number, attrs: string): string {
+	const n = (v: number) => v.toFixed(1);
+	switch (cls % 4) {
+		case 0:
+			return `<circle cx="${n(x)}" cy="${n(y)}" r="${n(r)}" ${attrs}/>`;
+		case 1:
+			return `<rect x="${n(x - r * 0.88)}" y="${n(y - r * 0.88)}" width="${n(r * 1.76)}" height="${n(r * 1.76)}" ${attrs}/>`;
+		case 2:
+			return `<polygon points="${n(x)},${n(y - r * 1.2)} ${n(x + r * 1.1)},${n(y + r * 0.85)} ${n(x - r * 1.1)},${n(y + r * 0.85)}" ${attrs}/>`;
+		default:
+			return `<polygon points="${n(x)},${n(y - r * 1.25)} ${n(x + r * 1.25)},${n(y)} ${n(x)},${n(y + r * 1.25)} ${n(x - r * 1.25)},${n(y)}" ${attrs}/>`;
+	}
+}
+
 /** Static twin of the canvas renderer, for build-time thumbnails with no client JS. */
 export function sceneToSvg(scene: Scene, label: string): string {
 	if (scene.grid) return gridToSvg(scene.grid, label);
@@ -54,10 +72,10 @@ export function sceneToSvg(scene: Scene, label: string): string {
 		})
 		.join('');
 	const points = scene.points
-		.map((p) => `<circle cx="${px(p.x)}" cy="${py(p.y)}" r="${(3 * (p.scale ?? 1)).toFixed(1)}" fill="${p.muted ? 'var(--viz-muted)' : fill(p.cls)}" stroke="var(--viz-surface)"/>`)
+		.map((p) => mark(p.cls, Number(px(p.x)), Number(py(p.y)), 3 * (p.scale ?? 1), `fill="${p.muted ? 'var(--viz-muted)' : fill(p.cls)}" stroke="var(--viz-surface)"`))
 		.join('');
 	const markers = (scene.markers ?? [])
-		.map((m) => `<circle cx="${px(m.x)}" cy="${py(m.y)}" r="7" fill="${fill(m.cls)}" stroke="var(--viz-ink)" stroke-width="2"/>`)
+		.map((m) => mark(m.cls, Number(px(m.x)), Number(py(m.y)), 7, `fill="${fill(m.cls)}" stroke="var(--viz-ink)" stroke-width="2"`))
 		.join('');
 	return `<svg viewBox="0 0 ${SIZE} ${SIZE}" role="img" aria-label="${label}" style="background:var(--viz-surface)">${regionRects(scene)}${lines}${points}${markers}</svg>`;
 }
