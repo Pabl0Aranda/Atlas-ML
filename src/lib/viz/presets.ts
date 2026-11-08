@@ -81,6 +81,11 @@ export const PRESETS: Partial<Record<AlgorithmId, Preset[]>> = {
 	'lasso-regression': [
 		{ label: 'Heavy penalty', note: 'Press Play. The L1 penalty drives weights to exactly zero, leaving only 1 of 9 terms. That is the difference from ridge.', params: { lambda: 0.2 } },
 	],
+	'imbalanced-data': [
+		{ label: 'No rebalancing', note: 'Press Play. Test accuracy reaches 96.8%, yet the model misses 9 of the 40 rare test samples, a rare class recall of 77.5%.', params: { method: 0 } },
+		{ label: 'Undersample', note: 'Press Play. The model trains on only 24 samples. Rare class recall still rises to 90.0%, while precision falls to 73.5%.', params: { method: 1 } },
+		{ label: 'Class weights', note: 'Press Play. Without adding or removing a single sample, rare class recall rises to 90.0%, the same as SMOTE here.', params: { method: 4 } },
+	],
 	'gradient-descent': [
 		{ label: 'Zigzag', note: 'Press Play. Each step overshoots the valley floor and bounces to the other side, yet the loss still falls, and the run settles after 39 steps.', params: { surface: 1, alpha: 0.2, beta: 0, startX: -0.8, startY: 0.6 } },
 		{ label: 'Too large', note: 'Press Play. A learning rate only a little higher makes each bounce bigger than the last, and the weights leave the plot after 29 steps.', params: { surface: 1, alpha: 0.23, beta: 0, startX: -0.8, startY: 0.6 } },

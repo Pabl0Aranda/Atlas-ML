@@ -18,8 +18,8 @@ Find an algorithm, watch it run, read the math, and inspect the exact code behin
 
 ## Features
 
-- **32 interactive sandboxes.** Play, step and rewind a run, change settings, add your own samples, and share the exact setup as a link.
-- **26 algorithms explained,** across supervised, unsupervised, statistical, deep and reinforcement learning, in a catalog of 64 entries.
+- **33 interactive sandboxes.** Play, step and rewind a run, change settings, add your own samples, and share the exact setup as a link.
+- **26 algorithms explained,** across supervised, unsupervised, statistical, deep and reinforcement learning, in a catalog of 65 entries.
 - **Compare mode.** Run two algorithms side by side on identical data.
 - **Train and test view.** Hold out data on classifiers to see overfitting directly.
 - **Guided presets.** One-click setups that make a single idea visible, with notes based on real runs.

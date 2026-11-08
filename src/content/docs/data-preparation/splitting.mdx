@@ -75,3 +75,4 @@ print(cross_val_score(model, X_train, y_train, cv=folds).mean())
 - More test data gives a more reliable estimate but leaves less for training.
 - Split before fitting any [cleaning or processing](/data-preparation/overview/#data-leakage) statistics.
 - Set a random seed, so results can be reproduced.
+- If one class is rare, split first and then [rebalance the training data](/data-preparation/imbalanced-data/).

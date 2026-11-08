@@ -35,6 +35,7 @@ const loaders: Record<AlgorithmId, () => Promise<AlgorithmSpec>> = {
 	'hyperparameter-search': () => import('./specs/evaluation').then((m) => m.hyperparameterSearch),
 	'threshold-metrics': () => import('./specs/evaluation').then((m) => m.thresholdMetrics),
 	'gradient-descent': () => import('./specs/gradientDescent').then((m) => m.gradientDescent),
+	'imbalanced-data': () => import('./specs/imbalance').then((m) => m.imbalancedData),
 };
 
 export const ALGORITHM_IDS = Object.keys(loaders) as AlgorithmId[];

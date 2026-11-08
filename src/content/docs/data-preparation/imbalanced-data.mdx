@@ -1,0 +1,113 @@
+---
+title: Imbalanced Data
+description: When one class is rare, rebalance the training data so a model learns to catch it.
+sidebar:
+  order: 5
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Sandbox from '@/components/interactive/Sandbox';
+import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
+
+## Intuition & Overview
+
+The cases people care about most are often the rarest: fraud among card payments, a disease among scans, a faulty part on a production line. When one class makes up 1% of the data, a model can be right 99% of the time by never predicting it. It learns that the rare class barely matters, because getting it wrong barely changes the <Term id="loss">loss</Term>.
+
+Rebalancing changes that. You either change the training data, so both classes appear about equally often, or change the loss, so each mistake on the rare class costs more.
+
+## Why Accuracy Misleads
+
+<Term id="accuracy">Accuracy</Term> counts every prediction the same, so the common class dominates it. Two other measures look at the rare class alone:
+
+- **<Term id="recall">Recall</Term>:** of the real rare cases, the share the model caught.
+- **<Term id="precision">Precision</Term>:** of the cases the model flagged as rare, the share that really were.
+
+Catching more rare cases usually means more false alarms too, so recall tends to rise as precision falls. Which matters more depends on the cost of each mistake. The [classification metrics](/testing/classification-metrics/) page covers these measures in depth.
+
+## Four Ways to Rebalance
+
+| Method | What it does | Watch out for |
+| --- | --- | --- |
+| Random undersampling | Drops common samples at random until the classes match | Throws away most of the data |
+| Random oversampling | Copies rare samples at random until the classes match | Copies add no new information, so the model can memorize them |
+| SMOTE | Creates new rare samples between nearby real ones | Can place samples where the common class lives, if the classes overlap |
+| Class weights | Keeps the data, and makes rare mistakes cost more in the loss | Needs a model that supports weights, as most do |
+
+## Mathematical Foundation
+
+**SMOTE**, short for Synthetic Minority Oversampling Technique, builds each new sample from two real ones. It picks a rare sample $x_i$, then one of its $k$ nearest rare neighbors $x_j$, and places the new sample at a random point on the line between them, with $t$ drawn uniformly between 0 and 1:
+
+$$
+x_{\text{new}} = x_i + t\,(x_j - x_i)
+$$
+
+**Class weights** scale each sample's share of the loss. With $n$ samples in total, $C$ classes and $n_c$ samples in class $c$, the usual choice is:
+
+$$
+w_c = \frac{n}{C \cdot n_c}
+$$
+
+Each class then carries the same total weight, $w_c \cdot n_c = n / C$. With 108 common and 12 rare samples, each rare sample counts 9 times as much as a common one.
+
+## Rebalance the Training Data Only
+
+Split the data first, then rebalance the training set alone. The test set must keep the real balance, because that is what the model will meet in use. A test set full of synthetic rare samples would report a score no real data could reproduce.
+
+It's the same rule as for [data leakage](/data-preparation/overview/#data-leakage): anything learned from data, including where to place synthetic samples, must come from the training set only. In [cross-validation](/validation/cross-validation/), that means rebalancing inside each fold.
+
+## Interactive Sandbox
+
+The training data has 12 rare samples among 120. Press **Step** to see the rebalanced data, then **Play** to train a logistic regression on it. The scores come from 400 separate test samples, 40 of them rare, which are never rebalanced.
+
+- **SMOTE**, the default, draws each new sample hollow, with a dashed line between the two real samples it came from.
+- **Undersample** grays out the common samples it drops.
+- **Oversample** rings each rare sample it copied, because the copies sit exactly on top of it.
+- **Class weights** draws the rare samples larger, since each one counts more.
+
+<Sandbox client:idle algorithm="imbalanced-data" />
+
+On this data, every method raises rare class recall from 77.5% to 90.0%: the model catches 36 of the 40 rare test samples instead of 31. In exchange, precision falls from 88.6% to about 72%, and test accuracy dips slightly, from 96.8% to 95.5%. Accuracy alone would suggest rebalancing made things worse.
+
+The methods end up almost the same here, because a straight boundary has little room to differ. With flexible models and messier data, the differences grow: undersampling loses information, copies invite memorizing, and SMOTE can blur an overlapping boundary.
+
+## Code
+
+<Tabs>
+<TabItem label="This site's engine">
+<AlgorithmSource file="imbalance.ts" />
+</TabItem>
+<TabItem label="scikit-learn">
+```python
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import make_pipeline
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, stratify=y, random_state=0)
+
+# The pipeline applies SMOTE while fitting only, never to data it predicts.
+smote_model = make_pipeline(SMOTE(k_neighbors=5, random_state=0), LogisticRegression())
+smote_model.fit(X_train, y_train)
+
+# Class weights need no resampling at all.
+weighted_model = LogisticRegression(class_weight="balanced").fit(X_train, y_train)
+
+for model in (smote_model, weighted_model):
+    print(classification_report(y_test, model.predict(X_test), digits=3))
+```
+
+<NotebookLinks page="data-preparation/imbalanced-data" />
+</TabItem>
+</Tabs>
+
+SMOTE comes from the imbalanced-learn library, whose pipeline knows to skip resampling at prediction time. scikit-learn's own pipeline doesn't, so use the one from `imblearn`.
+
+## Trade-offs
+
+- **Try class weights first.** They need no new data, and they work with most models.
+- **Moving the threshold** is another option. A model that outputs probabilities can flag a sample as rare above 0.3 instead of 0.5, and the [classification metrics sandbox](/testing/classification-metrics/#interactive-sandbox) shows the effect.
+- **Rebalancing distorts probabilities.** A model trained on balanced data overestimates how often the rare class occurs, so recalibrate it if you need real probabilities.
+- **More real data beats synthetic data.** If you can collect more rare examples, do that first.
