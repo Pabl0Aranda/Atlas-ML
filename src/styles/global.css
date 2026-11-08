@@ -585,6 +585,116 @@ a.atlas-card.grid {
 	outline-offset: 2px;
 }
 
+/* The home page's three-step tour, around a real sandbox. */
+.tour {
+	margin-top: 1.5rem;
+}
+
+.tour-panel {
+	padding: 1rem;
+	border: 1px solid var(--viz-border);
+	border-radius: 0.875rem;
+	background: var(--viz-panel);
+}
+
+.tour-steps {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.5rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.tour-step {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 0;
+	color: var(--viz-muted-ink);
+	font-size: 0.875rem;
+	font-weight: 600;
+}
+
+.tour-step.is-current,
+.tour-step.is-done {
+	color: var(--viz-ink);
+}
+
+.tour-badge {
+	display: flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	width: 1.75rem;
+	height: 1.75rem;
+	border: 2px solid var(--viz-border);
+	border-radius: 999px;
+	font-size: 0.8125rem;
+}
+
+.tour-step.is-current .tour-badge {
+	border-color: var(--accent-fill);
+	background: var(--accent-fill);
+	color: var(--on-accent);
+}
+
+.tour-step.is-done .tour-badge {
+	border-color: var(--sl-color-accent);
+	color: var(--sl-color-text-accent);
+}
+
+.tour-text {
+	margin: 0.875rem 0 0;
+	font-size: 0.9375rem;
+	line-height: 1.5;
+}
+
+.tour-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-top: 0.875rem;
+}
+
+.tour-skip {
+	margin-left: auto;
+}
+
+.tour .not-content.my-8,
+.tour section {
+	margin-top: 1rem;
+}
+
+/* The control the current step is about. */
+[data-tour-target] {
+	outline: 3px solid var(--sl-color-accent);
+	outline-offset: 3px;
+	border-radius: 0.5rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	[data-tour-target] {
+		animation: tour-pulse 1.6s ease-in-out infinite;
+	}
+}
+
+@keyframes tour-pulse {
+	50% {
+		outline-offset: 6px;
+		outline-color: color-mix(in srgb, var(--sl-color-accent) 45%, transparent);
+	}
+}
+
+/* Phones stack the step names under their numbers. */
+@media (max-width: 30rem) {
+	.tour-step {
+		flex-direction: column;
+		text-align: center;
+		font-size: 0.8125rem;
+	}
+}
+
 /* The arithmetic behind a sandbox's current step, under its metrics. */
 .calculations {
 	margin-top: 0.75rem;
