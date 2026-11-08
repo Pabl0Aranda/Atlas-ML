@@ -6,6 +6,7 @@ description: Combine one-split decision stumps by reweighting samples, so each n
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -31,7 +32,7 @@ $$
 w_i \leftarrow w_i\, e^{-\alpha_t\, y_i\, h_t(x_i)}
 $$
 
-After this update, the samples the stump got wrong hold exactly half of the total weight, so that stump is no better than chance on the new weights. The next stump has to find something different. The final classifier is a weighted vote:
+After this update, the samples the stump got wrong hold exactly half of the total weight, so that stump is no better than chance on the new weights. The next stump has to find something different. The final <Term id="classification">classifier</Term> is a weighted vote:
 
 $$
 H(x) = \operatorname{sign} \sum_{t} \alpha_t\, h_t(x)
@@ -53,7 +54,7 @@ $$
 
 ## Interactive Sandbox
 
-Each step adds one stump, drawn as a dashed line. Point size shows sample weight, so hard samples near the boundary swell as rounds pass. Then try the **Memorizing XOR** preset. A stump sees only one feature, and neither feature alone explains that pattern. Training accuracy climbs to about 77%, but accuracy on held-out samples stays near 50%, so the ensemble has memorized noise and learned nothing.
+Each step adds one stump, drawn as a dashed line. Point size shows sample weight, so hard samples near the boundary swell as rounds pass. Then try the **Memorizing XOR** preset. A stump sees only one feature, and neither feature alone explains that pattern. Training <Term id="accuracy">accuracy</Term> climbs to about 77%, but accuracy on held-out samples stays near 50%, so the ensemble has memorized noise and learned nothing.
 
 <Sandbox client:idle algorithm="adaboost" />
 
@@ -84,6 +85,6 @@ model = AdaBoostClassifier(estimator=stump, n_estimators=100).fit(X, y)
 
 **Limitations**
 
-- The exponential loss punishes mistakes heavily, so label noise and outliers can dominate training.
-- Stumps see one feature at a time, so the sum struggles with interactions such as XOR.
+- The exponential loss punishes mistakes heavily, so label noise and <Term id="outlier">outliers</Term> can dominate training.
+- Stumps see one <Term id="feature">feature</Term> at a time, so the sum struggles with interactions such as XOR.
 - Gradient boosting has largely replaced it in practice.

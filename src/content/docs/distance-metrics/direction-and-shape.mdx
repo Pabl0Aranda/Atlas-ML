@@ -8,6 +8,7 @@ sidebar:
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import DistanceExplorer from '@/components/interactive/DistanceExplorer';
+import Term from '@/components/docs/Term.astro';
 
 [Geometric distances](/distance-metrics/geometric/) take coordinates at face value. These two do not: cosine distance ignores how long a vector is, and Mahalanobis distance adjusts for how the data is spread.
 
@@ -49,9 +50,9 @@ $$
 
 Think of it as stretching space until the data forms a round cloud, then measuring with an ordinary ruler. A step along the direction the data naturally varies counts for little, and the same step across it counts for a lot.
 
-If features are uncorrelated and have unit variance, $\Sigma$ is the identity matrix, and this becomes plain Euclidean distance.
+If <Term id="feature">features</Term> are uncorrelated and have unit variance, $\Sigma$ is the identity matrix, and this becomes plain Euclidean distance.
 
-That makes it useful for outlier detection. A point can look close to the center by Euclidean distance, yet be highly unusual because it breaks the pattern between features. Someone 190 cm tall weighing 50 kg is not extreme on either measure alone, but the combination is rare.
+That makes it useful for <Term id="outlier">outlier</Term> detection. A point can look close to the center by Euclidean distance, yet be highly unusual because it breaks the pattern between features. Someone 190 cm tall weighing 50 kg is not extreme on either measure alone, but the combination is rare.
 
 <DistanceExplorer client:visible initialMetric="mahalanobis" />
 

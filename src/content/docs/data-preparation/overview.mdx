@@ -6,16 +6,18 @@ sidebar:
   order: 1
 ---
 
+import Term from '@/components/docs/Term.astro';
+
 Models learn whatever the data contains, including its errors. Most of the work in a real project happens before training, and a simple model on well-prepared data usually beats a sophisticated model on careless data.
 
 ## The three stages
 
-1. **[Clean](/data-preparation/cleaning/):** fix or remove what is wrong, such as missing values, duplicates, inconsistent entries and outliers.
+1. **[Clean](/data-preparation/cleaning/):** fix or remove what is wrong, such as missing values, duplicates, inconsistent entries and <Term id="outlier">outliers</Term>.
 2. **[Separate](/data-preparation/splitting/):** set aside data the model will never train on, so you can measure honestly.
-3. **[Process](/data-preparation/processing/):** turn the training data into the numeric form algorithms need, through scaling and encoding.
+3. **[Process](/data-preparation/processing/):** turn the <Term id="training-set">training data</Term> into the numeric form algorithms need, through scaling and encoding.
 
 :::caution[Separate before you learn anything from the data]
-Only fixes that need no statistics belong before the split. Any step that **learns a value from the data**, such as a mean, a scale or a category list, must be fitted on the training set only and then applied to the test set.
+Only fixes that need no statistics belong before the split. Any step that **learns a value from the data**, such as a mean, a scale or a category list, must be fitted on the training set only and then applied to the <Term id="test-set">test set</Term>.
 :::
 
 ## Data leakage
@@ -23,7 +25,7 @@ Only fixes that need no statistics belong before the split. Any step that **lear
 Leakage happens when information from outside the training set reaches the model. The results look excellent, then collapse in production. Common causes:
 
 - Scaling or imputing on the full dataset before splitting.
-- Keeping a feature that is only known after the outcome, such as a "refund issued" column when predicting purchases.
+- Keeping a <Term id="feature">feature</Term> that is only known after the outcome, such as a "refund issued" column when predicting purchases.
 - Duplicate rows, or several rows from the same customer, landing on both sides of the split.
 - Randomly splitting time series, which lets the model see the future.
 
@@ -51,4 +53,4 @@ model.fit(X_train, y_train)          # every step is fitted on training data onl
 print(model.score(X_test, y_test))
 ```
 
-A pipeline makes leakage hard to commit, because each preparation step is refitted inside `fit`, and inside every cross-validation fold.
+A pipeline makes leakage hard to commit, because each preparation step is refitted inside `fit`, and inside every <Term id="cross-validation">cross-validation</Term> fold.

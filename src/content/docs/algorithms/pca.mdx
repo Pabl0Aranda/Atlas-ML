@@ -6,6 +6,7 @@ description: Find the orthogonal directions along which data varies most.
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -71,5 +72,5 @@ print(Z.explained_variance_ratio_)
 **Limitations**
 
 - It only captures linear structure.
-- It is sensitive to feature scale, so standardize when units differ.
+- It is sensitive to <Term id="feature">feature</Term> scale, so standardize when units differ.
 - High variance does not guarantee relevance to your prediction task.

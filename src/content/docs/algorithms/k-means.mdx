@@ -6,6 +6,7 @@ description: Partition data into k clusters by alternating between assigning poi
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -71,6 +72,6 @@ print(model.cluster_centers_, model.inertia_)
 - You must choose $k$ in advance.
 - It assumes compact, similarly sized clusters.
 - Results depend on initialization, so production code runs several restarts.
-- Features need comparable scales, because distance mixes them directly.
+- <Term id="feature">Features</Term> need comparable scales, because distance mixes them directly.
 
 For curved or density-based structure, consider DBSCAN or hierarchical clustering, both listed in the [catalog](/catalog/).

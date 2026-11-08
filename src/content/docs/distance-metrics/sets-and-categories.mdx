@@ -8,6 +8,7 @@ sidebar:
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import { SetDistanceDemo } from '@/components/interactive/TextDistanceDemo';
+import Term from '@/components/docs/Term.astro';
 
 Not all data lives on a number line. "Red" is not halfway between "blue" and "green", and a list of tags has no coordinates. These distances compare such data directly.
 
@@ -21,7 +22,7 @@ $$
 
 For example, `karolin` and `kathrin` differ in 3 positions.
 
-It comes from error-correcting codes, where it counts how many bits were flipped in transmission. In machine learning it suits rows of categorical features or binary fingerprints. Dividing by the length gives the share of positions that differ, which is easier to compare across datasets.
+It comes from error-correcting codes, where it counts how many bits were flipped in transmission. In machine learning it suits rows of categorical <Term id="feature">features</Term> or binary fingerprints. Dividing by the length gives the share of positions that differ, which is easier to compare across datasets.
 
 Hamming distance is undefined for sequences of different lengths. One inserted character shifts every later position, so for text you usually want [Levenshtein distance](/distance-metrics/sequences/) instead.
 

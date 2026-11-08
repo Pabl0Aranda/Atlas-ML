@@ -8,6 +8,7 @@ sidebar:
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import DistributionDemo from '@/components/interactive/DistributionDemo';
+import Term from '@/components/docs/Term.astro';
 
 Sometimes the things you compare are not single samples but whole distributions: a model's predictions against the real data, or this month's data against last month's. These two measures answer that in very different ways.
 
@@ -21,7 +22,7 @@ $$
 
 It is 0 only when the two distributions are identical, and it grows as they differ. With a natural logarithm, the unit is nats.
 
-KL divergence is everywhere in machine learning. Minimizing cross-entropy, the loss used to train most classifiers, is equivalent to minimizing the KL divergence from the true labels to the model's predictions. Variational autoencoders use it directly.
+KL divergence is everywhere in machine learning. Minimizing cross-entropy, the loss used to train most <Term id="classification">classifiers</Term>, is equivalent to minimizing the KL divergence from the true labels to the model's predictions. Variational autoencoders use it directly.
 
 ### Not a distance at all
 

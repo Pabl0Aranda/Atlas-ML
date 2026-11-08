@@ -8,6 +8,7 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -28,13 +29,13 @@ Larger $k$ trains on more data per round, which reduces pessimism in the estimat
 1. Shuffle the data, unless order matters, and divide it into $k$ folds.
 2. Hold out one fold.
 3. Fit all preparation and the model on the remaining folds.
-4. Score on the held-out fold.
+4. Score on the <Term id="held-out-data">held-out</Term> fold.
 5. Repeat for each fold, then report the mean and standard deviation.
-6. Refit the chosen configuration on all the training data.
+6. Refit the chosen configuration on all the <Term id="training-set">training data</Term>.
 
 ## Interactive Sandbox
 
-Each step runs one fold of a KNN classifier. **Noise / outliers** shows how much scores differ between folds. Try 2 folds, then 10.
+Each step runs one fold of a KNN <Term id="classification">classifier</Term>. **Noise / outliers** shows how much scores differ between folds. Try 2 folds, then 10.
 
 <Sandbox client:idle algorithm="cross-validation" />
 

@@ -6,6 +6,7 @@ description: Average many decorrelated decision trees, each trained on a bootstr
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -25,13 +26,13 @@ $$
 \rho\,\sigma^2 + \frac{1 - \rho}{B}\,\sigma^2
 $$
 
-More trees shrink the second term, but only lower correlation shrinks the first. That is why each split considers a random subset of the features.
+More trees shrink the second term, but only lower correlation shrinks the first. That is why each split considers a random subset of the <Term id="feature">features</Term>.
 
-A bootstrap sample leaves out each point with probability $(1 - 1/n)^n \approx 0.37$. Those out-of-bag points act as a free validation set for that tree.
+A bootstrap sample leaves out each point with probability $(1 - 1/n)^n \approx 0.37$. Those out-of-bag points act as a free <Term id="validation-set">validation set</Term> for that tree.
 
 ## Step-by-Step Breakdown
 
-1. Draw a bootstrap sample of the training data.
+1. Draw a bootstrap sample of the <Term id="training-set">training data</Term>.
 2. Grow a tree on it, choosing from a random subset of features at each split.
 3. Score the tree on the samples it never saw, and add those votes to the out-of-bag tally.
 4. Repeat until the forest has enough trees.
@@ -39,7 +40,7 @@ A bootstrap sample leaves out each point with probability $(1 - 1/n)^n \approx 0
 
 ## Interactive Sandbox
 
-Each step adds one tree. The first tree gives a jagged boundary, and the region smooths out as more trees vote. Watch the gap between training accuracy and out-of-bag accuracy: the first is flattering, and the second is the honest estimate. This data has only two features, so each split here picks one at random.
+Each step adds one tree. The first tree gives a jagged boundary, and the region smooths out as more trees vote. Watch the gap between training <Term id="accuracy">accuracy</Term> and out-of-bag accuracy: the first is flattering, and the second is the honest estimate. This data has only two features, so each split here picks one at random.
 
 <Sandbox client:idle algorithm="random-forest" />
 
@@ -64,7 +65,7 @@ print(model.oob_score_)
 **Strengths**
 
 - A strong default on tabular data, with little tuning.
-- Adding trees does not cause overfitting. Past a point it only costs time.
+- Adding trees does not cause <Term id="overfitting">overfitting</Term>. Past a point it only costs time.
 - Out-of-bag scoring gives a validation estimate without a separate split.
 
 **Limitations**

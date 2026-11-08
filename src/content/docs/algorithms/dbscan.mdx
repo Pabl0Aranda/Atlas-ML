@@ -6,10 +6,11 @@ description: Grow clusters outward from dense regions, finding any shape and lab
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
-Picture a rumor spreading through a crowd. Anyone standing in a dense group passes it to everyone nearby, and it travels as far as the crowd stays connected. People standing alone never hear it. DBSCAN finds clusters the same way, so a cluster can take any shape, and you never have to say how many to expect. That makes it a good contrast with [k-means](/algorithms/k-means/), which only finds round clusters and must assign every point.
+Picture a rumor spreading through a crowd. Anyone standing in a dense group passes it to everyone nearby, and it travels as far as the crowd stays connected. People standing alone never hear it. DBSCAN finds <Term id="cluster">clusters</Term> the same way, so a cluster can take any shape, and you never have to say how many to expect. That makes it a good contrast with [k-means](/algorithms/k-means/), which only finds round clusters and must assign every point.
 
 ## Mathematical Foundation
 
@@ -66,7 +67,7 @@ labels = DBSCAN(eps=0.15, min_samples=4).fit_predict(X)  # -1 marks noise
 
 - Finds clusters of arbitrary shape.
 - Chooses the number of clusters by itself.
-- Flags outliers instead of forcing them into a cluster.
+- Flags <Term id="outlier">outliers</Term> instead of forcing them into a cluster.
 
 **Limitations**
 

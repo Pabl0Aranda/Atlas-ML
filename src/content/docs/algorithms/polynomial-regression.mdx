@@ -6,10 +6,11 @@ description: Capture curved relationships by running linear regression on powers
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
-A straight line cannot follow a curve, but a sum of powers of $x$ can. Polynomial regression is still linear in its weights, so the same training procedure as [linear regression](/algorithms/linear-regression/) applies. The degree controls flexibility, and with it the risk of [overfitting](/concepts/bias-variance/).
+A straight line cannot follow a curve, but a sum of powers of $x$ can. Polynomial <Term id="regression">regression</Term> is still linear in its weights, so the same training procedure as [linear regression](/algorithms/linear-regression/) applies. The degree controls flexibility, and with it the risk of [overfitting](/concepts/bias-variance/).
 
 ## Mathematical Foundation
 
@@ -25,7 +26,7 @@ $$
 L(w) = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2 + \lambda \sum_{j=1}^{d} w_j^2
 $$
 
-and each gradient component is:
+and each <Term id="gradient">gradient</Term> component is:
 
 $$
 \frac{\partial L}{\partial w_j} = \frac{2}{n} \sum_{i} (\hat{y}_i - y_i)\, x_i^{\,j} + 2 \lambda w_j
@@ -35,8 +36,8 @@ $$
 
 1. Choose a degree $d$ and map each $x$ to $(1, x, x^2, \dots, x^d)$.
 2. Start with all weights at zero.
-3. Apply gradient descent on the regularized loss.
-4. Compare degrees on held-out data, because training loss only improves as $d$ grows.
+3. Apply gradient descent on the <Term id="regularization">regularized</Term> loss.
+4. Compare degrees on <Term id="held-out-data">held-out data</Term>, because training loss only improves as $d$ grows.
 
 ## Interactive Sandbox
 
@@ -73,4 +74,4 @@ model.fit(X, y)
 
 - High degrees oscillate, especially near the edges of the data.
 - Extrapolation is unreliable because polynomials grow without bound.
-- Feature count grows quickly with several inputs, and high powers are poorly conditioned. Scale the inputs first.
+- <Term id="feature">Feature</Term> count grows quickly with several inputs, and high powers are poorly conditioned. Scale the inputs first.

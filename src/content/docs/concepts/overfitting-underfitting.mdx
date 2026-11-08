@@ -9,6 +9,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import FitExplorer from '@/components/interactive/FitExplorer';
 import Sandbox from '@/components/interactive/Sandbox';
+import Term from '@/components/docs/Term.astro';
 
 The goal of machine learning isn't to do well on the data you already have. It's to do well on data you haven't seen yet, which is called **generalization**. Overfitting and underfitting are the two main ways a model fails at that.
 
@@ -48,7 +49,7 @@ Notice that the model with the best training score has the worst gap. At $k = 1$
 
 As the model gets more rigid, the training score falls, while the test score rises and later falls. **The best model sits near that peak, not where the training score is highest.**
 
-Here the peak is wide: test accuracy stays near 88% from $k = 15$ to $k = 75$, so many settings work about equally well. It only collapses at the far end, when $k$ gets close to the 90 training samples and every prediction turns into a vote of almost the whole dataset. Real problems often have a wide good region like this, so there's no need to hunt for one perfect value.
+Here the peak is wide: test <Term id="accuracy">accuracy</Term> stays near 88% from $k = 15$ to $k = 75$, so many settings work about equally well. It only collapses at the far end, when $k$ gets close to the 90 training samples and every prediction turns into a vote of almost the whole dataset. Real problems often have a wide good region like this, so there's no need to hunt for one perfect value.
 
 Overfitting also depends on the data. On the clean moons dataset, $k = 1$ reaches 100% on test data too, because there's almost no noise to memorize.
 
@@ -100,7 +101,7 @@ Choosing this setting is what [hyperparameter tuning](/validation/hyperparameter
 
 ## Interactive Sandbox
 
-Regression makes the shape of the problem easy to see. Use the **Try this** buttons below, and press **Play** after each one:
+<Term id="regression">Regression</Term> makes the shape of the problem easy to see. Use the **Try this** buttons below, and press **Play** after each one:
 
 - **Underfit:** a degree 1 line can't follow the curve, whatever you do.
 - **High degree:** degree 12 has enough freedom to chase individual samples. Its training loss ends at about a tenth of the line's.
@@ -110,7 +111,7 @@ The lower training loss doesn't make the high-degree model better, since this sa
 
 <Sandbox client:idle algorithm="polynomial-regression" />
 
-Classifier sandboxes can measure both sides. Tick **Hold out 25% for testing**, or try these presets:
+<Term id="classification">Classifier</Term> sandboxes can measure both sides. Tick **Hold out 25% for testing**, or try these presets:
 
 | Sandbox | Preset | Training | Held out |
 | --- | --- | --- | --- |
@@ -124,7 +125,7 @@ Classifier sandboxes can measure both sides. Tick **Hold out 25% for testing**, 
 - **"Overfitting only affects complex models."** A simple model can overfit too when there are very few samples.
 - **"More data always helps."** It helps with overfitting, but it does little for an underfitting model.
 - **"A little gap means something is wrong."** A small gap is normal, since a model will nearly always do slightly better on data it has seen.
-- **"Overfitting only happens during training."** You can also overfit to a validation set by trying many models against it. That's why the final [test set](/testing/overview/) is used only once.
+- **"Overfitting only happens during training."** You can also overfit to a <Term id="validation-set">validation set</Term> by trying many models against it. That's why the final [test set](/testing/overview/) is used only once.
 - **"A suspiciously good score is good news."** A validation score that seems too good often comes from [data leakage](/data-preparation/overview/#data-leakage), not from a great model.
 
 ## Code

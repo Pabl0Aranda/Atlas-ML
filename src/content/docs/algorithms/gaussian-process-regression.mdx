@@ -6,14 +6,15 @@ description: A distribution over functions that gives predictions with honest un
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
-Most regression models return one curve. A Gaussian process (GP) keeps a whole distribution over possible curves, and each observation rules out those that disagree with it. The result says what it expects **and** how sure it is: confident near data, and unsure far from it.
+Most <Term id="regression">regression</Term> models return one curve. A Gaussian process (GP) keeps a whole distribution over possible curves, and each observation rules out those that disagree with it. The result says what it expects **and** how sure it is: confident near data, and unsure far from it.
 
 ## Mathematical Foundation
 
-A GP assumes any finite set of function values is jointly Gaussian, with covariance given by a kernel. This site uses the squared exponential kernel:
+A GP assumes any finite set of function values is jointly Gaussian, with covariance given by a <Term id="kernel">kernel</Term>. This site uses the squared exponential kernel:
 
 $$
 k(x, x') = \exp\left( -\frac{(x - x')^2}{2 \ell^2} \right)
@@ -29,7 +30,7 @@ There is no training loop: conditioning on the data gives the exact answer.
 
 ## Step-by-Step Breakdown
 
-1. Choose a kernel and its hyperparameters.
+1. Choose a kernel and its <Term id="hyperparameter">hyperparameters</Term>.
 2. Build the kernel matrix $K$ between observations.
 3. Factor $K + \sigma^2 I$ with a Cholesky decomposition, which is stable and fast.
 4. Compute the posterior mean and variance at each query point.

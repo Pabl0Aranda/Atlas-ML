@@ -6,10 +6,11 @@ description: Find the direction that best separates classes, assuming they share
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
-[PCA](/algorithms/pca/) looks for the direction of greatest spread, ignoring labels. LDA uses the labels: it looks for the direction where classes sit far apart **and** each class stays tight. It works both as a classifier and as a supervised way to reduce dimensions.
+[PCA](/algorithms/pca/) looks for the direction of greatest spread, ignoring labels. LDA uses the labels: it looks for the direction where classes sit far apart **and** each class stays tight. It works both as a <Term id="classification">classifier</Term> and as a supervised way to reduce dimensions.
 
 ## Mathematical Foundation
 
@@ -64,7 +65,7 @@ X_projected = model.transform(X_train)  # at most (classes - 1) dimensions
 
 **Strengths**
 
-- A closed-form solution with no learning rate to tune.
+- A closed-form solution with no <Term id="learning-rate">learning rate</Term> to tune.
 - It works well when its assumptions roughly hold, even with few samples.
 - It doubles as supervised dimensionality reduction.
 
@@ -72,4 +73,4 @@ X_projected = model.transform(X_train)  # at most (classes - 1) dimensions
 
 - It assumes Gaussian classes with equal covariance. Quadratic Discriminant Analysis relaxes the second assumption.
 - It depends on differences between means, so it fails when classes share a center.
-- Outliers distort the means and covariance.
+- <Term id="outlier">Outliers</Term> distort the means and covariance.

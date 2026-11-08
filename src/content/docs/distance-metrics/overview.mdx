@@ -8,8 +8,9 @@ sidebar:
 
 import DistanceExplorer from '@/components/interactive/DistanceExplorer';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
-Many algorithms never see your data as you do. They only ask one question: how far apart are these two samples? Whatever answers that question decides what counts as "similar", so it quietly shapes the model. [KNN](/algorithms/knn/) picks neighbors with it, [k-means](/algorithms/k-means/) assigns clusters with it, [DBSCAN](/algorithms/dbscan/) measures density with it, and [hierarchical clustering](/algorithms/hierarchical-clustering/) merges groups with it.
+Many algorithms never see your data as you do. They only ask one question: how far apart are these two samples? Whatever answers that question decides what counts as "similar", so it quietly shapes the model. [KNN](/algorithms/knn/) picks neighbors with it, [k-means](/algorithms/k-means/) assigns <Term id="cluster">clusters</Term> with it, [DBSCAN](/algorithms/dbscan/) measures density with it, and [hierarchical clustering](/algorithms/hierarchical-clustering/) merges groups with it.
 
 There is no single correct distance. The right one depends on what your data is and what "similar" should mean for your problem.
 
@@ -70,7 +71,7 @@ Plenty of useful measures break these rules, and that is fine. It only matters w
 
 ## Scale your features first
 
-Geometric distances add up differences across features, so a feature measured in thousands drowns out one measured in fractions. Income would decide everything and age would barely count. [Scale your features](/data-preparation/processing/) before you use any of them. Mahalanobis is the exception, because it accounts for each feature's spread by itself.
+Geometric distances add up differences across <Term id="feature">features</Term>, so a feature measured in thousands drowns out one measured in fractions. Income would decide everything and age would barely count. [Scale your features](/data-preparation/processing/) before you use any of them. Mahalanobis is the exception, because it accounts for each feature's spread by itself.
 
 Distances also lose contrast in high dimensions, where the nearest and farthest samples end up at similar distances. This is one reason [KNN](/algorithms/knn/) struggles with many features.
 
