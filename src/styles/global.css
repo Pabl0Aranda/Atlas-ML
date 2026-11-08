@@ -510,6 +510,9 @@ a.atlas-card.grid {
 }
 
 .notebook-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
 	padding: 0.35rem 0.8rem;
 	border: 1px solid var(--viz-border);
 	border-radius: 0.5rem;
@@ -521,6 +524,17 @@ a.atlas-card.grid {
 
 .notebook-link:hover {
 	border-color: var(--sl-color-accent);
+}
+
+/* A line drawing of two linked loops, Colab's shape without its colors. */
+.notebook-icon {
+	width: 1.1em;
+	height: 1.1em;
+	flex: none;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2.2;
+	stroke-linecap: round;
 }
 
 .notebook-link-primary {

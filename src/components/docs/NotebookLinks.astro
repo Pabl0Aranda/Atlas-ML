@@ -15,7 +15,10 @@ const name = `${page.split('/').pop()}.ipynb`;
 
 <div class="notebook-links not-content">
 	<a class="notebook-link notebook-link-primary" href={colab} target="_blank" rel="noopener">
-		Open in Colab <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span>
+		<svg class="notebook-icon" viewBox="0 0 24 24" aria-hidden="true">
+			<path d="M11 8.6a4.8 4.8 0 1 0 0 6.8M13 8.6a4.8 4.8 0 1 1 0 6.8" />
+		</svg>
+		Open in Colab<span class="sr-only"> (opens in a new tab)</span>
 	</a>
 	<a class="notebook-link" href={file} download={name}>Download notebook</a>
 	<span class="notebook-note">Runs as is, with example data included.</span>
