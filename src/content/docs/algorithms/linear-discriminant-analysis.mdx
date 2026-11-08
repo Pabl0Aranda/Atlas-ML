@@ -7,6 +7,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 ## Intuition & Overview
 
@@ -58,6 +59,8 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 model = LinearDiscriminantAnalysis().fit(X_train, y_train)
 X_projected = model.transform(X_train)  # at most (classes - 1) dimensions
 ```
+
+<NotebookLinks page="algorithms/linear-discriminant-analysis" />
 </TabItem>
 </Tabs>
 

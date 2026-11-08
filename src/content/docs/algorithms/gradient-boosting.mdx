@@ -7,6 +7,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 ## Intuition & Overview
 
@@ -63,6 +64,8 @@ from sklearn.ensemble import GradientBoostingClassifier
 model = GradientBoostingClassifier(n_estimators=200, learning_rate=0.1, max_depth=2).fit(X, y)
 print(model.score(X_test, y_test))
 ```
+
+<NotebookLinks page="algorithms/gradient-boosting" />
 </TabItem>
 </Tabs>
 

@@ -7,6 +7,7 @@ sidebar:
 
 import Sandbox from '@/components/interactive/Sandbox';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 ## Intuition & Overview
 
@@ -54,5 +55,7 @@ search = RandomizedSearchCV(
 search.fit(X_train, y_train)
 print(search.best_params_, search.best_score_)
 ```
+
+<NotebookLinks page="validation/hyperparameter-tuning" />
 
 `best_score_` is optimistic, because it is the highest of many noisy scores. Only the [test set](/testing/overview/) gives an honest final number.

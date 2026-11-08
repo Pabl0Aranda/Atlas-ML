@@ -7,6 +7,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 ## Intuition & Overview
 
@@ -54,6 +55,8 @@ from sklearn.naive_bayes import GaussianNB
 model = GaussianNB().fit(X_train, y_train)
 print(model.predict_proba(X_test))
 ```
+
+<NotebookLinks page="algorithms/naive-bayes" />
 </TabItem>
 </Tabs>
 

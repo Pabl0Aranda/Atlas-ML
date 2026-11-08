@@ -1,0 +1,22 @@
+---
+import { withBase } from '@/lib/url';
+
+interface Props {
+	/** The page's content id, such as algorithms/knn. Its notebook is public/notebooks/<page>.ipynb. */
+	page: string;
+}
+
+const { page } = Astro.props;
+// Colab opens notebooks straight from the repository, so the files are committed there.
+const colab = `https://colab.research.google.com/github/Pabl0Aranda/Atlas-ML/blob/main/public/notebooks/${page}.ipynb`;
+const file = withBase(`/notebooks/${page}.ipynb`);
+const name = `${page.split('/').pop()}.ipynb`;
+---
+
+<div class="notebook-links not-content">
+	<a class="notebook-link notebook-link-primary" href={colab} target="_blank" rel="noopener">
+		Open in Colab <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span>
+	</a>
+	<a class="notebook-link" href={file} download={name}>Download notebook</a>
+	<span class="notebook-note">Runs as is, with example data included.</span>
+</div>

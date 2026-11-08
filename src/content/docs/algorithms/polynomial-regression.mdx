@@ -7,6 +7,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 ## Intuition & Overview
 
@@ -60,6 +61,8 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 model = make_pipeline(PolynomialFeatures(degree=5), StandardScaler(), Ridge(alpha=1.0))
 model.fit(X, y)
 ```
+
+<NotebookLinks page="algorithms/polynomial-regression" />
 </TabItem>
 </Tabs>
 
