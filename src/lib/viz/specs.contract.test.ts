@@ -33,6 +33,12 @@ function expectValidFrame(spec: AlgorithmSpec, state: unknown, data: Dataset, pa
 		expect(latex).not.toMatch(/NaN|undefined|infty/);
 		expect(() => katex.renderToString(latex, { displayMode: true, throwOnError: true })).not.toThrow();
 	}
+	const table = spec.calculations?.(state, data, params, { x: 0.1, y: -0.2 });
+	if (table) {
+		for (const row of table.rows) expect(row).toHaveLength(table.columns.length);
+		expect(JSON.stringify(table)).not.toMatch(/NaN|undefined|Infinity/);
+		if (table.highlight !== undefined) expect(table.rows[table.highlight]).toBeDefined();
+	}
 }
 
 describe.each(ALGORITHM_IDS)('%s spec', (id) => {

@@ -5,7 +5,7 @@ import { ellipse, gmmStep, initGmm, mostLikely, density, type GmmState } from '.
 import { accuracy } from '../../ml/knn';
 import { fitLda, ldaScore } from '../../ml/lda';
 import { initLogistic, logisticProbability, logisticStep, type LogisticState } from '../../ml/logisticRegression';
-import { classifyNaiveBayes, fitNaiveBayes, type Feature } from '../../ml/naiveBayes';
+import { classifyNaiveBayes, explainNaiveBayes, fitNaiveBayes, type Feature } from '../../ml/naiveBayes';
 import { predict } from '../../ml/regression';
 import { initRegularized, regularizedStep, type RegularizedState } from '../../ml/regularizedRegression';
 import { lines, num, polynomial, sum } from '../equation';
@@ -48,6 +48,19 @@ export const naiveBayes: AlgorithmSpec<Stage> = {
 			'Feature x alone updates the belief, so the boundaries are vertical. Step to add feature y.',
 			'Both features multiply in, as if they were independent. The boundary is curved, because each class has its own variances.',
 		][s.stage],
+	calculations(s, data, _, probe) {
+		const features = NB_STAGES[s.stage];
+		const rows = explainNaiveBayes(fitNaiveBayes(data), probe.x, probe.y, features);
+		const winner = rows.reduce((top, row, i) => (row.posterior > rows[top].posterior ? i : top), 0);
+		const density = (row: (typeof rows)[number], f: Feature) => (row.likelihood[f] === undefined ? 'not used' : fixed(row.likelihood[f]!));
+		return {
+			title: `Naive Bayes at the cursor (${probe.x.toFixed(2)}, ${probe.y.toFixed(2)})`,
+			columns: ['Class', 'Prior', 'p(x | class)', 'p(y | class)', 'Posterior'],
+			rows: rows.map((row) => [CLASSES[row.label] ?? String(row.label), percent(row.prior), density(row, 'x'), density(row, 'y'), percent(row.posterior)]),
+			highlight: winner,
+			note: 'Posterior ∝ prior × p(x | class) × p(y | class), scaled so the classes add up to 100%. The likelihoods are densities, so they can be above 1. Move the cursor over the plot to update the table.',
+		};
+	},
 };
 
 export const logisticRegression: AlgorithmSpec<LogisticState> = {

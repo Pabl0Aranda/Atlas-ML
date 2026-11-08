@@ -1,12 +1,24 @@
 import type { Dataset } from '../../types/ml';
 import { planeDistance, PlaneMetric } from './distance';
 
+export interface Neighbor {
+	x: number;
+	y: number;
+	label: number;
+	distance: number;
+}
+
+/** The k samples closest to a location, nearest first. */
+export function nearestNeighbors(data: Dataset, k: number, x: number, y: number, metric: PlaneMetric = PlaneMetric.Euclidean): Neighbor[] {
+	return data
+		.map((p) => ({ x: p.x, y: p.y, label: p.label, distance: planeDistance(metric, p.x, p.y, x, y) }))
+		.sort((a, b) => a.distance - b.distance)
+		.slice(0, k);
+}
+
 /** Majority vote among the k closest points. Ties go to the nearest neighbor's class. */
 export function knnClassify(data: Dataset, k: number, x: number, y: number, metric: PlaneMetric = PlaneMetric.Euclidean): number {
-	const neighbors = data
-		.map((p) => ({ label: p.label, d: planeDistance(metric, p.x, p.y, x, y) }))
-		.sort((a, b) => a.d - b.d)
-		.slice(0, k);
+	const neighbors = nearestNeighbors(data, k, x, y, metric);
 	const votes = new Map<number, number>();
 	for (const n of neighbors) votes.set(n.label, (votes.get(n.label) ?? 0) + 1);
 	const top = Math.max(...votes.values());

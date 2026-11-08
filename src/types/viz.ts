@@ -123,6 +123,17 @@ export interface Series {
 	values: number[];
 }
 
+/** A small table showing the arithmetic behind the current step, under the metrics. */
+export interface Calculations {
+	title: string;
+	columns: string[];
+	rows: string[][];
+	/** A row to emphasize, such as the class that wins. */
+	highlight?: number;
+	/** One or two sentences on how to read the table. */
+	note?: string;
+}
+
 export interface AlgorithmSpec<S = any> {
 	datasets: DatasetKind[];
 	params: ParamSpec[];
@@ -154,4 +165,6 @@ export interface AlgorithmSpec<S = any> {
 	describe?(state: S, probe: { x: number; y: number }, params: Hyperparameters): string;
 	/** The model's formula as LaTeX, with the current numbers in place. Shown under the plot. */
 	equation?(state: S, data: Dataset, params: Hyperparameters): string;
+	/** The numbers behind the current step, for the calculations panel. The probe is the cursor's location. */
+	calculations?(state: S, data: Dataset, params: Hyperparameters, probe: { x: number; y: number }): Calculations | undefined;
 }
