@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { compareData, decodeCompare, decodePair, encodeCompare, partnerFor, presetQuery, sharedDatasets, type CompareOption, type ComparePair, type ComparePreset, type CompareSetup } from '@/lib/viz/compareSetup';
 import { DATASET_LABELS } from '@/lib/ml/datasets';
 import { COMPARE_PRESETS } from '@/lib/viz/presets';
@@ -26,13 +26,17 @@ interface PanelProps {
 	isDisabled: (option: CompareOption) => boolean;
 	onPick: (id: AlgorithmId) => void;
 	onParam: (key: string, value: number, live: boolean) => void;
+	playing: boolean;
 }
 
-function Panel({ title, spec, state, train, test, params, selected, choices, isDisabled, onPick, onParam }: PanelProps) {
+function Panel({ title, spec, state, train, test, params, selected, choices, isDisabled, onPick, onParam, playing }: PanelProps) {
 	const modelScene = useMemo(() => spec.scene(state, train, params), [spec, state, train, params]);
 	const scene = useMemo(() => withHeldOut(modelScene, test), [modelScene, test]);
 	const caption = spec.caption(state, train, params);
 	const series = spec.series?.(state);
+	// Announcing every tick would talk over the animation, so the spoken caption waits for a stop.
+	const spoken = useRef(caption);
+	if (!playing) spoken.current = caption;
 
 	return (
 		<section class="flex min-w-0 flex-col gap-3 rounded-2xl border border-(--viz-border) bg-(--viz-panel) p-3 sm:p-4" aria-label={title}>
@@ -45,6 +49,7 @@ function Panel({ title, spec, state, train, test, params, selected, choices, isD
 			<PlotCanvas scene={scene} class="block w-full rounded-lg border border-(--viz-border)" role="img" aria-label={caption} />
 			<div class="min-h-5 text-xs text-(--viz-muted-ink)"><PlotLegend legend={spec.legend(params)} /></div>
 			<p class="m-0 min-h-16 text-sm leading-snug">{caption}</p>
+			<p class="sr-only" aria-live="polite">{`${title}: ${spoken.current}`}</p>
 			<MetricList class="border-t border-(--viz-border) pt-3" metrics={[...spec.metrics(state, train, params), ...heldOutMetrics(modelScene.region, test)]} />
 			{spec.params.length > 0 && (
 				<div class="flex flex-col gap-3 border-t border-(--viz-border) pt-3">
@@ -174,6 +179,7 @@ function Arena({ pair, specA, specB, search, options, onPair, onEdit }: ArenaPro
 					isDisabled={() => false}
 					onPick={(a) => onPair({ a, b: partnerFor(options, a, pair.b) }, query())}
 					onParam={changeParam('paramsA')}
+					playing={playing}
 				/>
 				<Panel
 					title="Algorithm B"
@@ -187,6 +193,7 @@ function Arena({ pair, specA, specB, search, options, onPair, onEdit }: ArenaPro
 					isDisabled={(o) => sharedDatasets(optionOf(pair.a), o).length === 0}
 					onPick={(b) => onPair({ a: pair.a, b }, query())}
 					onParam={changeParam('paramsB')}
+					playing={playing}
 				/>
 			</div>
 		</>
