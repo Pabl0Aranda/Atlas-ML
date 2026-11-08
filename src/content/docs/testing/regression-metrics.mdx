@@ -7,10 +7,11 @@ sidebar:
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
-Regression predictions are never exactly right, so the question is how wrong they are, and in which way. Each metric summarizes the errors $e_i = y_i - \hat{y}_i$ differently.
+<Term id="regression">Regression</Term> predictions are never exactly right, so the question is how wrong they are, and in which way. Each metric summarizes the errors $e_i = y_i - \hat{y}_i$ differently.
 
 ## Mathematical Foundation
 
@@ -31,7 +32,7 @@ $$
 | $R^2$ | Variance explained, compared with predicting the mean | Comparing fits on the same dataset |
 | MAPE | Error as a percentage | Targets are well above zero, and relative error matters |
 
-$R^2$ can be negative on a test set, which means the model does worse than predicting the mean. MAPE breaks down when targets are near zero.
+$R^2$ can be negative on a <Term id="test-set">test set</Term>, which means the model does worse than predicting the mean. MAPE breaks down when targets are near zero.
 
 ## Residual Analysis
 

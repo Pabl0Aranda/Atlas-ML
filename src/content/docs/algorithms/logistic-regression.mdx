@@ -6,10 +6,11 @@ description: Model the probability of a class with a sigmoid of a linear score.
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
-Despite the name, logistic regression is a classifier. It computes a linear score, then squashes it into a probability between 0 and 1. It is the standard baseline for classification, because it is fast, its weights can be interpreted, and its probabilities are often well behaved.
+Despite the name, logistic regression is a classifier. It computes a linear score, then squashes it into a probability between 0 and 1. It is the standard baseline for <Term id="classification">classification</Term>, because it is fast, its weights can be interpreted, and its probabilities are often well behaved.
 
 ## Mathematical Foundation
 
@@ -19,13 +20,13 @@ $$
 P(y = 1 \mid x) = \sigma(w^\top x) = \frac{1}{1 + e^{-w^\top x}}
 $$
 
-Equivalently, the log-odds are linear: $\log \frac{p}{1 - p} = w^\top x$. So each weight says how much one unit of a feature changes the log-odds. Training maximizes the likelihood, which means minimizing the log loss:
+Equivalently, the log-odds are linear: $\log \frac{p}{1 - p} = w^\top x$. So each weight says how much one unit of a <Term id="feature">feature</Term> changes the log-odds. Training maximizes the likelihood, which means minimizing the log loss:
 
 $$
 L(w) = -\frac{1}{n} \sum_i \left[ y_i \log p_i + (1 - y_i) \log (1 - p_i) \right] + \frac{\lambda}{2} \lVert w \rVert^2
 $$
 
-The gradient has a simple form, and the loss is convex, so there are no bad local minima:
+The <Term id="gradient">gradient</Term> has a simple form, and the loss is convex, so there are no bad local minima:
 
 $$
 \nabla L(w) = \frac{1}{n} \sum_i (p_i - y_i)\, x_i + \lambda w
@@ -74,4 +75,4 @@ print(model.predict_proba(X_test))
 
 - The boundary is linear unless you engineer features.
 - Correlated features make individual weights unreliable.
-- Separable data needs regularization, or the weights grow without limit.
+- Separable data needs <Term id="regularization">regularization</Term>, or the weights grow without limit.

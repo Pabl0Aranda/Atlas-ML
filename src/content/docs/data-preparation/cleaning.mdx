@@ -8,6 +8,7 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -29,7 +30,7 @@ Real data arrives with gaps, typos and impossible values. Cleaning means finding
 First ask **why** a value is missing, because that determines what is safe:
 
 - Dropping rows is simple, but it loses data and can bias the sample when missingness is not random.
-- The median is a robust default for numeric features, and the most frequent value for categories.
+- The median is a robust default for numeric <Term id="feature">features</Term>, and the most frequent value for categories.
 - If missingness itself is informative, keep a binary "was missing" column.
 
 ## Mathematical Foundation

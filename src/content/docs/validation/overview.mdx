@@ -6,6 +6,8 @@ sidebar:
   order: 1
 ---
 
+import Term from '@/components/docs/Term.astro';
+
 Validation answers one question during development: **which model and settings should I pick?** It uses data held back from training, but it is not the final exam. That is the job of [testing](/testing/overview/).
 
 ## Most Used Methods
@@ -38,9 +40,9 @@ A validation method tells you how to split the data. You also need a way to judg
 
 ## Learning Curves
 
-Plot training and validation scores as the training set grows:
+Plot training and validation scores as the <Term id="training-set">training set</Term> grows:
 
-- If both scores are low and close together, the model is underfitting. Use a richer model or better features.
-- If there is a persistent gap, the model is overfitting. More data or regularization should help.
+- If both scores are low and close together, the model is <Term id="underfitting">underfitting</Term>. Use a richer model or better features.
+- If there is a persistent gap, the model is overfitting. More data or <Term id="regularization">regularization</Term> should help.
 
-Neural networks often use **early stopping** too: training stops when the validation loss has not improved for a set number of epochs.
+Neural networks often use **early stopping** too: training stops when the validation loss has not improved for a set number of <Term id="epoch">epochs</Term>.

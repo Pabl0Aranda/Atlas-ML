@@ -57,7 +57,7 @@ export default defineConfig({
 			sidebar: [
 				{
 					label: 'Get started',
-					items: [{ slug: 'start-here' }, { label: 'Catalog', link: '/catalog/' }, { label: 'Compare', link: '/compare/' }],
+					items: [{ slug: 'start-here' }, { label: 'Catalog', link: '/catalog/' }, { label: 'Compare', link: '/compare/' }, { slug: 'glossary' }],
 				},
 				{
 					label: 'Workflow',

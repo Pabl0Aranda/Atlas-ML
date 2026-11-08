@@ -1,0 +1,73 @@
+---
+import { GLOSSARY, type GlossaryId } from '@/data/glossary';
+
+interface Props {
+	id: GlossaryId;
+}
+
+const { id } = Astro.props;
+const entry = GLOSSARY[id];
+if (!entry) throw new Error(`Unknown glossary term "${id}"`);
+// Several uses of a term on one page each need their own tooltip id.
+const tipId = `term-${id}-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<span class="term"
+	><button type="button" class="term-word" aria-describedby={tipId}><slot>{entry.term}</slot></button><span
+		role="tooltip"
+		id={tipId}
+		class="term-tip"><strong>{entry.term}.</strong> {entry.definition}</span
+	></span
+>
+
+<script>
+	// Tooltips show on hover and focus through CSS. This keeps them on screen near the
+	// edges of a phone, and lets Escape close one, as tooltips should.
+	const place = (term: HTMLElement) => {
+		const tip = term.querySelector<HTMLElement>('.term-tip');
+		if (!tip) return;
+		tip.style.setProperty('--shift', '0px');
+		const box = tip.getBoundingClientRect();
+		const gutter = 12;
+		const over = box.right - (document.documentElement.clientWidth - gutter);
+		const under = gutter - box.left;
+		tip.style.setProperty('--shift', `${over > 0 ? -over : under > 0 ? under : 0}px`);
+		// Below the word when there's no room above it, under the sticky header.
+		if (box.top < 72) term.dataset.below = '';
+		else delete term.dataset.below;
+	};
+
+	// A tap opens the definition, and a tap anywhere else closes it, because touch
+	// screens have no hover.
+	document.addEventListener('click', (e) => {
+		const term = (e.target as Element).closest?.<HTMLElement>('.term');
+		for (const open of document.querySelectorAll<HTMLElement>('.term[data-open]')) {
+			if (open !== term) delete open.dataset.open;
+		}
+		if (!term) return;
+		if ('open' in term.dataset) delete term.dataset.open;
+		else {
+			term.dataset.open = '';
+			delete term.dataset.dismissed;
+			requestAnimationFrame(() => place(term));
+		}
+	});
+
+	for (const event of ['mouseover', 'focusin']) {
+		document.addEventListener(event, (e) => {
+			const term = (e.target as Element).closest?.<HTMLElement>('.term');
+			if (term) {
+				delete term.dataset.dismissed;
+				requestAnimationFrame(() => place(term));
+			}
+		});
+	}
+
+	document.addEventListener('keydown', (e) => {
+		if (e.key !== 'Escape') return;
+		for (const term of document.querySelectorAll<HTMLElement>('.term:hover, .term:focus-within, .term[data-open]')) {
+			term.dataset.dismissed = '';
+			delete term.dataset.open;
+		}
+	});
+</script>

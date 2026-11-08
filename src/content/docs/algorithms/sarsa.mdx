@@ -8,6 +8,7 @@ description: SARSA, the on-policy counterpart of Q-Learning, which learns from t
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -15,7 +16,7 @@ SARSA is named after the five values each update uses: $(s, a, r, s', a')$. It w
 
 ## Mathematical Foundation
 
-The update replaces the maximum with the value of the next action $a'$ drawn from the current policy:
+The update replaces the maximum with the value of the next action $a'$ drawn from the current <Term id="policy">policy</Term>:
 
 $$
 Q(s, a) \leftarrow Q(s, a) + \alpha \left[ r + \gamma Q(s', a') - Q(s, a) \right]
@@ -56,7 +57,7 @@ def sarsa_update(Q, s, a, r, s_next, a_next, done, alpha=0.5, gamma=1.0):
 
 **Strengths**
 
-- It accounts for its own exploration, so it earns more reward during training in risky environments.
+- It accounts for its own exploration, so it earns more <Term id="reward">reward</Term> during training in risky environments.
 - Its updates have lower variance than the $\max$-based target in many settings.
 
 **Limitations**

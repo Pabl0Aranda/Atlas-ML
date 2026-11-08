@@ -6,6 +6,7 @@ description: Find the maximum-margin boundary between two classes, optionally th
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -73,7 +74,7 @@ print(model[-1].n_support_)
 **Strengths**
 
 - A convex objective has no bad local minima.
-- Works well with many features and moderate sample counts.
+- Works well with many <Term id="feature">features</Term> and moderate sample counts.
 - The solution is sparse: only support vectors matter.
 
 **Limitations**

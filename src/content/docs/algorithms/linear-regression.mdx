@@ -6,6 +6,7 @@ description: Fit a straight line to data by minimizing mean squared error with g
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -19,7 +20,7 @@ $$
 L(w) = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2
 $$
 
-Its gradient tells us how to change each weight:
+Its <Term id="gradient">gradient</Term> tells us how to change each weight:
 
 $$
 \frac{\partial L}{\partial w_0} = \frac{2}{n} \sum_{i} (\hat{y}_i - y_i), \qquad
@@ -38,7 +39,7 @@ This problem also has an exact solution, the normal equation $w = (X^\top X)^{-1
 
 ## Interactive Sandbox
 
-Push the learning rate to its maximum to watch the updates overshoot. Then choose **Trend + outliers** and see how a few points tilt the line, because squared error punishes large residuals heavily.
+Push the <Term id="learning-rate">learning rate</Term> to its maximum to watch the updates overshoot. Then choose **Trend + outliers** and see how a few points tilt the line, because squared error punishes large residuals heavily.
 
 <Sandbox client:idle algorithm="linear-regression" />
 
@@ -67,6 +68,6 @@ print(model.intercept_, model.coef_)
 
 **Limitations**
 
-- It cannot capture curvature without engineered features. See [polynomial regression](/algorithms/polynomial-regression/).
-- Squared error makes it sensitive to outliers.
+- It cannot capture curvature without engineered <Term id="feature">features</Term>. See [polynomial regression](/algorithms/polynomial-regression/).
+- Squared error makes it sensitive to <Term id="outlier">outliers</Term>.
 - Strongly correlated features make individual coefficients unstable.
