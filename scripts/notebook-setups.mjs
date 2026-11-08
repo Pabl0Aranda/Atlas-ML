@@ -227,6 +227,20 @@ from sklearn.linear_model import LogisticRegression
 
 model = LogisticRegression().fit(X_train, y_train)`,
 	},
+	'testing/explainability': {
+		install: `%pip install --quiet shap lime`,
+		setup: `from sklearn.datasets import load_breast_cancer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
+# 569 tumors described by 30 measurements, each labeled malignant or benign.
+data = load_breast_cancer()
+X, y = data.data, data.target
+feature_names, class_names = list(data.feature_names), list(data.target_names)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, stratify=y, random_state=0)
+model = RandomForestClassifier(n_estimators=200, random_state=0).fit(X_train, y_train)
+print(f"Test accuracy: {model.score(X_test, y_test):.1%}")`,
+	},
 	'testing/regression-metrics': {
 		setup: `from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
