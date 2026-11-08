@@ -1,6 +1,7 @@
 import type { Dataset, Hyperparameters } from '../../../types/ml';
 import type { AlgorithmSpec, SceneLine } from '../../../types/viz';
 import { initRegression, predict, regressionStep, type RegressionState } from '../../ml/regression';
+import { lines, num, polynomial } from '../equation';
 import { fixed } from '../scene';
 
 const MAX_EPOCHS = 4000;
@@ -37,6 +38,7 @@ const shared: Omit<AlgorithmSpec<RegressionState>, 'datasets' | 'params' | 'thum
 		return `After ${s.epoch} gradient steps the mean squared error is ${fixed(s.loss, 4)}.`;
 	},
 	series: (s) => ({ label: 'Loss per epoch', values: s.lossHistory }),
+	equation: (s) => lines(polynomial(s.weights), `L(w) = ${num(s.loss, 4)}`),
 };
 
 const train = (s: RegressionState, data: Dataset, p: Hyperparameters) => regressionStep(s, data, p.learningRate, p.l2 ?? 0);

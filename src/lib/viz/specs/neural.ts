@@ -2,6 +2,7 @@ import type { AlgorithmSpec, Diagram, DiagramNode } from '../../../types/viz';
 import { accuracy } from '../../ml/knn';
 import { forward, initMlp, mlpProbability, mlpStep, type MlpState } from '../../ml/mlp';
 import { initPerceptron, perceptronClassify, perceptronEpoch, type PerceptronState } from '../../ml/perceptron';
+import { lines, num, sum } from '../equation';
 import { classPoints, fixed, percent } from '../scene';
 
 const MAX_PERCEPTRON_EPOCHS = 300;
@@ -30,6 +31,11 @@ export const perceptron: AlgorithmSpec<PerceptronState> = {
 		return `The rule corrected ${s.mistakes} mistakes this epoch. On non-separable data it never settles.`;
 	},
 	series: (s) => ({ label: 'Mistakes per epoch', values: s.mistakeHistory }),
+	equation: (s, _, p) =>
+		lines(
+			`\\text{Class B} \\iff ${sum([s.bias, ...s.weights], ['', 'x_1', 'x_2'])} > 0`,
+			`w \\leftarrow w + ${num(p.learningRate)}\\,(y - \\hat{y})\\,x`,
+		),
 };
 
 function networkDiagram(s: MlpState, probe: { x: number; y: number }): Diagram {

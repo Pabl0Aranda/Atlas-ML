@@ -1,6 +1,7 @@
 import type { Hyperparameters } from '../../../types/ml';
 import type { AlgorithmSpec, SceneLine } from '../../../types/viz';
 import { descentStep, gradientSize, lowestLoss, startDescent, SURFACES, type DescentState, type Surface } from '../../ml/gradientDescent';
+import { lines, num, vector } from '../equation';
 import { contour, fixed } from '../scene';
 
 /** Long enough for a slow but steady run to settle, short enough to stop a stalled one. */
@@ -86,6 +87,21 @@ export const gradientDescent: AlgorithmSpec<DescentState> = {
 		return 'The loss falls on every step. The steps shrink as the slope flattens near the bottom.';
 	},
 	series: (s) => ({ label: 'Loss per step', values: s.losses }),
+	equation(s, _, p) {
+		if (s.diverged) return '\\text{Diverged: the weights left the plot.}';
+		const [gx, gy] = surfaceOf(p).gradient(s.x, s.y);
+		const vx = p.beta * s.vx - p.alpha * gx;
+		const vy = p.beta * s.vy - p.alpha * gy;
+		// The rule shows its numbers, and only the results are written out as vectors, so it fits beside the plot.
+		const gradient = `\\nabla L(w) = ${vector(gx, gy)}`;
+		const next = vector(s.x + vx, s.y + vy);
+		if (!p.beta) return lines(gradient, `w \\leftarrow w - ${num(p.alpha, 3)}\\,\\nabla L(w) = ${next}`);
+		return lines(
+			gradient,
+			`v \\leftarrow ${num(p.beta)}\\,v - ${num(p.alpha, 3)}\\,\\nabla L = ${vector(vx, vy)}`,
+			`w \\leftarrow w + v = ${next}`,
+		);
+	},
 	describe(_, probe, p) {
 		return `loss ${fixed(surfaceOf(p).loss(probe.x, probe.y))}`;
 	},
