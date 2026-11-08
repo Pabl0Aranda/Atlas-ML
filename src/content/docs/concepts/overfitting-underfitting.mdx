@@ -10,6 +10,7 @@ import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import FitExplorer from '@/components/interactive/FitExplorer';
 import Sandbox from '@/components/interactive/Sandbox';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 The goal of machine learning isn't to do well on the data you already have. It's to do well on data you haven't seen yet, which is called **generalization**. Overfitting and underfitting are the two main ways a model fails at that.
 
@@ -147,5 +148,7 @@ print(train_scores.mean(axis=1), val_scores.mean(axis=1))
 
 sizes, train_scores, val_scores = learning_curve(KNeighborsClassifier(n_neighbors=25), X, y, cv=5)
 ```
+
+<NotebookLinks page="concepts/overfitting-underfitting" />
 </TabItem>
 </Tabs>

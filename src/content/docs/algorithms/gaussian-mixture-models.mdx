@@ -7,6 +7,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 ## Intuition & Overview
 
@@ -60,6 +61,8 @@ from sklearn.mixture import GaussianMixture
 model = GaussianMixture(n_components=4, covariance_type="full", n_init=5).fit(X)
 print(model.predict_proba(X), model.bic(X))
 ```
+
+<NotebookLinks page="algorithms/gaussian-mixture-models" />
 </TabItem>
 </Tabs>
 

@@ -9,6 +9,7 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import { SetDistanceDemo } from '@/components/interactive/TextDistanceDemo';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 Not all data lives on a number line. "Red" is not halfway between "blue" and "green", and a list of tags has no coordinates. These distances compare such data directly.
 
@@ -76,5 +77,7 @@ distance.hamming(list("karolin"), list("kathrin"))  # 0.428...
 # SciPy's jaccard takes boolean vectors, not sets.
 distance.jaccard([1, 1, 1, 0], [0, 1, 1, 1])  # 0.5
 ```
+
+<NotebookLinks page="distance-metrics/sets-and-categories" />
 </TabItem>
 </Tabs>

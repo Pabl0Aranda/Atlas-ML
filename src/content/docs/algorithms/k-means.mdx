@@ -7,6 +7,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 ## Intuition & Overview
 
@@ -57,6 +58,8 @@ model = KMeans(n_clusters=4, init="k-means++", n_init=10, random_state=0)
 labels = model.fit_predict(X)
 print(model.cluster_centers_, model.inertia_)
 ```
+
+<NotebookLinks page="algorithms/k-means" />
 </TabItem>
 </Tabs>
 

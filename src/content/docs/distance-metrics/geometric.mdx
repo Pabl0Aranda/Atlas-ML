@@ -9,6 +9,7 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import DistanceExplorer from '@/components/interactive/DistanceExplorer';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 These are the distances most people meet first. They all compare two numeric vectors <Term id="feature">feature</Term> by feature, and differ only in how they combine those differences.
 
@@ -102,5 +103,7 @@ distance.cityblock([0, 0], [3, 4])  # 7
 distance.chebyshev([0, 0], [3, 4])  # 4
 distance.minkowski([0, 0], [3, 4], p=3)
 ```
+
+<NotebookLinks page="distance-metrics/geometric" />
 </TabItem>
 </Tabs>

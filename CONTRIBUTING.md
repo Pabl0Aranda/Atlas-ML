@@ -26,6 +26,8 @@ npm run check
 npm run build
 ```
 
+If you change the Python code on a page, rebuild its notebook with `node scripts/build-notebooks.mjs` and commit the result. A test fails if a notebook falls out of date.
+
 CI also checks every link in the built site. To run that check yourself, build the site with the GitHub Pages subfolder, then check it:
 
 ```bash

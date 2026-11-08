@@ -62,6 +62,7 @@ Other parts to know:
 | Path | Purpose |
 | --- | --- |
 | `src/data/catalog.ts` | Source of truth for algorithms. Drives the sidebar, catalog, cards and counts |
+| `scripts/build-notebooks.mjs`, `scripts/notebook-setups.mjs` | Turn each page's Python code into a runnable notebook in `public/notebooks/`. After editing Python code on a page, run `node scripts/build-notebooks.mjs` and commit the result, or a test fails. A new page with Python code needs a setup entry |
 | `src/lib/pipeline.ts` | Maps each docs page to its workflow stage, for the trail above page titles. New sections need an entry |
 | `src/lib/viz/sandboxSetup.ts` | Builds the data for a run, and encodes share links |
 | `src/lib/viz/timeline.ts` | Frame history for rewind |
