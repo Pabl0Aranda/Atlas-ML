@@ -10,6 +10,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import ConfusionExplorer from '@/components/interactive/ConfusionExplorer';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 A single [indicator](/validation/indicators/) compresses a model into one number. A matrix keeps the detail: it shows where a model succeeds, which mistakes it makes, and how stable its results are.
 
@@ -216,5 +217,7 @@ fold_scores = cross_val_score(model, X, y, cv=5)  # one row of a fold score matr
 
 print(mcnemar([[180, 12], [4, 4]], exact=False, correction=True))
 ```
+
+<NotebookLinks page="validation/validation-matrices" />
 </TabItem>
 </Tabs>

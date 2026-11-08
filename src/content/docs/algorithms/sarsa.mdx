@@ -9,6 +9,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 ## Intuition & Overview
 
@@ -50,6 +51,8 @@ def sarsa_update(Q, s, a, r, s_next, a_next, done, alpha=0.5, gamma=1.0):
     future = 0.0 if done else Q[s_next][a_next]
     Q[s][a] += alpha * (r + gamma * future - Q[s][a])
 ```
+
+<NotebookLinks page="algorithms/sarsa" />
 </TabItem>
 </Tabs>
 

@@ -7,6 +7,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 ## Intuition & Overview
 
@@ -54,6 +55,8 @@ from sklearn.preprocessing import StandardScaler
 model = make_pipeline(StandardScaler(), LassoCV(cv=5)).fit(X_train, y_train)
 print((model[-1].coef_ != 0).sum(), "features kept")
 ```
+
+<NotebookLinks page="algorithms/lasso-regression" />
 </TabItem>
 </Tabs>
 

@@ -8,6 +8,7 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 ## Intuition & Overview
 
@@ -58,6 +59,8 @@ print(mean_absolute_error(y_test, predictions))
 print(mean_squared_error(y_test, predictions) ** 0.5)
 print(r2_score(y_test, predictions))
 ```
+
+<NotebookLinks page="testing/regression-metrics" />
 </TabItem>
 </Tabs>
 

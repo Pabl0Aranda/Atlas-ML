@@ -9,6 +9,7 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import { EditDistanceDemo } from '@/components/interactive/TextDistanceDemo';
 import TimeSeriesDemo from '@/components/interactive/TimeSeriesDemo';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 Comparing sequences position by position breaks down when one is longer, or runs slightly ahead of the other. Both distances here solve that the same way: they search for the best alignment first, using dynamic programming.
 
@@ -75,6 +76,8 @@ from dtaidistance import dtw
 Levenshtein.distance("kitten", "sitting")  # 3
 dtw.distance(series_a, series_b)
 ```
+
+<NotebookLinks page="distance-metrics/sequences" />
 These two libraries are separate installs. DTW implementations use different cost functions, so their numbers may not match this site's.
 </TabItem>
 </Tabs>

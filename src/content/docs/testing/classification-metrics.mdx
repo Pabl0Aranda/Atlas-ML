@@ -9,6 +9,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 ## Intuition & Overview
 
@@ -69,6 +70,8 @@ print(confusion_matrix(y_test, predictions))
 print(classification_report(y_test, predictions))
 print(roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]))
 ```
+
+<NotebookLinks page="testing/classification-metrics" />
 </TabItem>
 </Tabs>
 

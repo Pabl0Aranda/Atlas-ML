@@ -9,6 +9,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
 import Term from '@/components/docs/Term.astro';
+import NotebookLinks from '@/components/docs/NotebookLinks.astro';
 
 ## Intuition & Overview
 
@@ -64,6 +65,8 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratif
 folds = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
 print(cross_val_score(model, X_train, y_train, cv=folds).mean())
 ```
+
+<NotebookLinks page="data-preparation/splitting" />
 </TabItem>
 </Tabs>
 
