@@ -6,6 +6,7 @@ description: Build a strong classifier one small tree at a time, each one correc
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -13,7 +14,7 @@ A [random forest](/algorithms/random-forest/) grows independent trees and averag
 
 ## Mathematical Foundation
 
-The model is a running sum of trees that outputs log-odds, where $\alpha$ is the learning rate:
+The model is a running sum of trees that outputs log-odds, where $\alpha$ is the <Term id="learning-rate">learning rate</Term>:
 
 $$
 F_m(x) = F_{m-1}(x) + \alpha\, h_m(x), \qquad p(x) = \frac{1}{1 + e^{-F(x)}}
@@ -25,7 +26,7 @@ $$
 L = -\frac{1}{n} \sum_{i} \big[\, y_i \log p_i + (1 - y_i) \log(1 - p_i) \,\big]
 $$
 
-Its negative gradient with respect to $F(x_i)$ is simply the residual $r_i = y_i - p_i$. So each new tree fits these residuals, which is gradient descent carried out in function space.
+Its negative <Term id="gradient">gradient</Term> with respect to $F(x_i)$ is simply the residual $r_i = y_i - p_i$. So each new tree fits these residuals, which is gradient descent carried out in function space.
 
 Each leaf then takes one Newton step, using the curvature of the loss:
 
@@ -39,13 +40,13 @@ This site's engine also caps leaf values, so one confident leaf cannot overshoot
 
 1. Set $F_0$ to the log-odds of the positive class.
 2. Compute each sample's residual $r_i = y_i - p_i$.
-3. Fit a shallow regression tree to the residuals.
+3. Fit a shallow <Term id="regression">regression</Term> tree to the residuals.
 4. Replace each leaf's value with its Newton step.
 5. Add the tree to the model, scaled by the learning rate, and repeat from step 2.
 
 ## Interactive Sandbox
 
-Each step adds one shallow tree. Hover or tap to read the predicted probability at any location. Try lowering the learning rate: the loss curve falls more slowly, and in practice more trees at a smaller rate tend to generalize better. Training metrics keep improving even after a model begins to overfit, so tick **Hold out 25% for testing** to see the score that matters.
+Each step adds one shallow tree. Hover or tap to read the predicted probability at any location. Try lowering the learning rate: the loss curve falls more slowly, and in practice more trees at a smaller rate tend to generalize better. Training metrics keep improving even after a model begins to <Term id="overfitting">overfit</Term>, so tick **Hold out 25% for testing** to see the score that matters.
 
 <Sandbox client:idle algorithm="gradient-boosting" />
 
@@ -73,7 +74,7 @@ XGBoost, LightGBM and CatBoost build on this same idea, and differ mostly in how
 
 - Often the most accurate choice on tabular data.
 - Works with any differentiable loss, so it adapts to many tasks.
-- Shallow trees capture feature interactions without feature engineering.
+- Shallow trees capture <Term id="feature">feature</Term> interactions without feature engineering.
 
 **Limitations**
 

@@ -6,6 +6,7 @@ description: The original learning neuron, a linear classifier trained by correc
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -32,7 +33,7 @@ The perceptron convergence theorem guarantees a finite number of mistakes when t
 1. Start with small weights.
 2. Visit each sample and compute $\hat{y}$.
 3. If it is wrong, apply the update.
-4. Stop after an epoch with no mistakes.
+4. Stop after an <Term id="epoch">epoch</Term> with no mistakes.
 
 ## Interactive Sandbox
 

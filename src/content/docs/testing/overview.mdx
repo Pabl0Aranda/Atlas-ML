@@ -6,16 +6,18 @@ sidebar:
   order: 1
 ---
 
+import Term from '@/components/docs/Term.astro';
+
 Testing answers a different question from [validation](/validation/overview/): **how well will this chosen model work on new data?** It happens once, at the end, after every decision has been made.
 
 ## Good Practices
 
-- **Use the test set once.** If you change the model after seeing the result, the test set has become validation data.
+- **Use the test set once.** If you change the model after seeing the result, the <Term id="test-set">test set</Term> has become validation data.
 - **Choose metrics first.** Decide what success means before looking at results, based on the cost of each kind of error.
-- **Compare with a baseline.** 95% accuracy means little if 95% of samples belong to one class.
+- **Compare with a baseline.** 95% <Term id="accuracy">accuracy</Term> means little if 95% of samples belong to one class.
 - **Report uncertainty.** A score from a small test set can move several points by chance.
 - **Test subgroups.** A good average can hide failure on a region, device type or demographic group.
-- **Read the errors.** Look through real mistakes, as they often reveal labeling problems and missing features.
+- **Read the errors.** Look through real mistakes, as they often reveal labeling problems and missing <Term id="feature">features</Term>.
 - **Check for leakage.** A result that seems too good usually is. See [data leakage](/data-preparation/overview/#data-leakage).
 
 ## Most Used Methods

@@ -6,10 +6,11 @@ sidebar:
 ---
 
 import Sandbox from '@/components/interactive/Sandbox';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
-Parameters, such as regression weights, are learned during training. Hyperparameters, such as $k$ in KNN or a learning rate, are chosen before it. Tuning tries candidates and keeps the one with the best validation score.
+Parameters, such as <Term id="regression">regression</Term> weights, are learned during training. Hyperparameters, such as $k$ in KNN or a <Term id="learning-rate">learning rate</Term>, are chosen before it. Tuning tries candidates and keeps the one with the best validation score.
 
 ## Most Used Methods
 
@@ -28,11 +29,11 @@ Random search often beats grid search for the same budget. Usually only a few hy
 - Search on a log scale for rates and penalties, such as 0.001, 0.01, 0.1.
 - If the best value sits at the edge of your range, extend the range.
 - Prefer the simpler model when scores are within noise of each other.
-- Keep the test set out of it. Each extra comparison on the same validation data also overfits it slightly, which is why [nested cross-validation](/validation/overview/) exists.
+- Keep the test set out of it. Each extra comparison on the same validation data also <Term id="overfitting">overfits</Term> it slightly, which is why [nested cross-validation](/validation/overview/) exists.
 
 ## Interactive Sandbox
 
-This is a grid search over $k$ in KNN, where each candidate is scored by cross-validation. Training accuracy starts at 100%, which is meaningless, while the validation curve shows the real trade-off.
+This is a grid search over $k$ in KNN, where each candidate is scored by <Term id="cross-validation">cross-validation</Term>. Training accuracy starts at 100%, which is meaningless, while the validation curve shows the real trade-off.
 
 <Sandbox client:idle algorithm="hyperparameter-search" />
 

@@ -6,6 +6,7 @@ description: Classify a point by the majority vote of its k closest training sam
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -27,14 +28,14 @@ At $k = 1$, the decision regions form the Voronoi diagram of the samples. Larger
 
 ## Step-by-Step Breakdown
 
-1. Store the training set.
+1. Store the <Term id="training-set">training set</Term>.
 2. For a query, compute its distance to every sample.
 3. Take the $k$ closest.
 4. Return the majority class. This implementation breaks ties in favor of the class of the nearest neighbor.
 
 ## Interactive Sandbox
 
-Each step raises $k$ by two. Accuracy is measured leave-one-out, because training accuracy at $k = 1$ is always 100% and tells you nothing.
+Each step raises $k$ by two. <Term id="accuracy">Accuracy</Term> is measured leave-one-out, because training accuracy at $k = 1$ is always 100% and tells you nothing.
 
 Use the **Distance** control to change what "nearest" means, and the boundary redraws at once. Read more in [distance metrics](/distance-metrics/overview/).
 
@@ -67,5 +68,5 @@ print(cross_val_score(model, X, y, cv=5).mean())
 **Limitations**
 
 - Naive prediction costs $O(nd)$ per query, and all the data must stay in memory.
-- It is sensitive to feature scale, like [any geometric distance](/distance-metrics/overview/#scale-your-features-first).
+- It is sensitive to <Term id="feature">feature</Term> scale, like [any geometric distance](/distance-metrics/overview/#scale-your-features-first).
 - In high dimensions distances concentrate, so "nearest" loses meaning.

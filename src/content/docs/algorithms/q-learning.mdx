@@ -6,6 +6,7 @@ description: Learn the value of every action in every state from trial and error
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Sandbox from '@/components/interactive/Sandbox';
 import AlgorithmSource from '@/components/docs/AlgorithmSource.astro';
+import Term from '@/components/docs/Term.astro';
 
 ## Intuition & Overview
 
@@ -19,7 +20,7 @@ $$
 Q^*(s, a) = \mathbb{E}\left[ r + \gamma \max_{a'} Q^*(s', a') \right]
 $$
 
-Q-Learning turns this into a sample-based update with learning rate $\alpha$:
+Q-Learning turns this into a sample-based update with <Term id="learning-rate">learning rate</Term> $\alpha$:
 
 $$
 Q(s, a) \leftarrow Q(s, a) + \alpha \left[ r + \gamma \max_{a'} Q(s', a') - Q(s, a) \right]
